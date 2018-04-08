@@ -7,8 +7,24 @@ type GitHubUser struct {
 	HtmlUrl string `json:"html_url"`
 }
 
+type Repository struct {
+	Id       int64      `json:"id"`
+	FullName string     `json:"full_name"`
+	Owner    GitHubUser `json:"owner"`
+	SshUrl   string     `json:"ssh_url"`
+}
+
+type PullRequest struct {
+	Id     int64  `json:"id"`
+	Url    string `json:"url"`
+	Number int    `json:"number"`
+	State  string `json:"open"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+}
+
 type GitHubCommitComment struct {
-	Action string `json:"action"`
+	Action  string `json:"action"`
 	Comment struct {
 		Id        int64      `json:"id"`
 		Url       string     `json:"url"`
@@ -22,9 +38,5 @@ type GitHubCommitComment struct {
 		UpdatedAt string     `json:"updated_at"`
 		Body      string     `json:"body"`
 	} `json:"comment"`
-	Repository struct {
-		Id       int64      `json:"id"`
-		FullName string     `json:"full_name"`
-		Owner    GitHubUser `json:"owner"`
-	} `json:"repository"`
+	Repository Repository `json:"repository"`
 }
