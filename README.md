@@ -10,10 +10,13 @@ import (
 	"fmt"
 	"github.com/duck8823/webhook-proxy/payloads"
 	"github.com/duck8823/webhook-proxy/proxy/handlers"
+	"github.com/google/logger"
 	"net/http"
 )
 
 func main() {
+	logger.Init("webhook-proxy", false, false, os.Stdout)
+
 	http.Handle("/", &handlers.SlackNotificator{
 		Url: "https://hooks.slack.com/services/XXXX/YYYY/ZZZZ",
 		ConvertFunc: func(body []byte) (*payloads.SlackMessage, error) {
