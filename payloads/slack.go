@@ -1,5 +1,5 @@
 package payloads
 
-type Message struct {
+type SlackMessage struct {
 	Text string `json:"text"`
 }
