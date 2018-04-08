@@ -47,9 +47,9 @@ func (s *server) Register(pattern string, url string, convertFunc func(incomingP
 	}
 }
 
-func (s *server) Start() {
+func (s *server) Start(addr string) {
 	for pattern, handleFunc := range s.handlerMap {
 		http.HandleFunc(pattern, handleFunc)
 	}
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(addr, nil)
 }
