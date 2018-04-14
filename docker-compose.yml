@@ -1,0 +1,12 @@
+version: "2"
+services:
+  webhook-proxy:
+    build:
+      context: .
+    ports:
+      - 8080:8080
+  ngrok:
+    image: wernight/ngrok
+    command: "ngrok http webhook-proxy:8080"
+    ports:
+      - 4040:4040
