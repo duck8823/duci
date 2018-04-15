@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/duck8823/webhook-proxy/payloads"
 	"github.com/google/logger"
+	"github.com/nlopes/slack"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -11,7 +11,7 @@ import (
 
 type SlackNotificator struct {
 	Url         string
-	ConvertFunc func(body []byte) (*payloads.SlackMessage, error)
+	ConvertFunc func(body []byte) (*slack.Message, error)
 }
 
 func (s *SlackNotificator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
