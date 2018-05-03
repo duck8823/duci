@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:1.10-alpine
 MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache git

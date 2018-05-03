@@ -9,42 +9,19 @@
 
 [[projects]]
   name = "github.com/docker/distribution"
-  packages = [
-    "digest",
-    "reference"
-  ]
+  packages = ["digest","reference"]
   revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
   version = "v2.6.2"
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = [
-    "api/types",
-    "api/types/blkiodev",
-    "api/types/container",
-    "api/types/events",
-    "api/types/filters",
-    "api/types/mount",
-    "api/types/network",
-    "api/types/reference",
-    "api/types/registry",
-    "api/types/strslice",
-    "api/types/swarm",
-    "api/types/time",
-    "api/types/versions",
-    "api/types/volume",
-    "pkg/tlsconfig"
-  ]
+  packages = ["api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/mount","api/types/network","api/types/reference","api/types/registry","api/types/strslice","api/types/swarm","api/types/time","api/types/versions","api/types/volume","pkg/tlsconfig"]
   revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
   version = "v1.13.1"
 
 [[projects]]
   name = "github.com/docker/go-connections"
-  packages = [
-    "nat",
-    "sockets",
-    "tlsconfig"
-  ]
+  packages = ["nat","sockets","tlsconfig"]
   revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
   version = "v0.3.0"
 
@@ -56,14 +33,7 @@
 
 [[projects]]
   name = "github.com/emirpasic/gods"
-  packages = [
-    "containers",
-    "lists",
-    "lists/arraylist",
-    "trees",
-    "trees/binaryheap",
-    "utils"
-  ]
+  packages = ["containers","lists","lists/arraylist","trees","trees/binaryheap","utils"]
   revision = "f6c17b524822278a87e3b3bd809fec33b51f5b46"
   version = "v1.9.0"
 
@@ -141,12 +111,7 @@
 
 [[projects]]
   name = "github.com/src-d/gcfg"
-  packages = [
-    ".",
-    "scanner",
-    "token",
-    "types"
-  ]
+  packages = [".","scanner","token","types"]
   revision = "f187355171c936ac84a82793659ebb4936bc1c23"
   version = "v1.3.0"
 
@@ -159,117 +124,38 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = [
-    "cast5",
-    "curve25519",
-    "ed25519",
-    "ed25519/internal/edwards25519",
-    "internal/chacha20",
-    "openpgp",
-    "openpgp/armor",
-    "openpgp/elgamal",
-    "openpgp/errors",
-    "openpgp/packet",
-    "openpgp/s2k",
-    "poly1305",
-    "ssh",
-    "ssh/agent",
-    "ssh/knownhosts"
-  ]
-  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
+  packages = ["cast5","ed25519","ed25519/internal/edwards25519","internal/chacha20","openpgp","openpgp/armor","openpgp/elgamal","openpgp/errors","openpgp/packet","openpgp/s2k","poly1305","ssh","ssh/agent","ssh/knownhosts"]
+  revision = "8b1d31080a7692e075c4681cb2458454a1fe0706"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = [
-    "context",
-    "context/ctxhttp",
-    "internal/socks",
-    "proxy"
-  ]
-  revision = "61147c48b25b599e5b561d2e9c4f3e1ef489ca41"
+  packages = ["context","context/ctxhttp","internal/socks","proxy"]
+  revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = [
-    "windows",
-    "windows/registry",
-    "windows/svc/eventlog"
-  ]
-  revision = "2281fa97ef7b0c26324634d5a22f04babdac8713"
+  packages = ["windows","windows/registry","windows/svc/eventlog"]
+  revision = "78d5f264b493f125018180c204871ecf58a2dce1"
 
 [[projects]]
   name = "golang.org/x/text"
-  packages = [
-    "internal/gen",
-    "internal/triegen",
-    "internal/ucd",
-    "transform",
-    "unicode/cldr",
-    "unicode/norm"
-  ]
+  packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v4"
-  packages = [
-    ".",
-    "helper/chroot",
-    "helper/polyfill",
-    "osfs",
-    "util"
-  ]
+  packages = [".","helper/chroot","helper/polyfill","osfs","util"]
   revision = "df053870ae7070b0350624ba5a22161ba3796cc0"
   version = "v4.1.1"
 
 [[projects]]
   name = "gopkg.in/src-d/go-git.v4"
-  packages = [
-    ".",
-    "config",
-    "internal/revision",
-    "plumbing",
-    "plumbing/cache",
-    "plumbing/filemode",
-    "plumbing/format/config",
-    "plumbing/format/diff",
-    "plumbing/format/gitignore",
-    "plumbing/format/idxfile",
-    "plumbing/format/index",
-    "plumbing/format/objfile",
-    "plumbing/format/packfile",
-    "plumbing/format/pktline",
-    "plumbing/object",
-    "plumbing/protocol/packp",
-    "plumbing/protocol/packp/capability",
-    "plumbing/protocol/packp/sideband",
-    "plumbing/revlist",
-    "plumbing/storer",
-    "plumbing/transport",
-    "plumbing/transport/client",
-    "plumbing/transport/file",
-    "plumbing/transport/git",
-    "plumbing/transport/http",
-    "plumbing/transport/internal/common",
-    "plumbing/transport/server",
-    "plumbing/transport/ssh",
-    "storage",
-    "storage/filesystem",
-    "storage/filesystem/internal/dotgit",
-    "storage/memory",
-    "utils/binary",
-    "utils/diff",
-    "utils/ioutil",
-    "utils/merkletrie",
-    "utils/merkletrie/filesystem",
-    "utils/merkletrie/index",
-    "utils/merkletrie/internal/frame",
-    "utils/merkletrie/noder"
-  ]
-  revision = "0db54e829f81a28f71c22d54c03daba5ec144c8d"
-  version = "v4.3.0"
+  packages = [".","config","internal/revision","plumbing","plumbing/cache","plumbing/filemode","plumbing/format/config","plumbing/format/diff","plumbing/format/gitignore","plumbing/format/idxfile","plumbing/format/index","plumbing/format/objfile","plumbing/format/packfile","plumbing/format/pktline","plumbing/object","plumbing/protocol/packp","plumbing/protocol/packp/capability","plumbing/protocol/packp/sideband","plumbing/revlist","plumbing/storer","plumbing/transport","plumbing/transport/client","plumbing/transport/file","plumbing/transport/git","plumbing/transport/http","plumbing/transport/internal/common","plumbing/transport/server","plumbing/transport/ssh","storage","storage/filesystem","storage/filesystem/internal/dotgit","storage/memory","utils/binary","utils/diff","utils/ioutil","utils/merkletrie","utils/merkletrie/filesystem","utils/merkletrie/index","utils/merkletrie/internal/frame","utils/merkletrie/noder"]
+  revision = "b30763cb64afa91c016b23e905af0a378eb1b76d"
+  version = "v4.3.1"
 
 [[projects]]
   name = "gopkg.in/warnings.v0"
@@ -280,6 +166,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "415f4a9231884c167a98b31fe11e717d1247ff7735537d882646dd16413f5d85"
+  inputs-digest = "ce9793335971907f7809cba3eb77f6436d326853396bd6f63322c650b98c6002"
   solver-name = "gps-cdcl"
   solver-version = 1
