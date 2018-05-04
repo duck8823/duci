@@ -7,6 +7,7 @@ services:
       - 8080:8080
     environment:
       - DOCKER_HOST=tcp://docker.for.mac.host.internal:1234
+      - DANGER_GITHUB_API_TOKEN=${DANGER_GITHUB_API_TOKEN}
   ngrok:
     image: wernight/ngrok
     command: "ngrok http webhook-proxy:8080"
