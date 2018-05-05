@@ -11,7 +11,9 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/google/logger"
 	"github.com/moby/moby/client"
+	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -23,6 +25,12 @@ import (
 func main() {
 	logger.Init("minimal_ci", false, false, os.Stdout)
 
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_API_TOKEN")},
+	)
+	tc := oauth2.NewClient(context.Background(), ts)
+	githubClient := github.NewClient(tc)
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Read Payload
 		body, err := ioutil.ReadAll(r.Body)
@@ -31,8 +39,8 @@ func main() {
 			return
 		}
 
-		pr := &github.IssueCommentEvent{}
-		if err := json.Unmarshal(body, pr); err != nil {
+		event := &github.IssueCommentEvent{}
+		if err := json.Unmarshal(body, event); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -42,18 +50,29 @@ func main() {
 			http.Error(w, "payload event type must be issue_comment", http.StatusBadRequest)
 			return
 		}
-		if ! strings.Contains(*pr.Comment.Body, "test") {
+		if !strings.Contains(*event.Comment.Body, "test") {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("not build."))
+			return
+		}
+		pr, _, err := githubClient.PullRequests.Get(
+			context.Background(),
+			event.Repo.Owner.GetLogin(),
+			event.Repo.GetName(),
+			event.Issue.GetNumber(),
+		)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		// Clone git repository
 		base := fmt.Sprintf("%v", time.Now().Unix())
 		root := fmt.Sprintf("/tmp/%s", base)
-		if _, err = git.PlainClone(root, false, &git.CloneOptions{
-			URL:      *pr.Repo.CloneURL,
-			Progress: os.Stdout,
+		if _, err := git.PlainClone(root, false, &git.CloneOptions{
+			URL:           event.Repo.GetCloneURL(),
+			Progress:      os.Stdout,
+			ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", pr.Head.GetRef())),
 		}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -194,7 +213,7 @@ func main() {
 		buf.ReadFrom(out)
 
 		respBody, err := json.Marshal(struct {
-			Console string`json:"console"`
+			Console string `json:"console"`
 		}{
 			Console: buf.String(),
 		})
