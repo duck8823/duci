@@ -11,6 +11,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/google/logger"
 	"github.com/moby/moby/client"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -35,19 +36,19 @@ func main() {
 		// Read Payload
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, nil)
 			return
 		}
 
 		event := &github.IssueCommentEvent{}
 		if err := json.Unmarshal(body, event); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, nil)
 			return
 		}
 
 		// Trigger build
 		if r.Header.Get("X-GitHub-Event") != "issue_comment" {
-			http.Error(w, "payload event type must be issue_comment", http.StatusBadRequest)
+			Error(errors.New("payload event type must be issue_comment"), w, nil)
 			return
 		}
 		if !strings.Contains(*event.Comment.Body, "test") {
@@ -62,7 +63,7 @@ func main() {
 			event.Issue.GetNumber(),
 		)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, nil)
 			return
 		}
 
@@ -75,14 +76,14 @@ func main() {
 			ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", pr.Head.GetRef())),
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, nil)
 			return
 		}
 
 		// Pending Status
 		ref, err := repo.Head()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, nil)
 			return
 		}
 		statusService := &CommitStatusService{
@@ -96,7 +97,7 @@ func main() {
 		// Create tar archive
 		tarFile, err := os.OpenFile(root+"/Dockerfile.tar", os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 		defer tarFile.Close()
@@ -134,22 +135,22 @@ func main() {
 			}
 			return nil
 		}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
 		if err := writer.Close(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 		if err := tarFile.Close(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
 		file, err := os.Open(root + "/Dockerfile.tar")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 		defer file.Close()
@@ -157,7 +158,7 @@ func main() {
 		// Create docker client
 		cli, err := client.NewEnvClient()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
@@ -165,14 +166,13 @@ func main() {
 		if resp, err := cli.ImageBuild(context.Background(), file, types.ImageBuildOptions{
 			Tags: []string{base},
 		}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		} else {
 			defer resp.Body.Close()
 
 			if _, err := ioutil.ReadAll(resp.Body); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Error(err, w, statusService)
 				return
 			}
 			logger.Info("Image Build succeeded.")
@@ -184,18 +184,18 @@ func main() {
 			Cmd:   []string{"test"},
 		}, nil, nil, "")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
 		// Run container
 		if err := cli.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
 		if code, err := cli.ContainerWait(context.Background(), con.ID); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		} else if code != 0 {
 			// Failure status
@@ -210,19 +210,19 @@ func main() {
 			ShowStderr: true,
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
 		// Remove container
 		if err := cli.ContainerRemove(context.Background(), con.ID, types.ContainerRemoveOptions{}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
 		// Remove image
 		if _, err := cli.ImageRemove(context.Background(), base, types.ImageRemoveOptions{}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(err, w, statusService)
 			return
 		}
 
@@ -244,6 +244,14 @@ func main() {
 	})
 
 	http.ListenAndServe(":8080", nil)
+}
+
+func Error(err error, w http.ResponseWriter, s *CommitStatusService) {
+	logger.Error(err.Error())
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	if s != nil {
+		s.Create(ERROR)
+	}
 }
 
 type CommitStatusService struct {

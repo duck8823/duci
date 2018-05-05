@@ -6,17 +6,16 @@ services:
     ports:
       - 8080:8080
     environment:
-      - DOCKER_HOST=tcp://docker.for.mac.host.internal:1234
-      - DANGER_GITHUB_API_TOKEN=${DANGER_GITHUB_API_TOKEN}
+      - DOCKER_HOST=tcp://docker.for.win.host.internal:2375
   ngrok:
     image: wernight/ngrok
     command: "ngrok http webhook-proxy:8080"
     ports:
       - 4040:4040
-  socat:
-    image: bobrik/socat
-    command: TCP-LISTEN:1234,fork UNIX-CONNECT:/var/run/docker.sock
-    ports:
-      - 1234:1234
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+#  socat:
+#    image: bobrik/socat
+#    command: TCP-LISTEN:2375,fork UNIX-CONNECT:/var/run/docker.sock
+#    ports:
+#      - 2375:2375
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
