@@ -128,12 +128,20 @@ func main() {
 		}
 
 		// Build image
-		if _, err := cli.ImageBuild(context.Background(), file, types.ImageBuildOptions{
+		if resp, err := cli.ImageBuild(context.Background(), file, types.ImageBuildOptions{
 			Tags: []string{base},
 		}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		} else {
+			defer resp.Body.Close()
+
+			if _, err := ioutil.ReadAll(resp.Body); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			logger.Info("Image Build succeeded.")
 		}
 
 		// Create container
@@ -152,8 +160,11 @@ func main() {
 			return
 		}
 
-		if _, err = cli.ContainerWait(context.Background(), con.ID); err != nil {
+		if code, err := cli.ContainerWait(context.Background(), con.ID); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		} else if code != 0 {
+			http.Error(w, fmt.Sprintf("return code: %v", code), http.StatusInternalServerError)
 			return
 		}
 
@@ -172,6 +183,12 @@ func main() {
 			return
 		}
 
+		// Remove image
+		if _, err := cli.ImageRemove(context.Background(), base, types.ImageRemoveOptions{}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		// Response console
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(out)
@@ -181,10 +198,6 @@ func main() {
 		}{
 			Console: buf.String(),
 		})
-		if err := cli.ContainerRemove(context.Background(), con.ID, types.ContainerRemoveOptions{}); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
 
 		w.WriteHeader(http.StatusOK)
 		w.Write(respBody)
