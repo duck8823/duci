@@ -69,14 +69,29 @@ func main() {
 		// Clone git repository
 		base := fmt.Sprintf("%v", time.Now().Unix())
 		root := fmt.Sprintf("/tmp/%s", base)
-		if _, err := git.PlainClone(root, false, &git.CloneOptions{
+		repo, err := git.PlainClone(root, false, &git.CloneOptions{
 			URL:           event.Repo.GetCloneURL(),
 			Progress:      os.Stdout,
 			ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", pr.Head.GetRef())),
-		}); err != nil {
+		})
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		// Pending Status
+		ref, err := repo.Head()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		statusService := &CommitStatusService{
+			Context:      "minimal_ci-test",
+			GithubClient: githubClient,
+			Repo:         event.Repo,
+			Hash:         ref.Hash(),
+		}
+		statusService.Create(PENDING)
 
 		// Create tar archive
 		tarFile, err := os.OpenFile(root+"/Dockerfile.tar", os.O_RDWR|os.O_CREATE, 0666)
@@ -183,6 +198,9 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		} else if code != 0 {
+			// Failure status
+			statusService.Create(FAILURE)
+
 			http.Error(w, fmt.Sprintf("return code: %v", code), http.StatusInternalServerError)
 			return
 		}
@@ -208,6 +226,9 @@ func main() {
 			return
 		}
 
+		// Succeed Status
+		statusService.Create(SUCCESS)
+
 		// Response console
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(out)
@@ -224,3 +245,37 @@ func main() {
 
 	http.ListenAndServe(":8080", nil)
 }
+
+type CommitStatusService struct {
+	Context      string
+	GithubClient *github.Client
+	Repo         *github.Repository
+	Hash         plumbing.Hash
+}
+
+func (s *CommitStatusService) Create(state State) error {
+	str := string(state)
+	_, _, err := s.GithubClient.Repositories.CreateStatus(
+		context.Background(),
+		s.Repo.Owner.GetLogin(),
+		s.Repo.GetName(),
+		s.Hash.String(),
+		&github.RepoStatus{
+			Context: &s.Context,
+			State:   &str,
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type State string
+
+const (
+	PENDING State = "pending"
+	SUCCESS State = "success"
+	ERROR   State = "error"
+	FAILURE State = "failure"
+)
