@@ -1,0 +1,15 @@
+version: "2"
+services:
+  minimal-ci:
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    environment:
+      - DOCKER_HOST=tcp://docker.for.win.host.internal:2375
+      - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
+#  ngrok:
+#    image: wernight/ngrok
+#    command: "ngrok http minimal-ci:8080"
+#    ports:
+#      - 4040:4040
