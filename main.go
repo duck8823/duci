@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -51,11 +52,13 @@ func main() {
 			Error(errors.New("payload event type must be issue_comment"), w, nil)
 			return
 		}
-		if !strings.Contains(*event.Comment.Body, "test") {
+		if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("not build."))
 			return
 		}
+		phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
+
 		pr, _, err := githubClient.PullRequests.Get(
 			context.Background(),
 			event.Repo.Owner.GetLogin(),
@@ -87,7 +90,7 @@ func main() {
 			return
 		}
 		statusService := &CommitStatusService{
-			Context:      "minimal_ci-test",
+			Context:      fmt.Sprintf("minimal_ci-%s", phrase),
 			GithubClient: githubClient,
 			Repo:         event.Repo,
 			Hash:         ref.Hash(),
@@ -181,7 +184,7 @@ func main() {
 		// Create container
 		con, err := cli.ContainerCreate(context.Background(), &container.Config{
 			Image: base,
-			Cmd:   []string{"test"},
+			Cmd:   []string{phrase},
 		}, nil, nil, "")
 		if err != nil {
 			Error(err, w, statusService)
