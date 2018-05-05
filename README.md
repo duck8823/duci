@@ -1,36 +1,53 @@
-# webhook-proxy
+# minimal-ci
+Minimal-ci is a small ci server.  
+The job is triggered by pull request comment.  
 
-## Example
+## Target Repository
+The target repository must have Dockerfile.  
+I suggest to use `ENTRYPOINT` in Dockerfile.
 
-```go
-package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"github.com/duck8823/webhook-proxy/payloads"
-	"github.com/duck8823/webhook-proxy/proxy/handlers"
-	"github.com/google/logger"
-	"net/http"
-)
-
-func main() {
-	logger.Init("webhook-proxy", false, false, os.Stdout)
-
-	http.Handle("/", &handlers.SlackNotificator{
-		Url: "https://hooks.slack.com/services/XXXX/YYYY/ZZZZ",
-		ConvertFunc: func(body []byte) (*payloads.SlackMessage, error) {
-			commitComment := &payloads.GitHubCommitComment{}
-			if err := json.Unmarshal(body, commitComment); err != nil {
-				return nil, err
-			}
-
-			return &payloads.SlackMessage{
-				Text: fmt.Sprintf("repository: %s", commitComment.Repository.FullName),
-			}, nil
-		},
-	})
-
-	http.ListenAndServe(":8080", nil)
-}
+e.g.
+```Dockerfile
+ENTRYPOINT ["mvn"]
 ```
+
+```Dockerfile
+ENTRYPOINT ["fastlane"]
+```
+
+When comment `ci test` on github pull request, 
+minimal-ci exec `mvn test` / `fastlane test` in docker container.  
+
+## Run Server
+### Add Environment Variable
+This server needs environment variable `GITHUB_API_TOKEN` to create status.
+```bash
+export GITHUB_API_TOKEN=<your token>
+```
+
+### Run Server
+#### Locally
+If you have already set $GOPATH, you can install it with the following command.
+```bash
+$ go get -u github.com/duck8823/minimal-ci
+$ minimal-ci 
+```
+
+#### Using Docker
+##### Docker for Windows
+```bash
+$ git clone https://github.com/duck8823/minimal-ci.git
+$ cd minimal-ci
+$ docker-compose -f docker-compose.win.yml up
+```
+
+##### Docker for Mac
+```bash
+$ git clone https://github.com/duck8823/minimal-ci.git
+$ cd minimal-ci
+$ docker-compose -f docker-compose.mac.yml up
+```
+
+#### Add Webhooks to GitHub repository
+Add endpoint of minimal-ci to target repository.  
+`https://github.com/<owner>/<repository>/settings/hooks`
