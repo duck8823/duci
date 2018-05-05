@@ -48,8 +48,10 @@ func main() {
 		}
 
 		// Trigger build
-		if r.Header.Get("X-GitHub-Event") != "issue_comment" {
-			Error(errors.New("payload event type must be issue_comment"), w, nil)
+		githubEvent := r.Header.Get("X-GitHub-Event")
+		if githubEvent != "issue_comment" {
+			message := fmt.Sprintf("payload event type must be issue_comment. but %s", githubEvent)
+			Error(errors.New(message), w, nil)
 			return
 		}
 		if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
