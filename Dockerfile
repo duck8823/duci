@@ -3,7 +3,7 @@ MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache git
 
-WORKDIR /go/src/github.com/duck8823/webhook-proxy
+WORKDIR /go/src/github.com/duck8823/minimal-ci
 
 ADD . .
 
@@ -14,4 +14,4 @@ RUN go build
 
 EXPOSE 8080
 
-CMD ["./webhook-proxy"]
+CMD ["./minimal-ci"]
