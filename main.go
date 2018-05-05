@@ -37,6 +37,17 @@ func main() {
 			return
 		}
 
+		// Trigger build
+		if r.Header.Get("X-GitHub-Event") != "issue_comment" {
+			http.Error(w, "payload event type must be issue_comment", http.StatusBadRequest)
+			return
+		}
+		if ! strings.Contains(*pr.Comment.Body, "test") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("not build."))
+			return
+		}
+
 		// Clone git repository
 		base := fmt.Sprintf("%v", time.Now().Unix())
 		root := fmt.Sprintf("/tmp/%s", base)
@@ -165,12 +176,11 @@ func main() {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(out)
 
-		resp := &struct {
-			Console string
+		respBody, err := json.Marshal(struct {
+			Console string`json:"console"`
 		}{
 			Console: buf.String(),
-		}
-		respBody, err := json.Marshal(resp)
+		})
 		if err := cli.ContainerRemove(context.Background(), con.ID, types.ContainerRemoveOptions{}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
