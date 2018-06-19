@@ -1,13 +1,13 @@
 package main
 
 import (
-	"archive/tar"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
 	"github.com/google/go-github/github"
 	"github.com/google/logger"
 	"github.com/moby/moby/client"
@@ -18,9 +18,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -107,58 +105,7 @@ func main() {
 		}
 		defer tarFile.Close()
 
-		writer := tar.NewWriter(tarFile)
-		defer writer.Close()
-
-		if err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				return nil
-			}
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			data, err := ioutil.ReadAll(file)
-			if err != nil {
-				return err
-			}
-			header := &tar.Header{
-				Name: strings.Replace(file.Name(), root, "", -1),
-				Mode: 0666,
-				Size: info.Size(),
-			}
-			if err := writer.WriteHeader(header); err != nil {
-				return err
-			}
-			if _, err := writer.Write(data); err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
-			Error(err, w, statusService)
-			return
-		}
-
-		if err := writer.Close(); err != nil {
-			Error(err, w, statusService)
-			return
-		}
-		if err := tarFile.Close(); err != nil {
-			Error(err, w, statusService)
-			return
-		}
-
-		file, err := os.Open(root + "/Dockerfile.tar")
-		if err != nil {
-			Error(err, w, statusService)
-			return
-		}
-		defer file.Close()
+		tar.Create(root, tarFile)
 
 		// Create docker client
 		cli, err := client.NewEnvClient()
@@ -168,7 +115,7 @@ func main() {
 		}
 
 		// Build image
-		if resp, err := cli.ImageBuild(context.Background(), file, types.ImageBuildOptions{
+		if resp, err := cli.ImageBuild(context.Background(), tarFile, types.ImageBuildOptions{
 			Tags: []string{base},
 		}); err != nil {
 			Error(err, w, statusService)
