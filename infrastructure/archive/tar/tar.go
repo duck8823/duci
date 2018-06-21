@@ -1,13 +1,13 @@
 package tar
 
 import (
-	"io"
-	"os"
-	"path/filepath"
-	"io/ioutil"
-	"strings"
 	"archive/tar"
 	"github.com/pkg/errors"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 func Create(dir string, output io.Writer) error {
