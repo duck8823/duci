@@ -77,7 +77,7 @@ func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, co
 	}
 
 	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName)
-	if _, match := err.(docker.TaskFailure); match {
+	if err == docker.Failure {
 		r.CreateCommitStatus(ctx, repo, head, github.FAILURE)
 		return errors.WithStack(err)
 	} else if err != nil {

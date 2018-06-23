@@ -21,7 +21,7 @@ func (e Environments) ToArray() []string {
 	return a
 }
 
-type TaskFailure error
+var Failure = errors.New("Failure")
 
 type Client struct {
 	Moby *moby.Client
@@ -92,7 +92,7 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 	if code, err := c.Moby.ContainerWait(ctx, con.ID); err != nil {
 		return "", errors.WithStack(err)
 	} else if code != 0 {
-		return con.ID, new(TaskFailure)
+		return con.ID, Failure
 	}
 
 	return con.ID, nil
