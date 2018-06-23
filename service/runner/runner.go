@@ -60,19 +60,22 @@ func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, co
 	r.CreateCommitStatus(ctx, repo, head, github.PENDING)
 
 	tarFilePath := path.Join(workDir, "minimal-ci.tar")
-	tarFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0400)
+	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0400)
 	if err != nil {
 		r.CreateCommitStatusWithError(ctx, repo, head, err)
 		return errors.WithStack(err)
 	}
-	defer tarFile.Close()
+	defer writeFile.Close()
 
-	if err := tar.Create(workDir, tarFile); err != nil {
+	if err := tar.Create(workDir, writeFile); err != nil {
 		r.CreateCommitStatusWithError(ctx, repo, head, err)
 		return errors.WithStack(err)
 	}
 
-	if err := r.Docker.Build(ctx, tarFile, tagName); err != nil {
+	readFile, _ := os.Open(tarFilePath)
+	defer readFile.Close()
+
+	if err := r.Docker.Build(ctx, readFile, tagName); err != nil {
 		r.CreateCommitStatusWithError(ctx, repo, head, err)
 		return errors.WithStack(err)
 	}
