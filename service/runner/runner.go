@@ -11,8 +11,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
 	"path"
-	"time"
 	"strconv"
+	"time"
 )
 
 const NAME = "minimal-ci"

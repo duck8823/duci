@@ -35,7 +35,7 @@ func Create(dir string, output io.Writer) error {
 
 		now := time.Now()
 		header := &tar.Header{
-			Name:       strings.Replace(file.Name(), dir + "/", "", -1),
+			Name:       strings.Replace(file.Name(), dir+"/", "", -1),
 			Mode:       0600,
 			ModTime:    now,
 			AccessTime: now,
