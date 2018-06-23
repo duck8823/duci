@@ -23,5 +23,5 @@ func (r *RepositoryName) Repo() (string, error) {
 	if len(ss) != 2 {
 		return "", errors.New(fmt.Sprintf("Invalid repository name: %s", r.FullName))
 	}
-	return ss[0], nil
+	return ss[1], nil
 }
