@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/go-github/github"
 	"github.com/google/logger"
 	"github.com/pkg/errors"
@@ -86,19 +85,19 @@ func (s *Service) CreateCommitStatus(ctx context.Context, repository Repository,
 	return nil
 }
 
-func (s *Service) Clone(ctx context.Context, dir string, repo Repository, branch string) (plumbing.Hash, error) {
+func (s *Service) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           repo.GetSSHURL(),
 		Progress:      os.Stdout,
-		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branch)),
+		ReferenceName: plumbing.ReferenceName(ref),
 	})
 	if err != nil {
 		return plumbing.Hash{}, errors.WithStack(err)
 	}
 
-	ref, err := gitRepository.Head()
+	reference, err := gitRepository.Head()
 	if err != nil {
 		return plumbing.Hash{}, errors.WithStack(err)
 	}
-	return ref.Hash(), nil
+	return reference.Hash(), nil
 }

@@ -48,7 +48,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 
-	if err := c.runner.Run(context.Background(), event.GetRepo(), "master", phrase); err != nil {
+	if err := c.runner.RunWithPullRequest(context.Background(), event.GetRepo(), event.GetIssue().GetNumber(), phrase); err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

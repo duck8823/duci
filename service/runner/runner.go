@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
 	"github.com/duck8823/minimal-ci/service/github"
@@ -35,6 +36,15 @@ func NewWithEnv() (*Runner, error) {
 		Name:        RUNNER_NAME,
 		BaseWorkDir: path.Join(os.TempDir(), RUNNER_NAME),
 	}, nil
+}
+
+func (r *Runner) RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error {
+	pr, err := r.GitHub.GetPullRequest(ctx, repo, num)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	ref := fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
+	return r.Run(ctx, repo, ref, command...)
 }
 
 func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
