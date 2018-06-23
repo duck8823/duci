@@ -1,7 +1,9 @@
 package docker
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -42,16 +44,7 @@ func (c *Client) Build(ctx context.Context, file io.Reader, tag string) error {
 	}
 	defer resp.Body.Close()
 
-	buf := make([]byte, 128)
-	for {
-		_, err := resp.Body.Read(buf)
-		logger.Info(buf)
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return errors.WithStack(err)
-		}
-	}
+	logStream(resp.Body)
 	return nil
 }
 
@@ -79,14 +72,7 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 	}
 
 	go func() {
-		buf := make([]byte, 128)
-		for {
-			_, err := log.Read(buf)
-			logger.Info(buf)
-			if err == io.EOF {
-				break
-			}
-		}
+		logStream(log)
 	}()
 
 	if code, err := c.Moby.ContainerWait(ctx, con.ID); err != nil {
@@ -108,6 +94,24 @@ func (c *Client) Rm(ctx context.Context, containerId string) error {
 func (c *Client) Rmi(ctx context.Context, tag string) error {
 	if _, err := c.Moby.ImageRemove(context.Background(), tag, types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func logStream(log io.Reader) error {
+	reader := bufio.NewReaderSize(log, 1024)
+	for {
+		line, _, err := reader.ReadLine()
+		stream := &struct {
+			Stream string `json:"stream"`
+		}{}
+		json.Unmarshal(line, stream)
+		logger.Info(stream.Stream)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return errors.WithStack(err)
+		}
 	}
 	return nil
 }
