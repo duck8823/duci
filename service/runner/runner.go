@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const RUNNER_NAME = "minimal-ci"
+const NAME = "minimal-ci"
 
 type Runner struct {
 	GitHub      *github.Service
@@ -33,8 +33,8 @@ func NewWithEnv() (*Runner, error) {
 	return &Runner{
 		GitHub:      githubService,
 		Docker:      dockerClient,
-		Name:        RUNNER_NAME,
-		BaseWorkDir: path.Join(os.TempDir(), RUNNER_NAME),
+		Name:        NAME,
+		BaseWorkDir: path.Join(os.TempDir(), NAME),
 	}, nil
 }
 
