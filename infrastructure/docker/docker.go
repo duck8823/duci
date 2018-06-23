@@ -23,20 +23,20 @@ func (e Environments) ToArray() []string {
 
 type TaskFailure error
 
-type client struct {
-	moby *moby.Client
+type Client struct {
+	Moby *moby.Client
 }
 
-func New() (*client, error) {
+func New() (*Client, error) {
 	cli, err := moby.NewEnvClient()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &client{moby: cli}, nil
+	return &Client{Moby: cli}, nil
 }
 
-func (c *client) Build(ctx context.Context, file io.Reader, tag string) error {
-	resp, err := c.moby.ImageBuild(ctx, file, types.ImageBuildOptions{Tags: []string{tag}})
+func (c *Client) Build(ctx context.Context, file io.Reader, tag string) error {
+	resp, err := c.Moby.ImageBuild(ctx, file, types.ImageBuildOptions{Tags: []string{tag}})
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -55,8 +55,8 @@ func (c *client) Build(ctx context.Context, file io.Reader, tag string) error {
 	return nil
 }
 
-func (c *client) Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error) {
-	con, err := c.moby.ContainerCreate(ctx, &container.Config{
+func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error) {
+	con, err := c.Moby.ContainerCreate(ctx, &container.Config{
 		Image: tag,
 		Env:   env.ToArray(),
 		Cmd:   cmd,
@@ -65,11 +65,11 @@ func (c *client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 		return "", errors.WithStack(err)
 	}
 
-	if err := c.moby.ContainerStart(ctx, con.ID, types.ContainerStartOptions{}); err != nil {
+	if err := c.Moby.ContainerStart(ctx, con.ID, types.ContainerStartOptions{}); err != nil {
 		return "", errors.WithStack(err)
 	}
 
-	log, err := c.moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
+	log, err := c.Moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Follow:     true,
@@ -89,7 +89,7 @@ func (c *client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 		}
 	}()
 
-	if code, err := c.moby.ContainerWait(ctx, con.ID); err != nil {
+	if code, err := c.Moby.ContainerWait(ctx, con.ID); err != nil {
 		return "", errors.WithStack(err)
 	} else if code != 0 {
 		return con.ID, new(TaskFailure)
@@ -98,15 +98,15 @@ func (c *client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 	return con.ID, nil
 }
 
-func (c *client) Rm(ctx context.Context, containerId string) error {
-	if err := c.moby.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{}); err != nil {
+func (c *Client) Rm(ctx context.Context, containerId string) error {
+	if err := c.Moby.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func (c *client) Rmi(ctx context.Context, tag string) error {
-	if _, err := c.moby.ImageRemove(context.Background(), tag, types.ImageRemoveOptions{}); err != nil {
+func (c *Client) Rmi(ctx context.Context, tag string) error {
+	if _, err := c.Moby.ImageRemove(context.Background(), tag, types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
