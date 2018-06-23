@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"time"
+	"strconv"
 )
 
 const NAME = "minimal-ci"
@@ -48,7 +49,7 @@ func (r *Runner) RunWithPullRequest(ctx context.Context, repo github.Repository,
 }
 
 func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
-	workDir := path.Join(r.BaseWorkDir, string(time.Now().Unix()))
+	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
 	head, err := r.GitHub.Clone(ctx, workDir, repo, ref)
