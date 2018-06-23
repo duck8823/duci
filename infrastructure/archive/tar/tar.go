@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func Create(dir string, output io.Writer) error {
@@ -31,10 +32,15 @@ func Create(dir string, output io.Writer) error {
 		if err != nil {
 			return errors.WithStack(err)
 		}
+
+		now := time.Now()
 		header := &tar.Header{
-			Name: strings.Replace(file.Name(), dir, "", -1),
-			Mode: 0600,
-			Size: info.Size(),
+			Name:       strings.Replace(file.Name(), dir + "/", "", -1),
+			Mode:       0600,
+			ModTime:    now,
+			AccessTime: now,
+			ChangeTime: now,
+			Size:       info.Size(),
 		}
 		if err := writer.WriteHeader(header); err != nil {
 			return errors.WithStack(err)
