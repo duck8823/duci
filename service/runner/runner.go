@@ -15,33 +15,33 @@ import (
 
 const RUNNER_NAME = "minimal-ci"
 
-type runner struct {
-	github      *github.Service
-	docker      *docker.Client
+type Runner struct {
+	GitHub      *github.Service
+	Docker      *docker.Client
 	Name        string
 	BaseWorkDir string
 }
 
-func NewWithEnv() (*runner, error) {
+func NewWithEnv() (*Runner, error) {
 	githubService := github.New(context.Background(), os.Getenv("GITHUB_API_TOKEN"))
 	dockerClient, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	return &runner{
-		github:      githubService,
-		docker:      dockerClient,
+	return &Runner{
+		GitHub:      githubService,
+		Docker:      dockerClient,
 		Name:        RUNNER_NAME,
 		BaseWorkDir: path.Join(os.TempDir(), RUNNER_NAME),
 	}, nil
 }
 
-func (r *runner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
+func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, string(time.Now().Unix()))
 	tagName := repo.GetFullName()
 
-	head, err := r.github.Clone(ctx, workDir, repo, ref)
+	head, err := r.GitHub.Clone(ctx, workDir, repo, ref)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -61,12 +61,12 @@ func (r *runner) Run(ctx context.Context, repo github.Repository, ref string, co
 		return errors.WithStack(err)
 	}
 
-	if err := r.docker.Build(ctx, tarFile, tagName); err != nil {
+	if err := r.Docker.Build(ctx, tarFile, tagName); err != nil {
 		r.CreateCommitStatusWithError(ctx, repo, head, err)
 		return errors.WithStack(err)
 	}
 
-	_, err = r.docker.Run(ctx, docker.Environments{}, tagName)
+	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName)
 	if _, match := err.(docker.TaskFailure); match {
 		r.CreateCommitStatus(ctx, repo, head, github.FAILURE)
 		return errors.WithStack(err)
@@ -80,8 +80,8 @@ func (r *runner) Run(ctx context.Context, repo github.Repository, ref string, co
 	return nil
 }
 
-func (r *runner) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
-	if err := r.github.CreateCommitStatus(ctx, repo, hash, &github.Status{
+func (r *Runner) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
+	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
 		Context: &r.Name,
 		State:   &state,
 	}); err != nil {
@@ -89,10 +89,10 @@ func (r *runner) CreateCommitStatus(ctx context.Context, repo github.Repository,
 	}
 }
 
-func (r *runner) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
+func (r *Runner) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
 	msg := err.Error()
 	state := github.ERROR
-	if err := r.github.CreateCommitStatus(ctx, repo, hash, &github.Status{
+	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
 		Context:     &r.Name,
 		Description: &msg,
 		State:       &state,
