@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/google/logger"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 )
@@ -27,15 +26,8 @@ func New() (*jobController, error) {
 
 func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Read Payload
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	event := &github.IssueCommentEvent{}
-	if err := json.Unmarshal(body, event); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
 		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
