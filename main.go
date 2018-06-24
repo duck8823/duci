@@ -13,7 +13,6 @@ func main() {
 	ctrl, err := controller.New()
 	if err != nil {
 		logger.Fatalf("Failed to create controller.\n%+v", err)
-		os.Exit(-1)
 		return
 	}
 
