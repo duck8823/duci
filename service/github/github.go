@@ -108,6 +108,8 @@ type logWriter struct {
 
 func (l *logWriter) Write(p []byte) (n int, err error) {
 	log := l.rep.ReplaceAllString(string(p), "")
-	logger.Info(log)
+	if len(log) > 0 {
+		logger.Info(log)
+	}
 	return 0, nil
 }

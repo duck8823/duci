@@ -106,7 +106,9 @@ func logStream(log io.Reader) error {
 			Stream string `json:"stream"`
 		}{}
 		json.Unmarshal(line, stream)
-		logger.Info(stream.Stream)
+		if len(stream.Stream) > 0 {
+			logger.Info(stream.Stream)
+		}
 		if err == io.EOF {
 			break
 		} else if err != nil {
