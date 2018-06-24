@@ -28,7 +28,6 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Read Payload
 	event := &github.IssueCommentEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
-		logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -37,7 +36,6 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	githubEvent := r.Header.Get("X-GitHub-Event")
 	if githubEvent != "issue_comment" {
 		message := fmt.Sprintf("payload event type must be issue_comment. but %s", githubEvent)
-		logger.Error(message)
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
@@ -49,8 +47,9 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 
 	if err := c.runner.RunWithPullRequest(context.Background(), event.GetRepo(), event.GetIssue().GetNumber(), phrase); err != nil {
-		logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		logger.Errorf("%+v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
