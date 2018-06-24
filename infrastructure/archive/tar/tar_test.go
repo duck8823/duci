@@ -42,11 +42,11 @@ func TestCreate(t *testing.T) {
 
 	expect := Files{
 		{
-			Name:    "/dir/file",
+			Name:    "dir/file",
 			Content: "this is file in the dir.",
 		},
 		{
-			Name:    "/file",
+			Name:    "file",
 			Content: "this is file.",
 		},
 	}
