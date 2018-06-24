@@ -2,6 +2,7 @@ package docker
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -76,10 +77,17 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 		reader := bufio.NewReaderSize(log, 1024)
 		for {
 			line, _, err := reader.ReadLine()
-			if len(line) > 0 {
-				// remove log prefix
+			if len(line) > 8 {
+				// detect log prefix
 				// see https://godoc.org/github.com/docker/docker/client#Client.ContainerLogs
-				logger.Info(string(line[8:]))
+				if !((line[0] == 1 || line[0] == 2) && (line[1] == 0 && line[2] == 0 && line[3] == 0)) {
+					continue
+				}
+				messages := line[8:]
+
+				// prevent to CR
+				progress := bytes.Split(messages, []byte{'\r'})
+				logger.Info(string(progress[0]))
 			}
 			if err == io.EOF {
 				break
