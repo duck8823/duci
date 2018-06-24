@@ -24,7 +24,7 @@ func (e Environments) ToArray() []string {
 	return a
 }
 
-var Failure = errors.New("Failure")
+var Failure = errors.New("Task Failure")
 
 type Client struct {
 	Moby *moby.Client

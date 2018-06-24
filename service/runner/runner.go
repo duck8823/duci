@@ -95,9 +95,11 @@ func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, co
 }
 
 func (r *Runner) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
+	msg := fmt.Sprintf("task %s", state)
 	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
-		Context: &r.Name,
-		State:   &state,
+		Context:     &r.Name,
+		Description: &msg,
+		State:       &state,
 	}); err != nil {
 		logger.Errorf("Failed to create commit status: %+v", err)
 	}
@@ -105,6 +107,9 @@ func (r *Runner) CreateCommitStatus(ctx context.Context, repo github.Repository,
 
 func (r *Runner) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
 	msg := err.Error()
+	if len(msg) >= 50 {
+		msg = string([]rune(msg)[:46]) + "..."
+	}
 	state := github.ERROR
 	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
 		Context:     &r.Name,
