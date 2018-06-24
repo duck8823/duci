@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/duck8823/minimal-ci/service/runner"
 	"github.com/google/go-github/github"
-	"github.com/google/logger"
 	"github.com/pkg/errors"
 	"net/http"
 	"regexp"
@@ -36,10 +36,12 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	githubEvent := r.Header.Get("X-GitHub-Event")
 	if githubEvent != "issue_comment" {
 		message := fmt.Sprintf("payload event type must be issue_comment. but %s", githubEvent)
+		logger.Error(message)
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
+		logger.Info("no build.")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("not build."))
 		return

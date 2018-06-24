@@ -2,8 +2,8 @@ package github
 
 import (
 	"context"
+	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/google/go-github/github"
-	"github.com/google/logger"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4"

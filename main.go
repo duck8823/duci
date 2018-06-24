@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/duck8823/minimal-ci/presentation/controller"
-	"github.com/google/logger"
 	"net/http"
-	"os"
 )
 
 func main() {
-	logger.Init("minimal_ci", false, false, os.Stdout)
+	logger.Init()
 
 	ctrl, err := controller.New()
 	if err != nil {

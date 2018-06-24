@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/google/logger"
+	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	moby "github.com/moby/moby/client"
 	"github.com/pkg/errors"
 	"io"
