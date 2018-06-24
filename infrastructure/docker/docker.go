@@ -70,9 +70,21 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
+	defer log.Close()
 
 	go func() {
-		logStream(log)
+		reader := bufio.NewReaderSize(log, 1024)
+		for {
+			line, _, err := reader.ReadLine()
+			if len(line) > 0 {
+				// remove log prefix
+				// see https://godoc.org/github.com/docker/docker/client#Client.ContainerLogs
+				logger.Info(string(line[8:]))
+			}
+			if err == io.EOF {
+				break
+			}
+		}
 	}()
 
 	if code, err := c.Moby.ContainerWait(ctx, con.ID); err != nil {
