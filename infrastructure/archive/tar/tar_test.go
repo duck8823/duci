@@ -9,27 +9,30 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
 
 func TestCreate(t *testing.T) {
-	tempDir := CreateTestDir(t)
+	testDir := CreateTestDir(t)
+	archiveDir := path.Join(testDir, "archive")
 
-	if err := os.Mkdir(path.Join(tempDir, "empty"), 0700); err != nil {
+	CreateFile(t, path.Join(archiveDir, "file"), "this is file.")
+	CreateFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
+
+	if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
 		t.Fatalf("%+v", err)
 	}
-	CreateFile(t, path.Join(tempDir, "file"), "this is file.")
-	CreateFile(t, path.Join(tempDir, "dir", "file"), "this is file in the dir.")
 
-	output := path.Join(os.TempDir(), "output.tar")
+	output := path.Join(testDir, "output.tar")
 	tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
 	defer tarFile.Close()
 
-	if err := tar.Create(tempDir, tarFile); err != nil {
+	if err := tar.Create(archiveDir, tarFile); err != nil {
 		t.Fatalf("%+v", err)
 	}
 
@@ -98,6 +101,12 @@ func CreateTestDir(t *testing.T) string {
 
 func CreateFile(t *testing.T, name string, content string) {
 	t.Helper()
+
+	paths := strings.Split(name, "/")
+	dir := strings.Join(paths[:len(paths)-1], "/")
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		t.Fatalf("%+v", err)
+	}
 
 	file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0400)
 	if err != nil {
