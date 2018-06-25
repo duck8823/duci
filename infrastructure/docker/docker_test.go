@@ -1,10 +1,145 @@
 package docker_test
 
 import (
+	"context"
+	"fmt"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
+	"github.com/labstack/gommon/random"
+	"github.com/moby/moby/client"
+	"io/ioutil"
+	"os"
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 )
+
+func TestClient_Build(t *testing.T) {
+	cli, err := docker.New()
+	if err != nil {
+		t.Fatalf("error occured: %+v", err)
+	}
+
+	t.Run("with correct archive", func(t *testing.T) {
+		tag := strings.ToLower(random.String(64))
+
+		tar, err := os.Open("testdata/correct_archive.tar")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		if err := cli.Build(context.Background(), tar, tag); err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		images := DockerImages(t)
+		fullTag := fmt.Sprintf("%s:latest", tag)
+		if !Contains(images, fullTag) {
+			t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
+		}
+	})
+
+	t.Run("with invalid archive", func(t *testing.T) {
+		tag := strings.ToLower(random.String(64))
+
+		tar, err := os.Open("testdata/invalid_archive.tar")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		if err := cli.Build(context.Background(), tar, tag); err == nil {
+			t.Error("error must not be nil")
+		}
+	})
+}
+
+func TestClient_Run(t *testing.T) {
+	cli, err := docker.New()
+	if err != nil {
+		t.Fatalf("error occured: %+v", err)
+	}
+
+	t.Run("without environments", func(t *testing.T) {
+		t.Run("without command", func(t *testing.T) {
+			ImagePull(t, "hello-world:latest")
+			containerId, err := cli.Run(context.Background(), docker.Environments{}, "hello-world")
+			if err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
+			logs := ContainerLogsString(t, containerId)
+
+			if !strings.Contains(logs, "Hello from Docker!") {
+				t.Error("logs must contains `Hello from Docker!`")
+			}
+		})
+
+		t.Run("with command", func(t *testing.T) {
+			ImagePull(t, "centos:latest")
+			containerId, err := cli.Run(context.Background(), docker.Environments{}, "centos", "echo", "Hello-world")
+			if err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
+			logs := ContainerLogsString(t, containerId)
+
+			if strings.Contains(logs, "hello-world") {
+				t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
+			}
+		})
+	})
+
+	t.Run("with environments", func(t *testing.T) {
+		ImagePull(t, "centos:latest")
+		containerId, err := cli.Run(context.Background(), docker.Environments{"ENV": "hello-world"}, "centos", "sh", "-c", "echo $ENV")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		logs := ContainerLogsString(t, containerId)
+
+		if !strings.Contains(logs, "hello-world") {
+			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
+		}
+	})
+}
+
+func TestClient_Rm(t *testing.T) {
+	cli, err := docker.New()
+	if err != nil {
+		t.Fatalf("error occured: %+v", err)
+	}
+
+	tag := "alpine:2.7"
+	containerId := ContainerCreate(t, tag)
+
+	if err := cli.Rm(context.Background(), containerId); err != nil {
+		t.Fatalf("error occured: %+v", err)
+	}
+
+	containers := DockerContainers(t)
+	if Contains(containers, tag) {
+		t.Errorf("containers must not contains id. containers: %+v, tag: %+v", containers, containerId)
+	}
+}
+
+func TestClient_Rmi(t *testing.T) {
+	cli, err := docker.New()
+	if err != nil {
+		t.Fatalf("error occured: %+v", err)
+	}
+
+	tag := "alpine:2.6"
+	ImagePull(t, tag)
+
+	if err := cli.Rmi(context.Background(), tag); err != nil {
+		t.Fatalf("error occured: %+v", err)
+	}
+
+	images := DockerImages(t)
+	if Contains(images, tag) {
+		t.Errorf("images must not contains tag. images: %+v, tag: %+v", images, tag)
+	}
+}
 
 func TestEnvironments_ToArray(t *testing.T) {
 	var empty []string
@@ -28,8 +163,128 @@ func TestEnvironments_ToArray(t *testing.T) {
 		},
 	} {
 		actual := testcase.in.ToArray()
-		if !reflect.DeepEqual(actual, testcase.expected) {
-			t.Errorf("must be equal. actual=%+v, wont=%+v", actual, testcase.expected)
+		expected := testcase.expected
+		sort.Strings(actual)
+		sort.Strings(expected)
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("must be equal. actual=%+v, wont=%+v", actual, expected)
 		}
 	}
+}
+
+func Contains(strings []string, str string) bool {
+	for _, s := range strings {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
+func DockerImages(t *testing.T) []string {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	images, err := cli.ImageList(context.Background(), types.ImageListOptions{})
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	var names []string
+	for _, image := range images {
+		names = append(names, image.RepoTags...)
+	}
+
+	return names
+}
+
+func DockerContainers(t *testing.T) []string {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	var ids []string
+	for _, con := range containers {
+		ids = append(ids, con.ID)
+	}
+	return ids
+}
+
+func ContainerLogsString(t *testing.T, containerId string) string {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	reader, err := cli.ContainerLogs(context.Background(), containerId, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+	})
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	log, err := ioutil.ReadAll(reader)
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	return string(log)
+}
+
+func ImagePull(t *testing.T, ref string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	stream, err := cli.ImagePull(context.Background(), ref, types.ImagePullOptions{})
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+	// wait until pull
+	if _, err := ioutil.ReadAll(stream); err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	images := DockerImages(t)
+	if !Contains(images, ref) {
+		t.Fatalf("docker images must be contains %s", ref)
+	}
+}
+
+func ContainerCreate(t *testing.T, ref string) string {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	config := &container.Config{
+		Image: ref,
+		Cmd:   []string{"hello", "world"},
+	}
+	con, err := cli.ContainerCreate(context.Background(), config, nil, nil, "")
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+		return ""
+	}
+	return con.ID
 }
