@@ -15,23 +15,28 @@ import (
 	"time"
 )
 
+type Runner interface {
+	RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error
+	Run(ctx context.Context, repo github.Repository, ref string, command ...string) error
+}
+
 const NAME = "minimal-ci"
 
-type Runner struct {
+type runnerImpl struct {
 	GitHub      *github.Service
 	Docker      *docker.Client
 	Name        string
 	BaseWorkDir string
 }
 
-func NewWithEnv() (*Runner, error) {
+func NewWithEnv() (*runnerImpl, error) {
 	githubService := github.New(context.Background(), os.Getenv("GITHUB_API_TOKEN"))
 	dockerClient, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	return &Runner{
+	return &runnerImpl{
 		GitHub:      githubService,
 		Docker:      dockerClient,
 		Name:        NAME,
@@ -39,7 +44,7 @@ func NewWithEnv() (*Runner, error) {
 	}, nil
 }
 
-func (r *Runner) RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error {
+func (r *runnerImpl) RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error {
 	pr, err := r.GitHub.GetPullRequest(ctx, repo, num)
 	if err != nil {
 		return errors.WithStack(err)
@@ -48,7 +53,7 @@ func (r *Runner) RunWithPullRequest(ctx context.Context, repo github.Repository,
 	return r.Run(ctx, repo, ref, command...)
 }
 
-func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
+func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
@@ -94,7 +99,7 @@ func (r *Runner) Run(ctx context.Context, repo github.Repository, ref string, co
 	return nil
 }
 
-func (r *Runner) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
+func (r *runnerImpl) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
 	msg := fmt.Sprintf("task %s", state)
 	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
 		Context:     &r.Name,
@@ -105,7 +110,7 @@ func (r *Runner) CreateCommitStatus(ctx context.Context, repo github.Repository,
 	}
 }
 
-func (r *Runner) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
+func (r *runnerImpl) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
 	msg := err.Error()
 	if len(msg) >= 50 {
 		msg = string([]rune(msg)[:46]) + "..."

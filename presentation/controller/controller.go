@@ -13,7 +13,7 @@ import (
 )
 
 type jobController struct {
-	runner *runner.Runner
+	runner runner.Runner
 }
 
 func New() (*jobController, error) {
