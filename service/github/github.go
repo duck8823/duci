@@ -8,7 +8,6 @@ import (
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"regexp"
 )
 
 type Repository interface {
@@ -88,7 +87,7 @@ func (s *Service) CreateCommitStatus(ctx context.Context, repository Repository,
 func (s *Service) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           repo.GetSSHURL(),
-		Progress:      &logWriter{regexp.MustCompile("\r.*$")},
+		Progress:      &ProgressLogger{},
 		ReferenceName: plumbing.ReferenceName(ref),
 	})
 	if err != nil {
@@ -100,16 +99,4 @@ func (s *Service) Clone(ctx context.Context, dir string, repo Repository, ref st
 		return plumbing.Hash{}, errors.WithStack(err)
 	}
 	return reference.Hash(), nil
-}
-
-type logWriter struct {
-	rep *regexp.Regexp
-}
-
-func (l *logWriter) Write(p []byte) (n int, err error) {
-	log := l.rep.ReplaceAllString(string(p), "")
-	if len(log) > 0 {
-		logger.Info(log)
-	}
-	return 0, nil
 }

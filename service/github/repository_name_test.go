@@ -1,8 +1,8 @@
 package github_test
 
 import (
-	"testing"
 	"github.com/duck8823/minimal-ci/service/github"
+	"testing"
 )
 
 func TestRepositoryName_Owner(t *testing.T) {
