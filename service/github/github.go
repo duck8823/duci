@@ -15,6 +15,8 @@ type Repository interface {
 	GetSSHURL() string
 }
 
+type PullRequest = github.PullRequest
+
 type Status = github.RepoStatus
 
 type State = string
@@ -26,19 +28,25 @@ const (
 	FAILURE = "failure"
 )
 
-type Service struct {
+type Service interface {
+	GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error)
+	CreateCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, status *Status) error
+	Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error)
+}
+
+type serviceImpl struct {
 	Client *github.Client
 }
 
-func New(ctx context.Context, token string) *Service {
+func New(ctx context.Context, token string) *serviceImpl {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
-	return &Service{github.NewClient(tc)}
+	return &serviceImpl{github.NewClient(tc)}
 }
 
-func (s *Service) GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error) {
+func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error) {
 	name := &RepositoryName{repository.GetFullName()}
 	owner, err := name.Owner()
 	if err != nil {
@@ -61,7 +69,7 @@ func (s *Service) GetPullRequest(ctx context.Context, repository Repository, num
 	return pr, nil
 }
 
-func (s *Service) CreateCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, status *Status) error {
+func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, status *Status) error {
 	name := &RepositoryName{repository.GetFullName()}
 	owner, err := name.Owner()
 	if err != nil {
@@ -84,7 +92,7 @@ func (s *Service) CreateCommitStatus(ctx context.Context, repository Repository,
 	return nil
 }
 
-func (s *Service) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
+func (s *serviceImpl) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           repo.GetSSHURL(),
 		Progress:      &ProgressLogger{},

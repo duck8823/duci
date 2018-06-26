@@ -23,7 +23,7 @@ type Runner interface {
 const NAME = "minimal-ci"
 
 type runnerImpl struct {
-	GitHub      *github.Service
+	GitHub      github.Service
 	Docker      *docker.Client
 	Name        string
 	BaseWorkDir string
