@@ -109,7 +109,8 @@ func TestClient_Rm(t *testing.T) {
 		t.Fatalf("error occured: %+v", err)
 	}
 
-	tag := "alpine:2.7"
+	tag := "alpine:3.5"
+	ImagePull(t, tag)
 	containerId := ContainerCreate(t, tag)
 
 	if err := cli.Rm(context.New(), containerId); err != nil {
