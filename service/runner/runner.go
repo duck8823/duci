@@ -55,8 +55,8 @@ func (r *runnerImpl) RunWithPullRequest(ctx context.Context, repo github.Reposit
 }
 
 func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) {
-	commitHash := make(chan plumbing.Hash)
-	errs := make(chan error)
+	commitHash := make(chan plumbing.Hash, 1)
+	errs := make(chan error, 1)
 
 	timeout, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
@@ -100,17 +100,15 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 
 	select {
 	case <-timeout.Done():
-		select {
-		case timeout.Err() != nil:
+		if timeout.Err() != nil {
 			r.CreateCommitStatusWithError(timeout, repo, <-commitHash, timeout.Err())
 		}
 	case err := <-errs:
-		select {
-		case err == docker.Failure:
+		if err == docker.Failure {
 			r.CreateCommitStatus(timeout, repo, <-commitHash, github.FAILURE)
-		case err != nil:
+		} else if err != nil {
 			r.CreateCommitStatusWithError(timeout, repo, <-commitHash, err)
-		default:
+		} else {
 			r.CreateCommitStatus(timeout, repo, <-commitHash, github.SUCCESS)
 		}
 	}
