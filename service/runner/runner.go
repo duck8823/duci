@@ -17,7 +17,7 @@ import (
 
 type Runner interface {
 	RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error
-	Run(ctx context.Context, repo github.Repository, ref string, command ...string) error
+	Run(ctx context.Context, repo github.Repository, ref string, command ...string)
 }
 
 const NAME = "minimal-ci"
@@ -50,53 +50,73 @@ func (r *runnerImpl) RunWithPullRequest(ctx context.Context, repo github.Reposit
 		return errors.WithStack(err)
 	}
 	ref := fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
-	return r.Run(ctx, repo, ref, command...)
+	r.Run(ctx, repo, ref, command...)
+	return nil
 }
 
-func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
-	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
-	tagName := repo.GetFullName()
+func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) {
+	commitHash := make(chan plumbing.Hash)
+	errs := make(chan error)
 
-	head, err := r.GitHub.Clone(ctx, workDir, repo, ref)
-	if err != nil {
-		return errors.WithStack(err)
+	timeout, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	defer cancel()
+
+	go func() {
+		workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
+		tagName := repo.GetFullName()
+
+		head, err := r.GitHub.Clone(ctx, workDir, repo, ref)
+		if err != nil {
+			errs <- errors.WithStack(err)
+		}
+
+		commitHash <- head
+		r.CreateCommitStatus(ctx, repo, head, github.PENDING)
+
+		tarFilePath := path.Join(workDir, "minimal-ci.tar")
+		writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			errs <- errors.WithStack(err)
+		}
+		defer writeFile.Close()
+
+		if err := tar.Create(workDir, writeFile); err != nil {
+			errs <- errors.WithStack(err)
+		}
+
+		readFile, _ := os.Open(tarFilePath)
+		defer readFile.Close()
+
+		if err := r.Docker.Build(ctx, readFile, tagName); err != nil {
+			errs <- errors.WithStack(err)
+		}
+
+		_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
+		if err == docker.Failure {
+			errs <- errors.WithStack(err)
+		} else if err != nil {
+			errs <- errors.WithStack(err)
+		}
+
+		errs <- nil // success
+	}()
+
+	select {
+	case <-timeout.Done():
+		select {
+		case timeout.Err() != nil:
+			r.CreateCommitStatusWithError(timeout, repo, <-commitHash, timeout.Err())
+		}
+	case err := <-errs:
+		select {
+		case err == docker.Failure:
+			r.CreateCommitStatus(timeout, repo, <-commitHash, github.FAILURE)
+		case err != nil:
+			r.CreateCommitStatusWithError(timeout, repo, <-commitHash, err)
+		default:
+			r.CreateCommitStatus(timeout, repo, <-commitHash, github.SUCCESS)
+		}
 	}
-
-	r.CreateCommitStatus(ctx, repo, head, github.PENDING)
-
-	tarFilePath := path.Join(workDir, "minimal-ci.tar")
-	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0400)
-	if err != nil {
-		r.CreateCommitStatusWithError(ctx, repo, head, err)
-		return errors.WithStack(err)
-	}
-	defer writeFile.Close()
-
-	if err := tar.Create(workDir, writeFile); err != nil {
-		r.CreateCommitStatusWithError(ctx, repo, head, err)
-		return errors.WithStack(err)
-	}
-
-	readFile, _ := os.Open(tarFilePath)
-	defer readFile.Close()
-
-	if err := r.Docker.Build(ctx, readFile, tagName); err != nil {
-		r.CreateCommitStatusWithError(ctx, repo, head, err)
-		return errors.WithStack(err)
-	}
-
-	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
-	if err == docker.Failure {
-		r.CreateCommitStatus(ctx, repo, head, github.FAILURE)
-		return errors.WithStack(err)
-	} else if err != nil {
-		r.CreateCommitStatusWithError(ctx, repo, head, err)
-		return errors.WithStack(err)
-	}
-
-	r.CreateCommitStatus(ctx, repo, head, github.SUCCESS)
-
-	return nil
 }
 
 func (r *runnerImpl) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
