@@ -3,17 +3,15 @@ package main
 import (
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/duck8823/minimal-ci/presentation/controller"
-	"github.com/op/go-logging"
+	"github.com/google/uuid"
 	"net/http"
 	"os"
 )
 
 func main() {
-	logger.Init(os.Stdout, logging.DEBUG)
-
 	ctrl, err := controller.New()
 	if err != nil {
-		logger.Errorf("Failed to create controller.\n%+v", err)
+		logger.Errorf(uuid.UUID{}, "Failed to create controller.\n%+v", err)
 		os.Exit(1)
 		return
 	}

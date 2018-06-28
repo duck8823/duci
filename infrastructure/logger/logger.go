@@ -1,46 +1,50 @@
 package logger
 
 import (
-	"github.com/op/go-logging"
+	"fmt"
+	"github.com/google/uuid"
 	"io"
+	"os"
+	"time"
 )
 
-var logger = logging.MustGetLogger("minimal-ci")
-var format = logging.MustStringFormatter(
-	`%{color}%{time:2006-01-02 15:04:05.000} [%{level:-8s}]%{color:reset} %{message}`,
+var (
+	timeFormat           = "2006-01-02 15:04:05.000"
+	Writer     io.Writer = os.Stdout
 )
 
-func Init(writer io.Writer, level logging.Level) {
-	backend := logging.NewLogBackend(writer, "", 0)
-
-	formatter := logging.NewBackendFormatter(backend, format)
-
-	leveled := logging.AddModuleLevel(formatter)
-	leveled.SetLevel(level, "")
-
-	logging.SetBackend(leveled)
+func Debug(uuid uuid.UUID, message string) {
+	if message[len(message)-1] != '\n' {
+		message += "\n"
+	}
+	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[36;1m[DEBUG]\033[0m %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
-func Debug(message string) {
-	logger.Debug(message)
+func Debugf(uuid uuid.UUID, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Debug(uuid, message)
 }
 
-func Debugf(format string, args ...interface{}) {
-	logger.Debugf(format, args...)
+func Info(uuid uuid.UUID, message string) {
+	if message[len(message)-1] != '\n' {
+		message += "\n"
+	}
+	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[1m[INFO]\033[0m %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
-func Info(message string) {
-	logger.Info(message)
+func Infof(uuid uuid.UUID, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Info(uuid, message)
 }
 
-func Infof(format string, args ...interface{}) {
-	logger.Infof(format, args...)
+func Error(uuid uuid.UUID, message string) {
+	if message[len(message)-1] != '\n' {
+		message += "\n"
+	}
+	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[41;1m[ERROR]\033[0m %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
-func Error(message string) {
-	logger.Error(message)
-}
-
-func Errorf(format string, args ...interface{}) {
-	logger.Errorf(format, args...)
+func Errorf(uuid uuid.UUID, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Error(uuid, message)
 }
