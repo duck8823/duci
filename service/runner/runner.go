@@ -91,10 +91,7 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 			errs <- errors.WithStack(err)
 		}
 
-		_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
-		if err == docker.Failure {
-			errs <- errors.WithStack(err)
-		} else if err != nil {
+		if _, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...); err != nil {
 			errs <- errors.WithStack(err)
 		}
 
