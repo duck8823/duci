@@ -3,28 +3,21 @@ package logger
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/op/go-logging"
 	"io"
+	"os"
+	"time"
 )
 
-var logger = logging.MustGetLogger("minimal-ci")
-var format = logging.MustStringFormatter(
-	`%{color}%{time:2006-01-02 15:04:05.000} [%{level}]%{color:reset} %{message}`,
+var (
+	timeFormat           = "2006-01-02 15:04:05.000"
+	Writer     io.Writer = os.Stdout
 )
-
-func Init(writer io.Writer, level logging.Level) {
-	backend := logging.NewLogBackend(writer, "", 0)
-
-	formatter := logging.NewBackendFormatter(backend, format)
-
-	leveled := logging.AddModuleLevel(formatter)
-	leveled.SetLevel(level, "")
-
-	logging.SetBackend(leveled)
-}
 
 func Debug(uuid uuid.UUID, message string) {
-	logger.Debug(fmt.Sprintf("[%s] %s", uuid, message))
+	if message[len(message)-1] != '\n' {
+		message += "\n"
+	}
+	Writer.Write([]byte(fmt.Sprintf("[%s] %s [DEBUG] %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
 func Debugf(uuid uuid.UUID, format string, args ...interface{}) {
@@ -33,7 +26,10 @@ func Debugf(uuid uuid.UUID, format string, args ...interface{}) {
 }
 
 func Info(uuid uuid.UUID, message string) {
-	logger.Info(fmt.Sprintf("[%s] %s", uuid, message))
+	if message[len(message)-1] != '\n' {
+		message += "\n"
+	}
+	Writer.Write([]byte(fmt.Sprintf("[%s] %s [INFO ] %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
 func Infof(uuid uuid.UUID, format string, args ...interface{}) {
@@ -42,7 +38,10 @@ func Infof(uuid uuid.UUID, format string, args ...interface{}) {
 }
 
 func Error(uuid uuid.UUID, message string) {
-	logger.Error(fmt.Sprintf("[%s] %s", uuid, message))
+	if message[len(message)-1] != '\n' {
+		message += "\n"
+	}
+	Writer.Write([]byte(fmt.Sprintf("[%s] %s [ERROR] %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
 func Errorf(uuid uuid.UUID, format string, args ...interface{}) {

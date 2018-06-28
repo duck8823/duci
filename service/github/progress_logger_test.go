@@ -3,7 +3,6 @@ package github_test
 import (
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/duck8823/minimal-ci/service/github"
-	"github.com/op/go-logging"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -11,7 +10,7 @@ import (
 	"testing"
 )
 
-var regex = regexp.MustCompile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}")
+var regex = regexp.MustCompile(`\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}`)
 
 func TestProgressLogger_Write(t *testing.T) {
 	reader, writer, err := os.Pipe()
@@ -19,7 +18,7 @@ func TestProgressLogger_Write(t *testing.T) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	logger.Init(writer, logging.DEBUG)
+	logger.Writer = writer
 
 	progress := &github.ProgressLogger{}
 	progress.Write([]byte("hoge\rfuga"))
@@ -37,7 +36,7 @@ func TestProgressLogger_Write(t *testing.T) {
 	}
 
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-	expected := " [INFO]\033[0m [00000000-0000-0000-0000-000000000000] hoge"
+	expected := "[00000000-0000-0000-0000-000000000000]  [INFO ] hoge"
 
 	if actual != expected {
 		t.Errorf("must remove CR flag or later. wont: %+v, but got: %+v", expected, actual)
