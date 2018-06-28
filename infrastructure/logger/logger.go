@@ -1,13 +1,15 @@
 package logger
 
 import (
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/op/go-logging"
 	"io"
 )
 
 var logger = logging.MustGetLogger("minimal-ci")
 var format = logging.MustStringFormatter(
-	`%{color}%{time:2006-01-02 15:04:05.000} [%{level:-8s}]%{color:reset} %{message}`,
+	`%{color}%{time:2006-01-02 15:04:05.000} [%{level}]%{color:reset} %{message}`,
 )
 
 func Init(writer io.Writer, level logging.Level) {
@@ -21,26 +23,29 @@ func Init(writer io.Writer, level logging.Level) {
 	logging.SetBackend(leveled)
 }
 
-func Debug(message string) {
-	logger.Debug(message)
+func Debug(uuid uuid.UUID, message string) {
+	logger.Debug(fmt.Sprintf("[%s] %s", uuid, message))
 }
 
-func Debugf(format string, args ...interface{}) {
-	logger.Debugf(format, args...)
+func Debugf(uuid uuid.UUID, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Debug(uuid, message)
 }
 
-func Info(message string) {
-	logger.Info(message)
+func Info(uuid uuid.UUID, message string) {
+	logger.Info(fmt.Sprintf("[%s] %s", uuid, message))
 }
 
-func Infof(format string, args ...interface{}) {
-	logger.Infof(format, args...)
+func Infof(uuid uuid.UUID, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Info(uuid, message)
 }
 
-func Error(message string) {
-	logger.Error(message)
+func Error(uuid uuid.UUID, message string) {
+	logger.Error(fmt.Sprintf("[%s] %s", uuid, message))
 }
 
-func Errorf(format string, args ...interface{}) {
-	logger.Errorf(format, args...)
+func Errorf(uuid uuid.UUID, format string, args ...interface{}) {
+	message := fmt.Sprintf(format, args...)
+	Error(uuid, message)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/op/go-logging"
 	"net/http"
 	"os"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 
 	ctrl, err := controller.New()
 	if err != nil {
-		logger.Errorf("Failed to create controller.\n%+v", err)
+		logger.Errorf(uuid.UUID{}, "Failed to create controller.\n%+v", err)
 		os.Exit(1)
 		return
 	}

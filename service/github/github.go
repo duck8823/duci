@@ -1,7 +1,8 @@
 package github
 
 import (
-	"context"
+	ctx "context"
+	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
@@ -38,11 +39,11 @@ type serviceImpl struct {
 	Client *github.Client
 }
 
-func New(ctx context.Context, token string) *serviceImpl {
+func New(token string) *serviceImpl {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	tc := oauth2.NewClient(ctx, ts)
+	tc := oauth2.NewClient(ctx.Background(), ts)
 	return &serviceImpl{github.NewClient(tc)}
 }
 
@@ -63,7 +64,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 		num,
 	)
 	if err != nil {
-		logger.Errorf("Failed to get pull request no. %v on %s: %+v", num, repository.GetFullName(), resp)
+		logger.Errorf(ctx.UUID(), "Failed to get pull request no. %v on %s: %+v", num, repository.GetFullName(), resp)
 		return nil, errors.WithStack(err)
 	}
 	return pr, nil
@@ -81,7 +82,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 	}
 
 	if _, _, err := s.Client.Repositories.CreateStatus(
-		context.Background(),
+		ctx,
 		owner,
 		repo,
 		hash.String(),
@@ -95,7 +96,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 func (s *serviceImpl) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           repo.GetSSHURL(),
-		Progress:      &ProgressLogger{},
+		Progress:      &ProgressLogger{ctx.UUID()},
 		ReferenceName: plumbing.ReferenceName(ref),
 	})
 	if err != nil {

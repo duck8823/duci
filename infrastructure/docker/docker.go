@@ -3,12 +3,13 @@ package docker
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
+	"github.com/google/uuid"
 	moby "github.com/moby/moby/client"
 	"github.com/pkg/errors"
 	"io"
@@ -45,7 +46,7 @@ func (c *Client) Build(ctx context.Context, file io.Reader, tag string) error {
 	}
 	defer resp.Body.Close()
 
-	logStream(resp.Body)
+	logStream(ctx.UUID(), resp.Body)
 	return nil
 }
 
@@ -87,7 +88,7 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 
 				// prevent to CR
 				progress := bytes.Split(messages, []byte{'\r'})
-				logger.Info(string(progress[0]))
+				logger.Info(ctx.UUID(), string(progress[0]))
 			}
 			if err == io.EOF {
 				break
@@ -105,20 +106,20 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 }
 
 func (c *Client) Rm(ctx context.Context, containerId string) error {
-	if err := c.Moby.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{}); err != nil {
+	if err := c.Moby.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
 func (c *Client) Rmi(ctx context.Context, tag string) error {
-	if _, err := c.Moby.ImageRemove(context.Background(), tag, types.ImageRemoveOptions{}); err != nil {
+	if _, err := c.Moby.ImageRemove(ctx, tag, types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func logStream(log io.Reader) error {
+func logStream(uuid uuid.UUID, log io.Reader) error {
 	reader := bufio.NewReaderSize(log, 1024)
 	for {
 		line, _, err := reader.ReadLine()
@@ -127,7 +128,7 @@ func logStream(log io.Reader) error {
 		}{}
 		json.Unmarshal(line, stream)
 		if len(stream.Stream) > 0 {
-			logger.Info(stream.Stream)
+			logger.Info(uuid, stream.Stream)
 		}
 		if err == io.EOF {
 			break

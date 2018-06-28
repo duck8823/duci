@@ -5,7 +5,7 @@
 package mock_runner
 
 import (
-	context "context"
+	context "github.com/duck8823/minimal-ci/infrastructure/context"
 	github "github.com/duck8823/minimal-ci/service/github"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"

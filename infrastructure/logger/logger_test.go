@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"github.com/google/uuid"
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 func TestDebug(t *testing.T) {
 	InitLogger(t)
 
-	logger.Debug("Hello World.")
+	logger.Debug(uuid.UUID{}, "Hello World.")
 
 	log := ReadLog(t)
 	if !regex.MatchString(log) {
@@ -29,7 +30,7 @@ func TestDebug(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := fmt.Sprintf("%s [DEBUG   ]\033[0m Hello World.", logging.ColorSeq(logging.ColorCyan))
+	expected := fmt.Sprintf("%s [DEBUG]\033[0m [00000000-0000-0000-0000-000000000000] Hello World.", logging.ColorSeq(logging.ColorCyan))
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -38,7 +39,7 @@ func TestDebug(t *testing.T) {
 func TestDebugf(t *testing.T) {
 	InitLogger(t)
 
-	logger.Debugf("Hello %s.", "World")
+	logger.Debugf(uuid.UUID{}, "Hello %s.", "World")
 
 	log := ReadLog(t)
 	if !regex.MatchString(log) {
@@ -46,7 +47,7 @@ func TestDebugf(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := fmt.Sprintf("%s [DEBUG   ]\033[0m Hello World.", logging.ColorSeq(logging.ColorCyan))
+	expected := fmt.Sprintf("%s [DEBUG]\033[0m [00000000-0000-0000-0000-000000000000] Hello World.", logging.ColorSeq(logging.ColorCyan))
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -55,7 +56,7 @@ func TestDebugf(t *testing.T) {
 func TestInfo(t *testing.T) {
 	InitLogger(t)
 
-	logger.Info("Hello World.")
+	logger.Info(uuid.UUID{}, "Hello World.")
 
 	log := ReadLog(t)
 	if !regex.MatchString(log) {
@@ -63,7 +64,7 @@ func TestInfo(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := fmt.Sprintf("%s [INFO    ]\033[0m Hello World.", "")
+	expected := fmt.Sprintf("%s [INFO]\033[0m [00000000-0000-0000-0000-000000000000] Hello World.", "")
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -72,7 +73,7 @@ func TestInfo(t *testing.T) {
 func TestInfof(t *testing.T) {
 	InitLogger(t)
 
-	logger.Infof("Hello %s.", "World")
+	logger.Infof(uuid.UUID{}, "Hello %s.", "World")
 
 	log := ReadLog(t)
 	if !regex.MatchString(log) {
@@ -80,7 +81,7 @@ func TestInfof(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := fmt.Sprintf("%s [INFO    ]\033[0m Hello World.", "")
+	expected := fmt.Sprintf("%s [INFO]\033[0m [00000000-0000-0000-0000-000000000000] Hello World.", "")
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -89,7 +90,7 @@ func TestInfof(t *testing.T) {
 func TestError(t *testing.T) {
 	InitLogger(t)
 
-	logger.Error("Hello World.")
+	logger.Error(uuid.UUID{}, "Hello World.")
 
 	log := ReadLog(t)
 	if !regex.MatchString(log) {
@@ -97,7 +98,7 @@ func TestError(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := fmt.Sprintf("%s [ERROR   ]\033[0m Hello World.", logging.ColorSeq(logging.ColorRed))
+	expected := fmt.Sprintf("%s [ERROR]\033[0m [00000000-0000-0000-0000-000000000000] Hello World.", logging.ColorSeq(logging.ColorRed))
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -106,7 +107,7 @@ func TestError(t *testing.T) {
 func TestErrorf(t *testing.T) {
 	InitLogger(t)
 
-	logger.Errorf("Hello %s.", "World")
+	logger.Errorf(uuid.UUID{}, "Hello %s.", "World")
 
 	log := ReadLog(t)
 	if !regex.MatchString(log) {
@@ -114,7 +115,7 @@ func TestErrorf(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := fmt.Sprintf("%s [ERROR   ]\033[0m Hello World.", logging.ColorSeq(logging.ColorRed))
+	expected := fmt.Sprintf("%s [ERROR]\033[0m [00000000-0000-0000-0000-000000000000] Hello World.", logging.ColorSeq(logging.ColorRed))
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}

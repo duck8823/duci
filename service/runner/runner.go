@@ -1,9 +1,9 @@
 package runner
 
 import (
-	"context"
 	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
+	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/duck8823/minimal-ci/service/github"
@@ -30,7 +30,7 @@ type runnerImpl struct {
 }
 
 func NewWithEnv() (*runnerImpl, error) {
-	githubService := github.New(context.Background(), os.Getenv("GITHUB_API_TOKEN"))
+	githubService := github.New(os.Getenv("GITHUB_API_TOKEN"))
 	dockerClient, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -101,15 +101,15 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 	select {
 	case <-timeout.Done():
 		if timeout.Err() != nil {
-			r.CreateCommitStatusWithError(timeout, repo, <-commitHash, timeout.Err())
+			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, timeout.Err())
 		}
 	case err := <-errs:
 		if err == docker.Failure {
-			r.CreateCommitStatus(timeout, repo, <-commitHash, github.FAILURE)
+			r.CreateCommitStatus(ctx, repo, <-commitHash, github.FAILURE)
 		} else if err != nil {
-			r.CreateCommitStatusWithError(timeout, repo, <-commitHash, err)
+			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, err)
 		} else {
-			r.CreateCommitStatus(timeout, repo, <-commitHash, github.SUCCESS)
+			r.CreateCommitStatus(ctx, repo, <-commitHash, github.SUCCESS)
 		}
 	}
 }
@@ -121,7 +121,7 @@ func (r *runnerImpl) CreateCommitStatus(ctx context.Context, repo github.Reposit
 		Description: &msg,
 		State:       &state,
 	}); err != nil {
-		logger.Errorf("Failed to create commit status: %+v", err)
+		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
 	}
 }
 
@@ -136,6 +136,6 @@ func (r *runnerImpl) CreateCommitStatusWithError(ctx context.Context, repo githu
 		Description: &msg,
 		State:       &state,
 	}); err != nil {
-		logger.Errorf("Failed to create commit status: %+v", err)
+		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
 	}
 }

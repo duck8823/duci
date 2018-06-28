@@ -1,9 +1,9 @@
 package github_test
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/service/github"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
@@ -55,14 +55,14 @@ func TestService_GetPullRequest(t *testing.T) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	s := github.New(context.Background(), "")
+	s := github.New("")
 	s.Client.BaseURL = baseUrl
 
 	repo := &MockRepo{
 		FullName: "duck8823/minimal-ci",
 		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 	}
-	pr, err := s.GetPullRequest(context.Background(), repo, 5)
+	pr, err := s.GetPullRequest(context.New(), repo, 5)
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -90,14 +90,14 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s := github.New(context.Background(), "")
+		s := github.New("")
 		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.Background(), repo, plumbing.Hash{}, &github.Status{}); err != nil {
+		if err := s.CreateCommitStatus(context.New(), repo, plumbing.Hash{}, &github.Status{}); err != nil {
 			t.Errorf("failed to create commit status: %+v", err)
 		}
 	})
@@ -112,14 +112,14 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s := github.New(context.Background(), "")
+		s := github.New("")
 		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.Background(), repo, plumbing.Hash{}, &github.Status{}); err == nil {
+		if err := s.CreateCommitStatus(context.New(), repo, plumbing.Hash{}, &github.Status{}); err == nil {
 			t.Error("must error")
 		}
 	})
@@ -131,14 +131,14 @@ func TestService_Clone(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 
-	s := github.New(context.Background(), "")
+	s := github.New("")
 
 	repo := &MockRepo{
 		FullName: "duck8823/minimal-ci",
 		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 	}
 
-	_, err := s.Clone(context.Background(), tempDir, repo, "refs/heads/master")
+	_, err := s.Clone(context.New(), tempDir, repo, "refs/heads/master")
 	if err != nil {
 		t.Errorf("must not error. %+v", err)
 	}

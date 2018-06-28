@@ -1,8 +1,8 @@
 package runner_test
 
 import (
-	"context"
 	"fmt"
+	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/service/github"
 	"github.com/duck8823/minimal-ci/service/runner"
 	goGithub "github.com/google/go-github/github"
@@ -70,7 +70,7 @@ func TestRunnerImpl_RunWithPullRequest(t *testing.T) {
 	r.GitHub = &MockGitHub{}
 
 	repo := &MockRepo{"duck8823/minimal-ci", "git@github.com:duck8823/minimal-ci.git"}
-	if err := r.RunWithPullRequest(context.Background(), repo, 5, "Hello World."); err != nil {
+	if err := r.RunWithPullRequest(context.New(), repo, 5, "Hello World."); err != nil {
 		t.Errorf("must not error. but: %+v", err)
 	}
 }
