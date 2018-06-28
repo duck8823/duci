@@ -1,16 +1,16 @@
 package runner_test
 
 import (
-	"testing"
-	"github.com/duck8823/minimal-ci/service/runner"
 	"context"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"github.com/duck8823/minimal-ci/service/github"
-	goGithub "github.com/google/go-github/github"
 	"fmt"
+	"github.com/duck8823/minimal-ci/service/github"
+	"github.com/duck8823/minimal-ci/service/runner"
+	goGithub "github.com/google/go-github/github"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
 	"path"
 	"reflect"
+	"testing"
 )
 
 type MockRepo struct {
@@ -29,7 +29,6 @@ func (r *MockRepo) GetSSHURL() string {
 type MockGitHub struct {
 }
 
-
 func (g *MockGitHub) GetPullRequest(ctx context.Context, repository github.Repository, num int) (*github.PullRequest, error) {
 	return &github.PullRequest{
 		Head: &goGithub.PullRequestBranch{
@@ -39,7 +38,7 @@ func (g *MockGitHub) GetPullRequest(ctx context.Context, repository github.Repos
 }
 
 func (g *MockGitHub) CreateCommitStatus(ctx context.Context, repository github.Repository, hash plumbing.Hash, status *github.Status) error {
-	expected := plumbing.Hash{1,2,3,4,5,6,7,8,9}
+	expected := plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}
 	if !reflect.DeepEqual(expected, hash) {
 		return fmt.Errorf("hash must be equal %+v, but got %+v", expected, hash)
 	}
@@ -59,7 +58,7 @@ func (g *MockGitHub) Clone(ctx context.Context, dir string, repo github.Reposito
 
 	dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
 
-	return plumbing.Hash{1,2,3,4,5,6,7,8,9}, nil
+	return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
 }
 
 func TestRunnerImpl_RunWithPullRequest(t *testing.T) {
