@@ -11,18 +11,18 @@ import (
 	reflect "reflect"
 )
 
-// MockRunner is a mock_runner of Runner interface
+// MockRunner is a mock of Runner interface
 type MockRunner struct {
 	ctrl     *gomock.Controller
 	recorder *MockRunnerMockRecorder
 }
 
-// MockRunnerMockRecorder is the mock_runner recorder for MockRunner
+// MockRunnerMockRecorder is the mock recorder for MockRunner
 type MockRunnerMockRecorder struct {
 	mock *MockRunner
 }
 
-// NewMockRunner creates a new mock_runner instance
+// NewMockRunner creates a new mock instance
 func NewMockRunner(ctrl *gomock.Controller) *MockRunner {
 	mock := &MockRunner{ctrl: ctrl}
 	mock.recorder = &MockRunnerMockRecorder{mock}
@@ -52,14 +52,12 @@ func (mr *MockRunnerMockRecorder) RunWithPullRequest(ctx, repo, num interface{},
 }
 
 // Run mocks base method
-func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) error {
+func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) {
 	varargs := []interface{}{ctx, repo, ref}
 	for _, a := range command {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "Run", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
+	m.ctrl.Call(m, "Run", varargs...)
 }
 
 // Run indicates an expected call of Run
