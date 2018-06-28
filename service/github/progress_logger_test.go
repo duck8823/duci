@@ -36,7 +36,7 @@ func TestProgressLogger_Write(t *testing.T) {
 	}
 
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-	expected := "[00000000-0000-0000-0000-000000000000]  [INFO ] hoge"
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m hoge"
 
 	if actual != expected {
 		t.Errorf("must remove CR flag or later. wont: %+v, but got: %+v", expected, actual)

@@ -28,7 +28,7 @@ func TestDebug(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := "[00000000-0000-0000-0000-000000000000]  [DEBUG] Hello World."
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[36;1m[DEBUG]\033[0m Hello World."
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -45,7 +45,7 @@ func TestDebugf(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := "[00000000-0000-0000-0000-000000000000]  [DEBUG] Hello World."
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[36;1m[DEBUG]\033[0m Hello World."
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -62,7 +62,7 @@ func TestInfo(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := "[00000000-0000-0000-0000-000000000000]  [INFO ] Hello World."
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m Hello World."
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -79,7 +79,7 @@ func TestInfof(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := "[00000000-0000-0000-0000-000000000000]  [INFO ] Hello World."
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m Hello World."
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -96,7 +96,7 @@ func TestError(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := "[00000000-0000-0000-0000-000000000000]  [ERROR] Hello World."
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[41;1m[ERROR]\033[0m Hello World."
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
@@ -113,7 +113,7 @@ func TestErrorf(t *testing.T) {
 	}
 	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 
-	expected := "[00000000-0000-0000-0000-000000000000]  [ERROR] Hello World."
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[41;1m[ERROR]\033[0m Hello World."
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
