@@ -50,7 +50,7 @@ func (r *runnerImpl) RunWithPullRequest(ctx context.Context, repo github.Reposit
 		return errors.WithStack(err)
 	}
 	ref := fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
-	r.Run(ctx, repo, ref, command...)
+	go r.Run(ctx, repo, ref, command...)
 	return nil
 }
 
