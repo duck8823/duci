@@ -1,4 +1,9 @@
 # minimal-ci
+[![Build Status](https://travis-ci.org/duck8823/minimal-ci.svg?branch=master)](https://travis-ci.org/duck8823/minimal-ci)
+[![Coverage Status](https://coveralls.io/repos/github/duck8823/minimal-ci/badge.svg?branch=maintainance%2Fvarious)](https://coveralls.io/github/duck8823/minimal-ci?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/minimal-ci)](https://goreportcard.com/report/github.com/duck8823/minimal-ci)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+
 Minimal-ci is a small ci server.  
 The job is triggered by pull request comment.  
 
