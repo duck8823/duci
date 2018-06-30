@@ -1,0 +1,12 @@
+language: go
+go:
+  - tip
+before_install:
+  - go get github.com/golang/dep/...
+  - go get github.com/mattn/goveralls
+install:
+  - dep ensure
+script:
+  - $GOPATH/bin/goveralls -service=travis-ci -ignore=main.go,service/runner/mock_runner
+after_success:
+  - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
