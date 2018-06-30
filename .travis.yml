@@ -16,6 +16,7 @@ before_script:
   - chmod 0600 ~/.ssh/travis_key
   - ssh-add ~/.ssh/travis_key
 script:
-  - $GOPATH/bin/goveralls -service=travis-ci -ignore=main.go
+  - go test -v -coverprofile=cover.out ./...
+  - $GOPATH/bin/goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go
 after_success:
   - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
