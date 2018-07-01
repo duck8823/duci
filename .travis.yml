@@ -5,18 +5,20 @@ services:
 language: go
 go:
   - tip
-before_install:
-  - go get github.com/golang/dep/...
-  - go get github.com/mattn/goveralls
-install:
-  - dep ensure
+
+install: true
 before_script:
+  # ssh settings
   - eval $(ssh-agent -s)
   - openssl aes-256-cbc -K $encrypted_a66fdba2821d_key -iv $encrypted_a66fdba2821d_iv -in .travis/travis_key.enc -out ~/.ssh/travis_key -d
   - chmod 0600 ~/.ssh/travis_key
   - ssh-add ~/.ssh/travis_key
+  # for coverage report
+  - go get github.com/mattn/goveralls
+  # using vgo for resolve dependencies
+  - go get golang.org/x/vgo
 script:
-  - go test -v -coverprofile=cover.out ./...
-  - $GOPATH/bin/goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go,service/runner/mock_runner/runner.go
+  - vgo test -v -coverprofile=cover.out ./...
+  - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go,service/runner/mock_runner/runner.go
 after_script:
   - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash

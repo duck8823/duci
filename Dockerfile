@@ -7,11 +7,10 @@ WORKDIR /go/src/github.com/duck8823/minimal-ci
 
 ADD . .
 
-RUN go get -u github.com/golang/dep/cmd/dep && \
-    dep ensure
+RUN go get golang.org/x/vgo
 
-RUN go build
+RUN vgo install
 
 EXPOSE 8080
 
-CMD ["./minimal-ci"]
+CMD ["minimal-ci"]
