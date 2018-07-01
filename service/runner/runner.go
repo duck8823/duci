@@ -68,6 +68,7 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 		head, err := r.GitHub.Clone(ctx, workDir, repo, ref)
 		if err != nil {
 			errs <- errors.WithStack(err)
+			return
 		}
 
 		commitHash <- head
@@ -77,11 +78,13 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 		writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0400)
 		if err != nil {
 			errs <- errors.WithStack(err)
+			return
 		}
 		defer writeFile.Close()
 
 		if err := tar.Create(workDir, writeFile); err != nil {
 			errs <- errors.WithStack(err)
+			return
 		}
 
 		readFile, _ := os.Open(tarFilePath)
@@ -89,10 +92,12 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 
 		if err := r.Docker.Build(ctx, readFile, tagName); err != nil {
 			errs <- errors.WithStack(err)
+			return
 		}
 
 		if _, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...); err != nil {
 			errs <- errors.WithStack(err)
+			return
 		}
 
 		errs <- nil // success
@@ -101,12 +106,15 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 	select {
 	case <-timeout.Done():
 		if timeout.Err() != nil {
+			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
 			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, timeout.Err())
 		}
 	case err := <-errs:
 		if err == docker.Failure {
+			logger.Error(ctx.UUID(), err.Error())
 			r.CreateCommitStatus(ctx, repo, <-commitHash, github.FAILURE)
 		} else if err != nil {
+			logger.Errorf(ctx.UUID(), "%+v", err)
 			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, err)
 		} else {
 			r.CreateCommitStatus(ctx, repo, <-commitHash, github.SUCCESS)
