@@ -30,6 +30,11 @@ This server needs environment variable `GITHUB_API_TOKEN` to create status.
 export GITHUB_API_TOKEN=<your token>
 ```
 
+### Setting SSH
+This server clone from github.com with **SSH** protocol
+using private key `$HOME/.ssh/id_rsa`.  
+Please set the public key of the pair at https://github.com/settings/keys.
+
 ### Run Server
 #### Locally
 If you have already set $GOPATH, you can install it with the following command.
@@ -39,14 +44,20 @@ $ minimal-ci
 ```
 
 #### Using Docker
-##### Docker for Windows
+```
+$ git clone https://github.com/duck8823/minimal-ci.git
+$ docker build -t duck8823/minimal-ci .
+$ docker run -e GITHUB_API_TOKEN=<your toekn> -v ~/.ssh:/root/.ssh:ro duck8823/minimal-ci
+```
+
+##### docker-compose for Windows
 ```bash
 $ git clone https://github.com/duck8823/minimal-ci.git
 $ cd minimal-ci
 $ docker-compose -f docker-compose.win.yml up
 ```
 
-##### Docker for Mac
+##### docker-compose for Mac
 ```bash
 $ git clone https://github.com/duck8823/minimal-ci.git
 $ cd minimal-ci
