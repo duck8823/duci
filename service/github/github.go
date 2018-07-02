@@ -9,6 +9,10 @@ import (
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
+	"os"
+	"path"
 )
 
 type Repository interface {
@@ -37,14 +41,21 @@ type Service interface {
 
 type serviceImpl struct {
 	Client *github.Client
+	auth   transport.AuthMethod
 }
 
-func New(token string) *serviceImpl {
+func New(token string) (*serviceImpl, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx.Background(), ts)
-	return &serviceImpl{github.NewClient(tc)}
+
+	auth, err := ssh.NewPublicKeysFromFile("git", path.Join(os.Getenv("HOME"), ".ssh/id_rsa"), "")
+	if err != nil {
+		return nil, err
+	}
+
+	return &serviceImpl{Client: github.NewClient(tc), auth: auth}, nil
 }
 
 func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error) {
@@ -96,6 +107,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 func (s *serviceImpl) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           repo.GetSSHURL(),
+		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx.UUID()},
 		ReferenceName: plumbing.ReferenceName(ref),
 	})

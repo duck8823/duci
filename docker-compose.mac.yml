@@ -5,6 +5,8 @@ services:
       context: .
     ports:
       - 8080:8080
+    volumes:
+      - $HOME/.ssh:/root/.ssh:ro
     environment:
       - DOCKER_HOST=tcp://docker.for.mac.host.internal:2375
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}

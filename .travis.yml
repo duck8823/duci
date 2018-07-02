@@ -9,10 +9,8 @@ go:
 install: true
 before_script:
   # ssh settings
-  - eval $(ssh-agent -s)
-  - openssl aes-256-cbc -K $encrypted_a66fdba2821d_key -iv $encrypted_a66fdba2821d_iv -in .travis/travis_key.enc -out ~/.ssh/travis_key -d
-  - chmod 0600 ~/.ssh/travis_key
-  - ssh-add ~/.ssh/travis_key
+  - openssl aes-256-cbc -K $encrypted_a66fdba2821d_key -iv $encrypted_a66fdba2821d_iv -in .travis/travis_key.enc -out ~/.ssh/id_rsa -d
+  - touch ~/.ssh/known_hosts
   # for coverage report
   - go get github.com/mattn/goveralls
   # using vgo for resolve dependencies

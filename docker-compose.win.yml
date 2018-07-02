@@ -5,7 +5,10 @@ services:
       context: .
     ports:
       - 8080:8080
+    volumes:
+      - ~\.ssh:/root/.ssh:ro
     environment:
+      - COMPOSE_CONVERT_WINDOWS_PATHS=1
       - DOCKER_HOST=tcp://docker.for.win.host.internal:2375
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
 #  ngrok:
