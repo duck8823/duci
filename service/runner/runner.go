@@ -30,7 +30,11 @@ type runnerImpl struct {
 }
 
 func NewWithEnv() (*runnerImpl, error) {
-	githubService := github.New(os.Getenv("GITHUB_API_TOKEN"))
+	githubService, err := github.New(os.Getenv("GITHUB_API_TOKEN"))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	dockerClient, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)

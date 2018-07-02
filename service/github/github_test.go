@@ -55,7 +55,10 @@ func TestService_GetPullRequest(t *testing.T) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	s := github.New("")
+	s, err := github.New("")
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
 	s.Client.BaseURL = baseUrl
 
 	repo := &MockRepo{
@@ -90,7 +93,10 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s := github.New("")
+		s, err := github.New("")
+		if err != nil {
+			t.Fatalf("error occured. %+v", err)
+		}
 		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
@@ -112,7 +118,10 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s := github.New("")
+		s, err := github.New("")
+		if err != nil {
+			t.Fatalf("error occured. %+v", err)
+		}
 		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
@@ -131,15 +140,17 @@ func TestService_Clone(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 
-	s := github.New("")
+	s, err := github.New("")
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
 
 	repo := &MockRepo{
 		FullName: "duck8823/minimal-ci",
 		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 	}
 
-	_, err := s.Clone(context.New(), tempDir, repo, "refs/heads/master")
-	if err != nil {
+	if _, err := s.Clone(context.New(), tempDir, repo, "refs/heads/master"); err != nil {
 		t.Errorf("must not error. %+v", err)
 	}
 
