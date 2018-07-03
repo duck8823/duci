@@ -1,0 +1,51 @@
+package context_test
+
+import (
+	ct "context"
+	"github.com/duck8823/minimal-ci/infrastructure/context"
+	"github.com/google/uuid"
+	"testing"
+	"time"
+)
+
+func TestContextWithUUID_UUID(t *testing.T) {
+	ctx := context.New()
+
+	var empty uuid.UUID
+	if ctx.UUID() == empty {
+		t.Error("UUID() must not empty.")
+	}
+}
+
+func TestWithTimeout(t *testing.T) {
+	t.Run("when timeout", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.New(), 5*time.Millisecond)
+		defer cancel()
+
+		go func() {
+			time.Sleep(10*time.Millisecond)
+			cancel()
+		}()
+
+		<-ctx.Done()
+
+		if ctx.Err() != ct.DeadlineExceeded {
+			t.Errorf("not expected error. wont: %+v, but got %+v", ct.DeadlineExceeded, ctx.Err())
+		}
+	})
+
+	t.Run("when cancel", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.New(), 5*time.Millisecond)
+		defer cancel()
+
+		go func() {
+			cancel()
+		}()
+
+		<-ctx.Done()
+
+		if ctx.Err() != ct.Canceled {
+			t.Errorf("not expected error. wont: %+v, but got %+v", ct.Canceled, ctx.Err())
+		}
+	})
+}
