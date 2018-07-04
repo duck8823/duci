@@ -23,7 +23,7 @@ func TestWithTimeout(t *testing.T) {
 		defer cancel()
 
 		go func() {
-			time.Sleep(10*time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 			cancel()
 		}()
 
