@@ -16,9 +16,9 @@ import (
 )
 
 type Runner interface {
-	RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error
-	RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string)
 	Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error)
+	RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string)
+	ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error)
 }
 
 const NAME = "minimal-ci"
@@ -49,15 +49,12 @@ func NewWithEnv() (*runnerImpl, error) {
 	}, nil
 }
 
-func (r *runnerImpl) RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error {
+func (r *runnerImpl) ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error) {
 	pr, err := r.GitHub.GetPullRequest(ctx, repo, num)
 	if err != nil {
-		return errors.WithStack(err)
+		return "", errors.WithStack(err)
 	}
-	ref := fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
-
-	go r.RunInBackground(ctx, repo, ref, command...)
-	return nil
+	return fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()), nil
 }
 
 func (r *runnerImpl) RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string) {
@@ -69,11 +66,8 @@ func (r *runnerImpl) RunInBackground(ctx context.Context, repo github.Repository
 
 	go func() {
 		hash, err := r.Run(ctx, repo, ref, command...)
-		if err != nil {
-			errs <- err
-		} else {
-			commitHash <- hash
-		}
+		commitHash <- hash
+		errs <- err
 	}()
 
 	select {
@@ -109,23 +103,23 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 	tarFilePath := path.Join(workDir, "minimal-ci.tar")
 	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
+		return head, errors.WithStack(err)
 	}
 	defer writeFile.Close()
 
 	if err := tar.Create(workDir, writeFile); err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
+		return head, errors.WithStack(err)
 	}
 
 	readFile, _ := os.Open(tarFilePath)
 	defer readFile.Close()
 
 	if err := r.Docker.Build(ctx, readFile, tagName); err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
+		return head, errors.WithStack(err)
 	}
 
 	if _, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...); err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
+		return head, errors.WithStack(err)
 	}
 
 	return head, nil

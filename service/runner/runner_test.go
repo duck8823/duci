@@ -61,7 +61,7 @@ func (g *MockGitHub) Clone(ctx context.Context, dir string, repo github.Reposito
 	return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
 }
 
-func TestRunnerImpl_RunWithPullRequest(t *testing.T) {
+func TestRunnerImpl_ConvertPullRequestToRef(t *testing.T) {
 	r, err := runner.NewWithEnv()
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
@@ -69,9 +69,14 @@ func TestRunnerImpl_RunWithPullRequest(t *testing.T) {
 
 	r.GitHub = &MockGitHub{}
 
-	repo := &MockRepo{"duck8823/minimal-ci", "git@github.com:duck8823/minimal-ci.git"}
-	if err := r.RunWithPullRequest(context.New(), repo, 5, "Hello World."); err != nil {
+	actual, err := r.ConvertPullRequestToRef(context.New(), &MockRepo{}, 5)
+	if err != nil {
 		t.Errorf("must not error. but: %+v", err)
+	}
+
+	expected := "refs/heads/master"
+	if actual != expected {
+		t.Errorf("wont: %+v. but got: %+v", expected, actual)
 	}
 }
 
