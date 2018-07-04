@@ -8,6 +8,7 @@ import (
 	context "github.com/duck8823/minimal-ci/infrastructure/context"
 	github "github.com/duck8823/minimal-ci/service/github"
 	gomock "github.com/golang/mock/gomock"
+	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"
 )
 
@@ -51,13 +52,31 @@ func (mr *MockRunnerMockRecorder) RunWithPullRequest(ctx, repo, num interface{},
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunWithPullRequest", reflect.TypeOf((*MockRunner)(nil).RunWithPullRequest), varargs...)
 }
 
-// Run mocks base method
-func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) {
+// RunInBackground mocks base method
+func (m *MockRunner) RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string) {
 	varargs := []interface{}{ctx, repo, ref}
 	for _, a := range command {
 		varargs = append(varargs, a)
 	}
-	m.ctrl.Call(m, "Run", varargs...)
+	m.ctrl.Call(m, "RunInBackground", varargs...)
+}
+
+// RunInBackground indicates an expected call of RunInBackground
+func (mr *MockRunnerMockRecorder) RunInBackground(ctx, repo, ref interface{}, command ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{ctx, repo, ref}, command...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunInBackground", reflect.TypeOf((*MockRunner)(nil).RunInBackground), varargs...)
+}
+
+// Run mocks base method
+func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
+	varargs := []interface{}{ctx, repo, ref}
+	for _, a := range command {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Run", varargs...)
+	ret0, _ := ret[0].(plumbing.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Run indicates an expected call of Run

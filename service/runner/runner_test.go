@@ -74,3 +74,22 @@ func TestRunnerImpl_RunWithPullRequest(t *testing.T) {
 		t.Errorf("must not error. but: %+v", err)
 	}
 }
+
+func TestRunnerImpl_Run(t *testing.T) {
+	r, err := runner.NewWithEnv()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	r.GitHub = &MockGitHub{}
+
+	repo := &MockRepo{"duck8823/minimal-ci", "git@github.com:duck8823/minimal-ci.git"}
+	hash, err := r.Run(context.New(), repo, "master", "Hello World.")
+	if err != nil {
+		t.Errorf("must not error. but: %+v", err)
+	}
+	var empty plumbing.Hash
+	if hash == empty {
+		t.Error("hash must not empty")
+	}
+}
