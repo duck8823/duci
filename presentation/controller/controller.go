@@ -51,12 +51,14 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 
-	if err := c.runner.RunWithPullRequest(context.New(), event.GetRepo(), event.GetIssue().GetNumber(), phrase); err != nil {
+	ref, err := c.runner.ConvertPullRequestToRef(context.New(), event.GetRepo(), event.GetIssue().GetNumber())
+	if err != nil {
 		logger.Errorf(requestId, "%+v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
+	go c.runner.Run(context.New(), event.GetRepo(), ref, phrase)
 
 	// Response
 	w.WriteHeader(http.StatusOK)

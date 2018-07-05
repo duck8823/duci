@@ -8,6 +8,7 @@ import (
 	context "github.com/duck8823/minimal-ci/infrastructure/context"
 	github "github.com/duck8823/minimal-ci/service/github"
 	gomock "github.com/golang/mock/gomock"
+	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"
 )
 
@@ -34,34 +35,33 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 	return m.recorder
 }
 
-// RunWithPullRequest mocks base method
-func (m *MockRunner) RunWithPullRequest(ctx context.Context, repo github.Repository, num int, command ...string) error {
-	varargs := []interface{}{ctx, repo, num}
-	for _, a := range command {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "RunWithPullRequest", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// RunWithPullRequest indicates an expected call of RunWithPullRequest
-func (mr *MockRunnerMockRecorder) RunWithPullRequest(ctx, repo, num interface{}, command ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{ctx, repo, num}, command...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunWithPullRequest", reflect.TypeOf((*MockRunner)(nil).RunWithPullRequest), varargs...)
-}
-
 // Run mocks base method
-func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) {
+func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
 	varargs := []interface{}{ctx, repo, ref}
 	for _, a := range command {
 		varargs = append(varargs, a)
 	}
-	m.ctrl.Call(m, "Run", varargs...)
+	ret := m.ctrl.Call(m, "Run", varargs...)
+	ret0, _ := ret[0].(plumbing.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Run indicates an expected call of Run
 func (mr *MockRunnerMockRecorder) Run(ctx, repo, ref interface{}, command ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{ctx, repo, ref}, command...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockRunner)(nil).Run), varargs...)
+}
+
+// ConvertPullRequestToRef mocks base method
+func (m *MockRunner) ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error) {
+	ret := m.ctrl.Call(m, "ConvertPullRequestToRef", ctx, repo, num)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ConvertPullRequestToRef indicates an expected call of ConvertPullRequestToRef
+func (mr *MockRunnerMockRecorder) ConvertPullRequestToRef(ctx, repo, num interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConvertPullRequestToRef", reflect.TypeOf((*MockRunner)(nil).ConvertPullRequestToRef), ctx, repo, num)
 }

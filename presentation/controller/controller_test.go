@@ -19,7 +19,8 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 	t.Run("with correct payload", func(t *testing.T) {
 		mock := mock_runner.NewMockRunner(ctrl)
-		mock.EXPECT().RunWithPullRequest(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return(nil)
+		mock.EXPECT().ConvertPullRequestToRef(gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return("master", nil)
+		mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 		handler := &jobController{runner: mock}
 
@@ -43,7 +44,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 	t.Run("when runner returns error", func(t *testing.T) {
 		mock := mock_runner.NewMockRunner(ctrl)
-		mock.EXPECT().RunWithPullRequest(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return(errors.New("error"))
+		mock.EXPECT().ConvertPullRequestToRef(gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return("", errors.New("error"))
 
 		handler := &jobController{runner: mock}
 
@@ -67,7 +68,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 	t.Run("must not call RunWithPullRequest", func(t *testing.T) {
 		mock := mock_runner.NewMockRunner(ctrl)
-		mock.EXPECT().RunWithPullRequest(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+		mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
 		handler := &jobController{runner: mock}
 
