@@ -17,7 +17,6 @@ import (
 
 type Runner interface {
 	Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error)
-	RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string)
 	ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error)
 }
 
@@ -57,7 +56,7 @@ func (r *runnerImpl) ConvertPullRequestToRef(ctx context.Context, repo github.Re
 	return fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()), nil
 }
 
-func (r *runnerImpl) RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string) {
+func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
 	commitHash := make(chan plumbing.Hash, 1)
 	errs := make(chan error, 1)
 
@@ -65,31 +64,35 @@ func (r *runnerImpl) RunInBackground(ctx context.Context, repo github.Repository
 	defer cancel()
 
 	go func() {
-		hash, err := r.Run(ctx, repo, ref, command...)
+		hash, err := r.run(ctx, repo, ref, command...)
 		commitHash <- hash
 		errs <- err
 	}()
 
 	select {
 	case <-timeout.Done():
+		hash := <-commitHash
 		if timeout.Err() != nil {
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
 			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, timeout.Err())
 		}
+		return hash, timeout.Err()
 	case err := <-errs:
+		hash := <-commitHash
 		if err == docker.Failure {
 			logger.Error(ctx.UUID(), err.Error())
-			r.CreateCommitStatus(ctx, repo, <-commitHash, github.FAILURE)
+			r.CreateCommitStatus(ctx, repo, hash, github.FAILURE)
 		} else if err != nil {
 			logger.Errorf(ctx.UUID(), "%+v", err)
-			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, err)
+			r.CreateCommitStatusWithError(ctx, repo, hash, err)
 		} else {
-			r.CreateCommitStatus(ctx, repo, <-commitHash, github.SUCCESS)
+			r.CreateCommitStatus(ctx, repo, hash, github.SUCCESS)
 		}
+		return hash, err
 	}
 }
 
-func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
+func (r *runnerImpl) run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
 	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 

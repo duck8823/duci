@@ -58,7 +58,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	go c.runner.RunInBackground(context.New(), event.GetRepo(), ref, phrase)
+	go c.runner.Run(context.New(), event.GetRepo(), ref, phrase)
 
 	// Response
 	w.WriteHeader(http.StatusOK)

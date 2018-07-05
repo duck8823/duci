@@ -65,7 +65,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockGitHub := mock_github.NewMockService(ctrl)
 	mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-		Times(1).
+		Times(2).
 		Return(nil)
 	mockGitHub.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Times(1).

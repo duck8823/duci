@@ -53,21 +53,6 @@ func (mr *MockRunnerMockRecorder) Run(ctx, repo, ref interface{}, command ...int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockRunner)(nil).Run), varargs...)
 }
 
-// RunInBackground mocks base method
-func (m *MockRunner) RunInBackground(ctx context.Context, repo github.Repository, ref string, command ...string) {
-	varargs := []interface{}{ctx, repo, ref}
-	for _, a := range command {
-		varargs = append(varargs, a)
-	}
-	m.ctrl.Call(m, "RunInBackground", varargs...)
-}
-
-// RunInBackground indicates an expected call of RunInBackground
-func (mr *MockRunnerMockRecorder) RunInBackground(ctx, repo, ref interface{}, command ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{ctx, repo, ref}, command...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunInBackground", reflect.TypeOf((*MockRunner)(nil).RunInBackground), varargs...)
-}
-
 // ConvertPullRequestToRef mocks base method
 func (m *MockRunner) ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error) {
 	ret := m.ctrl.Call(m, "ConvertPullRequestToRef", ctx, repo, num)
