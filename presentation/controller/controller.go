@@ -65,15 +65,16 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ref = branch
 		command = strings.Split(phrase, " ")
 	case "push":
-		event := github.PushEvent{}
+		event := &github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
+			logger.Errorf(requestId, "%+v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		repo, ref = event.GetRepo(), event.GetRef()
 	default:
-		message := fmt.Sprintf("payload event type must be issue_comment. but %s", githubEvent)
+		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
 		http.Error(w, message, http.StatusInternalServerError)
 		return
