@@ -130,8 +130,9 @@ func (r *runnerImpl) run(ctx context.Context, repo github.Repository, ref string
 
 func (r *runnerImpl) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
 	msg := fmt.Sprintf("task %s", state)
+	jobContext := fmt.Sprintf("%s/%s", r.Name, ctx.TaskName())
 	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
-		Context:     &r.Name,
+		Context:     &jobContext,
 		Description: &msg,
 		State:       &state,
 	}); err != nil {
@@ -145,8 +146,9 @@ func (r *runnerImpl) CreateCommitStatusWithError(ctx context.Context, repo githu
 		msg = string([]rune(msg)[:46]) + "..."
 	}
 	state := github.ERROR
+	jobContext := fmt.Sprintf("%s/%s", r.Name, ctx.TaskName())
 	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
-		Context:     &r.Name,
+		Context:     &jobContext,
 		Description: &msg,
 		State:       &state,
 	}); err != nil {
