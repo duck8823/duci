@@ -33,6 +33,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var repo gh.Repository
 	var ref string
 	var command []string
+	var ctx context.Context
 
 	// Trigger build
 	githubEvent := r.Header.Get("X-GitHub-Event")
@@ -52,8 +53,11 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
+		command = strings.Split(phrase, " ")
+		task := fmt.Sprintf("pr/%s", command[0])
+		ctx = context.New(task)
 
-		branch, err := c.runner.ConvertPullRequestToRef(context.New(), event.GetRepo(), event.GetIssue().GetNumber())
+		branch, err := c.runner.ConvertPullRequestToRef(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 		if err != nil {
 			logger.Errorf(requestId, "%+v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -63,7 +67,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		repo = event.GetRepo()
 		ref = branch
-		command = strings.Split(phrase, " ")
+
 	case "push":
 		event := &github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
@@ -72,6 +76,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		ctx = context.New("push")
 		repo, ref = event.GetRepo(), event.GetRef()
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
@@ -80,7 +85,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go c.runner.Run(context.New(), repo, ref, command...)
+	go c.runner.Run(ctx, repo, ref, command...)
 
 	// Response
 	w.WriteHeader(http.StatusOK)

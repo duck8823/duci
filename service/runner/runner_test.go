@@ -45,7 +45,7 @@ func TestRunnerImpl_ConvertPullRequestToRef(t *testing.T) {
 		}, nil)
 	r.GitHub = mockGitHub
 
-	actual, err := r.ConvertPullRequestToRef(context.New(), &MockRepo{}, 5)
+	actual, err := r.ConvertPullRequestToRef(context.New("test/task"), &MockRepo{}, 5)
 	if err != nil {
 		t.Errorf("must not error. but: %+v", err)
 	}
@@ -87,7 +87,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	r.GitHub = mockGitHub
 
 	repo := &MockRepo{"duck8823/minimal-ci", "git@github.com:duck8823/minimal-ci.git"}
-	hash, err := r.Run(context.New(), repo, "master", "Hello World.")
+	hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
 	if err != nil {
 		t.Errorf("must not error. but: %+v", err)
 	}
@@ -107,11 +107,11 @@ func TestRunnerImpl_CreateCommitStatus(t *testing.T) {
 		reader, writer, _ := os.Pipe()
 		logger.Writer = writer
 
-		ctx := context.New()
+		ctx := context.New("test/task")
 		repo := &MockRepo{"full/name", ""}
 		hash := plumbing.Hash{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 		state := github.SUCCESS
-		statusContext := "minimal-ci"
+		statusContext := "minimal-ci/test/task"
 		description := "task success"
 		status := goGithub.RepoStatus{
 			State:       &state,
@@ -145,11 +145,11 @@ func TestRunnerImpl_CreateCommitStatus(t *testing.T) {
 		reader, writer, _ := os.Pipe()
 		logger.Writer = writer
 
-		ctx := context.New()
+		ctx := context.New("test/task")
 		repo := &MockRepo{"full/name", ""}
 		hash := plumbing.Hash{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 		state := github.SUCCESS
-		statusContext := "minimal-ci"
+		statusContext := "minimal-ci/test/task"
 		description := "task success"
 		status := goGithub.RepoStatus{
 			State:       &state,
@@ -190,11 +190,11 @@ func TestRunnerImpl_CreateCommitStatusWithError(t *testing.T) {
 		reader, writer, _ := os.Pipe()
 		logger.Writer = writer
 
-		ctx := context.New()
+		ctx := context.New("test/task")
 		repo := &MockRepo{"full/name", ""}
 		hash := plumbing.Hash{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 		state := github.ERROR
-		statusContext := "minimal-ci"
+		statusContext := "minimal-ci/test/task"
 		description := "long error description error1 / error2 / error..."
 		status := goGithub.RepoStatus{
 			State:       &state,
@@ -228,11 +228,11 @@ func TestRunnerImpl_CreateCommitStatusWithError(t *testing.T) {
 		reader, writer, _ := os.Pipe()
 		logger.Writer = writer
 
-		ctx := context.New()
+		ctx := context.New("test/task")
 		repo := &MockRepo{"full/name", ""}
 		hash := plumbing.Hash{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 		state := github.ERROR
-		statusContext := "minimal-ci"
+		statusContext := "minimal-ci/test/task"
 		description := "err"
 		status := goGithub.RepoStatus{
 			State:       &state,
