@@ -65,7 +65,7 @@ func TestService_GetPullRequest(t *testing.T) {
 		FullName: "duck8823/minimal-ci",
 		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 	}
-	pr, err := s.GetPullRequest(context.New(), repo, 5)
+	pr, err := s.GetPullRequest(context.New("test/task"), repo, 5)
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -103,7 +103,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.New(), repo, plumbing.Hash{}, &github.Status{}); err != nil {
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, &github.Status{}); err != nil {
 			t.Errorf("failed to create commit status: %+v", err)
 		}
 	})
@@ -128,7 +128,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.New(), repo, plumbing.Hash{}, &github.Status{}); err == nil {
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, &github.Status{}); err == nil {
 			t.Error("must error")
 		}
 	})
@@ -150,7 +150,7 @@ func TestService_Clone(t *testing.T) {
 		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 	}
 
-	if _, err := s.Clone(context.New(), tempDir, repo, "refs/heads/master"); err != nil {
+	if _, err := s.Clone(context.New("test/task"), tempDir, repo, "refs/heads/master"); err != nil {
 		t.Errorf("must not error. %+v", err)
 	}
 

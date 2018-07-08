@@ -30,7 +30,7 @@ func TestClient_Build(t *testing.T) {
 			t.Fatalf("error occured: %+v", err)
 		}
 
-		if err := cli.Build(context.New(), tar, tag); err != nil {
+		if err := cli.Build(context.New("test/task"), tar, tag); err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
 
@@ -49,7 +49,7 @@ func TestClient_Build(t *testing.T) {
 			t.Fatalf("error occured: %+v", err)
 		}
 
-		if err := cli.Build(context.New(), tar, tag); err == nil {
+		if err := cli.Build(context.New("test/task"), tar, tag); err == nil {
 			t.Error("error must not be nil")
 		}
 	})
@@ -64,7 +64,7 @@ func TestClient_Run(t *testing.T) {
 	t.Run("without environments", func(t *testing.T) {
 		t.Run("without command", func(t *testing.T) {
 			ImagePull(t, "hello-world:latest")
-			containerId, err := cli.Run(context.New(), docker.Environments{}, "hello-world")
+			containerId, err := cli.Run(context.New("test/task"), docker.Environments{}, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -77,7 +77,7 @@ func TestClient_Run(t *testing.T) {
 
 		t.Run("with command", func(t *testing.T) {
 			ImagePull(t, "centos:latest")
-			containerId, err := cli.Run(context.New(), docker.Environments{}, "centos", "echo", "Hello-world")
+			containerId, err := cli.Run(context.New("test/task"), docker.Environments{}, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -91,7 +91,7 @@ func TestClient_Run(t *testing.T) {
 
 	t.Run("with environments", func(t *testing.T) {
 		ImagePull(t, "centos:latest")
-		containerId, err := cli.Run(context.New(), docker.Environments{"ENV": "hello-world"}, "centos", "sh", "-c", "echo $ENV")
+		containerId, err := cli.Run(context.New("test/task"), docker.Environments{"ENV": "hello-world"}, "centos", "sh", "-c", "echo $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -113,7 +113,7 @@ func TestClient_Rm(t *testing.T) {
 	ImagePull(t, tag)
 	containerId := ContainerCreate(t, tag)
 
-	if err := cli.Rm(context.New(), containerId); err != nil {
+	if err := cli.Rm(context.New("test/task"), containerId); err != nil {
 		t.Fatalf("error occured: %+v", err)
 	}
 
@@ -132,7 +132,7 @@ func TestClient_Rmi(t *testing.T) {
 	tag := "alpine:2.6"
 	ImagePull(t, tag)
 
-	if err := cli.Rmi(context.New(), tag); err != nil {
+	if err := cli.Rmi(context.New("test/task"), tag); err != nil {
 		t.Fatalf("error occured: %+v", err)
 	}
 
@@ -190,7 +190,7 @@ func DockerImages(t *testing.T) []string {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	images, err := cli.ImageList(context.New(), types.ImageListOptions{})
+	images, err := cli.ImageList(context.New("test/task"), types.ImageListOptions{})
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -211,7 +211,7 @@ func DockerContainers(t *testing.T) []string {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	containers, err := cli.ContainerList(context.New(), types.ContainerListOptions{})
+	containers, err := cli.ContainerList(context.New("test/task"), types.ContainerListOptions{})
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -231,7 +231,7 @@ func ContainerLogsString(t *testing.T, containerId string) string {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	reader, err := cli.ContainerLogs(context.New(), containerId, types.ContainerLogsOptions{
+	reader, err := cli.ContainerLogs(context.New("test/task"), containerId, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 	})
@@ -255,7 +255,7 @@ func ImagePull(t *testing.T, ref string) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	stream, err := cli.ImagePull(context.New(), ref, types.ImagePullOptions{})
+	stream, err := cli.ImagePull(context.New("test/task"), ref, types.ImagePullOptions{})
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -282,7 +282,7 @@ func ContainerCreate(t *testing.T, ref string) string {
 		Image: ref,
 		Cmd:   []string{"hello", "world"},
 	}
-	con, err := cli.ContainerCreate(context.New(), config, nil, nil, "")
+	con, err := cli.ContainerCreate(context.New("test/task"), config, nil, nil, "")
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 		return ""
