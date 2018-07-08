@@ -46,7 +46,8 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx, repo, ref, command, err := c.parseIssueComment(event)
 		if err == SKIP_BUILD {
 			logger.Info(requestId, "skip build")
-			http.Error(w, err.Error(), http.StatusOK)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(err.Error()))
 			return
 		} else if err != nil {
 			logger.Errorf(requestId, "%+v", err)
