@@ -5,7 +5,7 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Minimal-ci is a small ci server.  
-The job is triggered by pull request comment.  
+The job is triggered by pull request comment and push.  
 
 ## Target Repository
 The target repository must have Dockerfile.  
@@ -14,14 +14,17 @@ I suggest to use `ENTRYPOINT` in Dockerfile.
 e.g.
 ```Dockerfile
 ENTRYPOINT ["mvn"]
+CMD ["build"]
 ```
 
 ```Dockerfile
 ENTRYPOINT ["fastlane"]
+CMD ["build"]
 ```
 
-When comment `ci test` on github pull request, 
-minimal-ci exec `mvn test` / `fastlane test` in docker container.  
+When push to github, minimal-ci exec `mvn build` / `fastlane build`.  
+And when comment `ci test` on github pull request, 
+exec `mvn test` / `fastlane test` in docker container.  
 
 ## Run Server
 ### Add Environment Variable
@@ -67,3 +70,4 @@ $ docker-compose -f docker-compose.mac.yml up
 #### Add Webhooks to GitHub repository
 Add endpoint of minimal-ci to target repository.  
 `https://github.com/<owner>/<repository>/settings/hooks`
+

@@ -18,28 +18,66 @@ func TestJobController_ServeHTTP(t *testing.T) {
 	defer ctrl.Finish()
 
 	t.Run("with correct payload", func(t *testing.T) {
-		mock := mock_runner.NewMockRunner(ctrl)
-		mock.EXPECT().ConvertPullRequestToRef(gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return("master", nil)
-		mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-		handler := &jobController{runner: mock}
+		t.Run("when issue_comment", func(t *testing.T) {
+			mock := mock_runner.NewMockRunner(ctrl)
+			mock.EXPECT().ConvertPullRequestToRef(gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return("master", nil)
+			mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-		s := httptest.NewServer(handler)
-		defer s.Close()
+			handler := &jobController{runner: mock}
 
-		body := CreateBody(t, "ci test")
+			s := httptest.NewServer(handler)
+			defer s.Close()
 
-		req := httptest.NewRequest("POST", "/", body)
-		req.Header.Set("X-GitHub-Event", "issue_comment")
-		rec := httptest.NewRecorder()
+			body := CreateBody(t, "ci test")
 
-		handler.ServeHTTP(rec, req)
+			req := httptest.NewRequest("POST", "/", body)
+			req.Header.Set("X-GitHub-Event", "issue_comment")
+			rec := httptest.NewRecorder()
 
-		actual := rec.Code
-		expected := 200
-		if actual != expected {
-			t.Errorf("status must equal %+v, but got %+v", expected, actual)
-		}
+			handler.ServeHTTP(rec, req)
+
+			actual := rec.Code
+			expected := 200
+			if actual != expected {
+				t.Errorf("status must equal %+v, but got %+v", expected, actual)
+			}
+		})
+
+		t.Run("when push", func(t *testing.T) {
+			mock := mock_runner.NewMockRunner(ctrl)
+			mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+
+			handler := &jobController{runner: mock}
+
+			s := httptest.NewServer(handler)
+			defer s.Close()
+
+			repoName := "test/repo"
+			ref := "ref"
+			body, err := json.Marshal(&github.PushEvent{
+				Repo: &github.PushEventRepository{
+					FullName: &repoName,
+				},
+				Ref: &ref,
+			})
+			if err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
+
+			req := httptest.NewRequest("POST", "/", bytes.NewReader(body))
+			req.Header.Set("X-GitHub-Event", "push")
+			rec := httptest.NewRecorder()
+
+			handler.ServeHTTP(rec, req)
+
+			actual := rec.Code
+			expected := 200
+			if actual != expected {
+				t.Errorf("status must equal %+v, but got %+v", expected, actual)
+			}
+		})
+
 	})
 
 	t.Run("when runner returns error", func(t *testing.T) {
@@ -66,7 +104,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 		}
 	})
 
-	t.Run("must not call RunWithPullRequest", func(t *testing.T) {
+	t.Run("with invalid payload", func(t *testing.T) {
 		mock := mock_runner.NewMockRunner(ctrl)
 		mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
