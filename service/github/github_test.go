@@ -104,7 +104,9 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS)
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS); err != nil {
+			t.Errorf("error must not occured: but got %+v", err)
+		}
 	})
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
@@ -127,7 +129,9 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS)
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS); err == nil {
+			t.Error("errot must occred. but got nil")
+		}
 	})
 }
 
@@ -156,7 +160,9 @@ func TestService_CreateCommitStatusWithError(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		s.CreateCommitStatusWithError(context.New("test/task"), repo, plumbing.Hash{}, errors.New("Hello Error"))
+		if err := s.CreateCommitStatusWithError(context.New("test/task"), repo, plumbing.Hash{}, errors.New("Hello Error")); err != nil {
+			t.Errorf("error must not occured: but got %+v", err)
+		}
 	})
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
@@ -179,7 +185,9 @@ func TestService_CreateCommitStatusWithError(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		s.CreateCommitStatusWithError(context.New("test/task"), repo, plumbing.Hash{}, errors.New("Hello Error"))
+		if err := s.CreateCommitStatusWithError(context.New("test/task"), repo, plumbing.Hash{}, errors.New("Hello Error")); err == nil {
+			t.Error("error must occurd. but got nil")
+		}
 	})
 }
 

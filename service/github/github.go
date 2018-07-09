@@ -36,8 +36,8 @@ const (
 
 type Service interface {
 	GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error)
-	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State)
-	CreateCommitStatusWithError(ctx context.Context, repo Repository, hash plumbing.Hash, err error)
+	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State) error
+	CreateCommitStatusWithError(ctx context.Context, repo Repository, hash plumbing.Hash, err error) error
 	Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error)
 }
 
@@ -83,7 +83,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	return pr, nil
 }
 
-func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State) {
+func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State) error {
 	msg := fmt.Sprintf("task %s", state)
 	taskName := ctx.TaskName()
 	if err := s.createCommitStatus(ctx, repo, hash, &Status{
@@ -92,10 +92,12 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repo Repository, h
 		State:       &state,
 	}); err != nil {
 		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
+		return errors.WithStack(err)
 	}
+	return nil
 }
 
-func (s *serviceImpl) CreateCommitStatusWithError(ctx context.Context, repo Repository, hash plumbing.Hash, err error) {
+func (s *serviceImpl) CreateCommitStatusWithError(ctx context.Context, repo Repository, hash plumbing.Hash, err error) error {
 	msg := err.Error()
 	if len(msg) >= 50 {
 		msg = string([]rune(msg)[:46]) + "..."
@@ -108,7 +110,9 @@ func (s *serviceImpl) CreateCommitStatusWithError(ctx context.Context, repo Repo
 		State:       &state,
 	}); err != nil {
 		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
+		return errors.WithStack(err)
 	}
+	return nil
 }
 
 func (s *serviceImpl) createCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, status *Status) error {

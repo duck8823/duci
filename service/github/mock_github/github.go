@@ -97,8 +97,10 @@ func (mr *MockServiceMockRecorder) GetPullRequest(ctx, repository, num interface
 }
 
 // CreateCommitStatus mocks base method
-func (m *MockService) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
-	m.ctrl.Call(m, "CreateCommitStatus", ctx, repo, hash, state)
+func (m *MockService) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) error {
+	ret := m.ctrl.Call(m, "CreateCommitStatus", ctx, repo, hash, state)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // CreateCommitStatus indicates an expected call of CreateCommitStatus
@@ -107,8 +109,10 @@ func (mr *MockServiceMockRecorder) CreateCommitStatus(ctx, repo, hash, state int
 }
 
 // CreateCommitStatusWithError mocks base method
-func (m *MockService) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
-	m.ctrl.Call(m, "CreateCommitStatusWithError", ctx, repo, hash, err)
+func (m *MockService) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) error {
+	ret := m.ctrl.Call(m, "CreateCommitStatusWithError", ctx, repo, hash, err)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // CreateCommitStatusWithError indicates an expected call of CreateCommitStatusWithError
