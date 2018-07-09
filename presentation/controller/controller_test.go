@@ -129,36 +129,60 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			}
 		})
 
-		t.Run("without comment started ci", func(t *testing.T) {
-			body := CreateBody(t, "test")
+		t.Run("with issue_comment", func(t *testing.T) {
+			event := "issue_comment"
 
-			req := httptest.NewRequest("POST", "/", body)
-			req.Header.Set("X-GitHub-Event", "issue_comment")
-			rec := httptest.NewRecorder()
+			t.Run("without comment started ci", func(t *testing.T) {
+				body := CreateBody(t, "test")
 
-			handler.ServeHTTP(rec, req)
+				req := httptest.NewRequest("POST", "/", body)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
 
-			actual := rec.Code
-			expected := 200
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
-			}
+				handler.ServeHTTP(rec, req)
+
+				actual := rec.Code
+				expected := 200
+				if actual != expected {
+					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				}
+			})
+
+			t.Run("with invalid body", func(t *testing.T) {
+				body := strings.NewReader("Invalid JSON format.")
+
+				req := httptest.NewRequest("POST", "/", body)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
+
+				handler.ServeHTTP(rec, req)
+
+				actual := rec.Code
+				expected := 500
+				if actual != expected {
+					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				}
+			})
 		})
 
-		t.Run("with invalid body", func(t *testing.T) {
-			body := strings.NewReader("Invalid JSON format.")
+		t.Run("with push", func(t *testing.T) {
+			event := "push"
 
-			req := httptest.NewRequest("POST", "/", body)
-			req.Header.Set("X-GitHub-Event", "issue_comment")
-			rec := httptest.NewRecorder()
+			t.Run("with invalid body", func(t *testing.T) {
+				body := strings.NewReader("Invalid JSON format.")
 
-			handler.ServeHTTP(rec, req)
+				req := httptest.NewRequest("POST", "/", body)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
 
-			actual := rec.Code
-			expected := 500
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
-			}
+				handler.ServeHTTP(rec, req)
+
+				actual := rec.Code
+				expected := 500
+				if actual != expected {
+					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				}
+			})
 		})
 	})
 }
