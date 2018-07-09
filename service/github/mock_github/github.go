@@ -97,15 +97,23 @@ func (mr *MockServiceMockRecorder) GetPullRequest(ctx, repository, num interface
 }
 
 // CreateCommitStatus mocks base method
-func (m *MockService) CreateCommitStatus(ctx context.Context, repository github.Repository, hash plumbing.Hash, status *github.Status) error {
-	ret := m.ctrl.Call(m, "CreateCommitStatus", ctx, repository, hash, status)
-	ret0, _ := ret[0].(error)
-	return ret0
+func (m *MockService) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
+	m.ctrl.Call(m, "CreateCommitStatus", ctx, repo, hash, state)
 }
 
 // CreateCommitStatus indicates an expected call of CreateCommitStatus
-func (mr *MockServiceMockRecorder) CreateCommitStatus(ctx, repository, hash, status interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatus", reflect.TypeOf((*MockService)(nil).CreateCommitStatus), ctx, repository, hash, status)
+func (mr *MockServiceMockRecorder) CreateCommitStatus(ctx, repo, hash, state interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatus", reflect.TypeOf((*MockService)(nil).CreateCommitStatus), ctx, repo, hash, state)
+}
+
+// CreateCommitStatusWithError mocks base method
+func (m *MockService) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
+	m.ctrl.Call(m, "CreateCommitStatusWithError", ctx, repo, hash, err)
+}
+
+// CreateCommitStatusWithError indicates an expected call of CreateCommitStatusWithError
+func (mr *MockServiceMockRecorder) CreateCommitStatusWithError(ctx, repo, hash, err interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatusWithError", reflect.TypeOf((*MockService)(nil).CreateCommitStatusWithError), ctx, repo, hash, err)
 }
 
 // Clone mocks base method

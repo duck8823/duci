@@ -74,19 +74,19 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 		hash := <-commitHash
 		if timeout.Err() != nil {
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
-			r.CreateCommitStatusWithError(ctx, repo, <-commitHash, timeout.Err())
+			r.GitHub.CreateCommitStatusWithError(ctx, repo, <-commitHash, timeout.Err())
 		}
 		return hash, timeout.Err()
 	case err := <-errs:
 		hash := <-commitHash
 		if err == docker.Failure {
 			logger.Error(ctx.UUID(), err.Error())
-			r.CreateCommitStatus(ctx, repo, hash, github.FAILURE)
+			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.FAILURE)
 		} else if err != nil {
 			logger.Errorf(ctx.UUID(), "%+v", err)
-			r.CreateCommitStatusWithError(ctx, repo, hash, err)
+			r.GitHub.CreateCommitStatusWithError(ctx, repo, hash, err)
 		} else {
-			r.CreateCommitStatus(ctx, repo, hash, github.SUCCESS)
+			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.SUCCESS)
 		}
 		return hash, err
 	}
@@ -101,7 +101,7 @@ func (r *runnerImpl) run(ctx context.Context, repo github.Repository, ref string
 		return plumbing.Hash{}, errors.WithStack(err)
 	}
 
-	r.CreateCommitStatus(ctx, repo, head, github.PENDING)
+	r.GitHub.CreateCommitStatus(ctx, repo, head, github.PENDING)
 
 	tarFilePath := path.Join(workDir, "minimal-ci.tar")
 	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
@@ -126,32 +126,4 @@ func (r *runnerImpl) run(ctx context.Context, repo github.Repository, ref string
 	}
 
 	return head, nil
-}
-
-func (r *runnerImpl) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) {
-	msg := fmt.Sprintf("task %s", state)
-	jobContext := fmt.Sprintf("%s/%s", r.Name, ctx.TaskName())
-	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
-		Context:     &jobContext,
-		Description: &msg,
-		State:       &state,
-	}); err != nil {
-		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
-	}
-}
-
-func (r *runnerImpl) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) {
-	msg := err.Error()
-	if len(msg) >= 50 {
-		msg = string([]rune(msg)[:46]) + "..."
-	}
-	state := github.ERROR
-	jobContext := fmt.Sprintf("%s/%s", r.Name, ctx.TaskName())
-	if err := r.GitHub.CreateCommitStatus(ctx, repo, hash, &github.Status{
-		Context:     &jobContext,
-		Description: &msg,
-		State:       &state,
-	}); err != nil {
-		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
-	}
 }
