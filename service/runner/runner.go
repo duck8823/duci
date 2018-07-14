@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
@@ -17,46 +16,16 @@ import (
 
 type Runner interface {
 	Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error)
-	ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error)
 }
 
-const NAME = "minimal-ci"
-
-type runnerImpl struct {
+type DockerRunner struct {
 	GitHub      github.Service
 	Docker      *docker.Client
 	Name        string
 	BaseWorkDir string
 }
 
-func NewWithEnv() (*runnerImpl, error) {
-	githubService, err := github.New(os.Getenv("GITHUB_API_TOKEN"))
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	dockerClient, err := docker.New()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return &runnerImpl{
-		GitHub:      githubService,
-		Docker:      dockerClient,
-		Name:        NAME,
-		BaseWorkDir: path.Join(os.TempDir(), NAME),
-	}, nil
-}
-
-func (r *runnerImpl) ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error) {
-	pr, err := r.GitHub.GetPullRequest(ctx, repo, num)
-	if err != nil {
-		return "", errors.WithStack(err)
-	}
-	return fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()), nil
-}
-
-func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
+func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
 	commitHash := make(chan plumbing.Hash, 1)
 	errs := make(chan error, 1)
 
@@ -92,7 +61,7 @@ func (r *runnerImpl) Run(ctx context.Context, repo github.Repository, ref string
 	}
 }
 
-func (r *runnerImpl) run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
+func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
 	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
