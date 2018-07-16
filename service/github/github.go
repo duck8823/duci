@@ -72,23 +72,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	return pr, nil
 }
 
-func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State, description string) error {
-	if len(description) >= 50 {
-		description = string([]rune(description)[:46]) + "..."
-	}
-	taskName := ctx.TaskName()
-	if err := s.createCommitStatus(ctx, repo, hash, &Status{
-		Context:     &taskName,
-		Description: &description,
-		State:       &state,
-	}); err != nil {
-		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
-func (s *serviceImpl) createCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, status *Status) error {
+func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, state State, description string) error {
 	name := &RepositoryName{repository.GetFullName()}
 	owner, err := name.Owner()
 	if err != nil {
@@ -99,6 +83,16 @@ func (s *serviceImpl) createCommitStatus(ctx context.Context, repository Reposit
 		return errors.WithStack(err)
 	}
 
+	taskName := ctx.TaskName()
+	if len(description) >= 50 {
+		description = string([]rune(description)[:46]) + "..."
+	}
+	status := &Status{
+		Context:     &taskName,
+		Description: &description,
+		State:       &state,
+	}
+
 	if _, _, err := s.Client.Repositories.CreateStatus(
 		ctx,
 		owner,
@@ -106,6 +100,7 @@ func (s *serviceImpl) createCommitStatus(ctx context.Context, repository Reposit
 		hash.String(),
 		status,
 	); err != nil {
+		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
 		return errors.WithStack(err)
 	}
 	return nil
