@@ -51,11 +51,11 @@ func TestService_GetPullRequest(t *testing.T) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	s, err := github.New("")
+	s, err := github.NewWithEnv()
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
-	s.GitHub.BaseURL = baseUrl
+	s.Client.BaseURL = baseUrl
 
 	repo := &MockRepo{
 		FullName: "duck8823/minimal-ci",
@@ -89,11 +89,11 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s, err := github.New("")
+		s, err := github.NewWithEnv()
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
-		s.GitHub.BaseURL = baseUrl
+		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
 			FullName: "duck8823/minimal-ci",
@@ -114,11 +114,11 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s, err := github.New("")
+		s, err := github.NewWithEnv()
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
-		s.GitHub.BaseURL = baseUrl
+		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
 			FullName: "duck8823/minimal-ci",

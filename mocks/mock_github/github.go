@@ -8,7 +8,6 @@ import (
 	context "github.com/duck8823/minimal-ci/infrastructure/context"
 	github "github.com/duck8823/minimal-ci/service/github"
 	gomock "github.com/golang/mock/gomock"
-	github0 "github.com/google/go-github/github"
 	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"
 )
@@ -37,9 +36,9 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // GetPullRequest mocks base method
-func (m *MockService) GetPullRequest(ctx context.Context, repository github.Repository, num int) (*github0.PullRequest, error) {
+func (m *MockService) GetPullRequest(ctx context.Context, repository github.Repository, num int) (*github.PullRequest, error) {
 	ret := m.ctrl.Call(m, "GetPullRequest", ctx, repository, num)
-	ret0, _ := ret[0].(*github0.PullRequest)
+	ret0, _ := ret[0].(*github.PullRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

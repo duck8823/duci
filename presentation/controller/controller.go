@@ -28,7 +28,7 @@ type jobController struct {
 func New() (*jobController, error) {
 	name := "minimal-ci"
 
-	githubService, err := github.New(os.Getenv("GITHUB_API_TOKEN"))
+	githubService, err := github.NewWithEnv()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

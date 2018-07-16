@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"os"
 )
 
 type State = string
@@ -20,17 +21,18 @@ const (
 )
 
 type Service interface {
-	GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error)
+	GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error)
 	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State, description string) error
 }
 
 type serviceImpl struct {
-	GitHub *github.Client
+	Client *github.Client
 }
 
-func New(token string) (*serviceImpl, error) {
+// TODO change return type to interface using mock server ( gock? )
+func NewWithEnv() (*serviceImpl, error) {
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: os.Getenv("GITHUB_API_TOKEN")},
 	)
 	tc := oauth2.NewClient(ctx.Background(), ts)
 
@@ -47,7 +49,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	pr, resp, err := s.GitHub.PullRequests.Get(
+	pr, resp, err := s.Client.PullRequests.Get(
 		ctx,
 		owner,
 		repo,
@@ -81,7 +83,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 		State:       &state,
 	}
 
-	if _, _, err := s.GitHub.Repositories.CreateStatus(
+	if _, _, err := s.Client.Repositories.CreateStatus(
 		ctx,
 		owner,
 		repo,
