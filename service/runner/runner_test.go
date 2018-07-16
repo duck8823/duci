@@ -3,8 +3,8 @@ package runner_test
 import (
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
-	"github.com/duck8823/minimal-ci/infrastructure/git/mock_git"
-	"github.com/duck8823/minimal-ci/service/github/mock_github"
+	"github.com/duck8823/minimal-ci/mocks/mock_git"
+	"github.com/duck8823/minimal-ci/mocks/mock_github"
 	"github.com/duck8823/minimal-ci/service/runner"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/src-d/go-git.v4/plumbing"
