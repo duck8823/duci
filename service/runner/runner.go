@@ -4,6 +4,7 @@ import (
 	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
+	"github.com/duck8823/minimal-ci/infrastructure/git"
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/duck8823/minimal-ci/service/github"
 	"github.com/pkg/errors"
@@ -19,6 +20,7 @@ type Runner interface {
 }
 
 type DockerRunner struct {
+	Git         git.Client
 	GitHub      github.Service
 	Docker      *docker.Client
 	Name        string
@@ -65,7 +67,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
-	head, err := r.GitHub.Clone(ctx, workDir, repo, ref)
+	head, err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref)
 	if err != nil {
 		return plumbing.Hash{}, errors.WithStack(err)
 	}

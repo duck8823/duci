@@ -7,12 +7,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
-	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
-	"os"
-	"path"
 )
 
 type State = string
@@ -27,12 +22,10 @@ const (
 type Service interface {
 	GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error)
 	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State, description string) error
-	Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error)
 }
 
 type serviceImpl struct {
-	Client *github.Client
-	auth   transport.AuthMethod
+	GitHub *github.Client
 }
 
 func New(token string) (*serviceImpl, error) {
@@ -41,12 +34,7 @@ func New(token string) (*serviceImpl, error) {
 	)
 	tc := oauth2.NewClient(ctx.Background(), ts)
 
-	auth, err := ssh.NewPublicKeysFromFile("git", path.Join(os.Getenv("HOME"), ".ssh/id_rsa"), "")
-	if err != nil {
-		return nil, err
-	}
-
-	return &serviceImpl{Client: github.NewClient(tc), auth: auth}, nil
+	return &serviceImpl{github.NewClient(tc)}, nil
 }
 
 func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error) {
@@ -59,7 +47,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	pr, resp, err := s.Client.PullRequests.Get(
+	pr, resp, err := s.GitHub.PullRequests.Get(
 		ctx,
 		owner,
 		repo,
@@ -93,7 +81,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 		State:       &state,
 	}
 
-	if _, _, err := s.Client.Repositories.CreateStatus(
+	if _, _, err := s.GitHub.Repositories.CreateStatus(
 		ctx,
 		owner,
 		repo,
@@ -104,22 +92,4 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 		return errors.WithStack(err)
 	}
 	return nil
-}
-
-func (s *serviceImpl) Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error) {
-	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
-		URL:           repo.GetSSHURL(),
-		Auth:          s.auth,
-		Progress:      &ProgressLogger{ctx.UUID()},
-		ReferenceName: plumbing.ReferenceName(ref),
-	})
-	if err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
-	}
-
-	reference, err := gitRepository.Head()
-	if err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
-	}
-	return reference.Hash(), nil
 }

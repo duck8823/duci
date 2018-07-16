@@ -3,7 +3,7 @@ package runner_test
 import (
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/docker"
-	"github.com/duck8823/minimal-ci/service/github"
+	"github.com/duck8823/minimal-ci/infrastructure/git/mock_git"
 	"github.com/duck8823/minimal-ci/service/github/mock_github"
 	"github.com/duck8823/minimal-ci/service/runner"
 	"github.com/golang/mock/gomock"
@@ -32,9 +32,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 	mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Times(2).
 		Return(nil)
-	mockGitHub.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+
+	mockGit := mock_git.NewMockClient(ctrl)
+	mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Times(1).
-		DoAndReturn(func(ctx context.Context, dir string, repo github.Repository, ref string) (plumbing.Hash, error) {
+		DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
 			if err := os.MkdirAll(dir, 0700); err != nil {
 				return plumbing.Hash{}, err
 			}
@@ -58,6 +60,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	r := &runner.DockerRunner{
 		Name:        "test-runner",
 		BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+		Git:         mockGit,
 		GitHub:      mockGitHub,
 		Docker:      dockerClient,
 	}

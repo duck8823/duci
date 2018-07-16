@@ -2,17 +2,13 @@ package github_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/service/github"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
-	"path"
 	"testing"
-	"time"
 )
 
 type MockHandler struct {
@@ -59,7 +55,7 @@ func TestService_GetPullRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
-	s.Client.BaseURL = baseUrl
+	s.GitHub.BaseURL = baseUrl
 
 	repo := &MockRepo{
 		FullName: "duck8823/minimal-ci",
@@ -97,7 +93,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
-		s.Client.BaseURL = baseUrl
+		s.GitHub.BaseURL = baseUrl
 
 		repo := &MockRepo{
 			FullName: "duck8823/minimal-ci",
@@ -122,7 +118,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
-		s.Client.BaseURL = baseUrl
+		s.GitHub.BaseURL = baseUrl
 
 		repo := &MockRepo{
 			FullName: "duck8823/minimal-ci",
@@ -132,30 +128,4 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Error("errot must occred. but got nil")
 		}
 	})
-}
-
-func TestService_Clone(t *testing.T) {
-	tempDir := path.Join(os.TempDir(), fmt.Sprintf("minimal-ci_test_%v", time.Now().Unix()))
-	if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
-		t.Fatalf("%+v", err)
-	}
-
-	s, err := github.New("")
-	if err != nil {
-		t.Fatalf("error occured. %+v", err)
-	}
-
-	repo := &MockRepo{
-		FullName: "duck8823/minimal-ci",
-		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
-	}
-
-	if _, err := s.Clone(context.New("test/task"), tempDir, repo, "refs/heads/master"); err != nil {
-		t.Errorf("must not error. %+v", err)
-	}
-
-	if _, err := os.Stat(path.Join(tempDir, ".git")); err != nil {
-		t.Errorf("must be created dir: %s", path.Join(tempDir, ".git"))
-	}
-
 }

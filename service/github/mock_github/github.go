@@ -60,16 +60,3 @@ func (m *MockService) CreateCommitStatus(ctx context.Context, repo github.Reposi
 func (mr *MockServiceMockRecorder) CreateCommitStatus(ctx, repo, hash, state, description interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatus", reflect.TypeOf((*MockService)(nil).CreateCommitStatus), ctx, repo, hash, state, description)
 }
-
-// Clone mocks base method
-func (m *MockService) Clone(ctx context.Context, dir string, repo github.Repository, ref string) (plumbing.Hash, error) {
-	ret := m.ctrl.Call(m, "Clone", ctx, dir, repo, ref)
-	ret0, _ := ret[0].(plumbing.Hash)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Clone indicates an expected call of Clone
-func (mr *MockServiceMockRecorder) Clone(ctx, dir, repo, ref interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clone", reflect.TypeOf((*MockService)(nil).Clone), ctx, dir, repo, ref)
-}
