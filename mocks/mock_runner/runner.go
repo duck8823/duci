@@ -52,16 +52,3 @@ func (mr *MockRunnerMockRecorder) Run(ctx, repo, ref interface{}, command ...int
 	varargs := append([]interface{}{ctx, repo, ref}, command...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockRunner)(nil).Run), varargs...)
 }
-
-// ConvertPullRequestToRef mocks base method
-func (m *MockRunner) ConvertPullRequestToRef(ctx context.Context, repo github.Repository, num int) (string, error) {
-	ret := m.ctrl.Call(m, "ConvertPullRequestToRef", ctx, repo, num)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ConvertPullRequestToRef indicates an expected call of ConvertPullRequestToRef
-func (mr *MockRunnerMockRecorder) ConvertPullRequestToRef(ctx, repo, num interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConvertPullRequestToRef", reflect.TypeOf((*MockRunner)(nil).ConvertPullRequestToRef), ctx, repo, num)
-}

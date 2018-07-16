@@ -3,10 +3,10 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/duck8823/minimal-ci/service/runner/mock_runner"
+	"github.com/duck8823/minimal-ci/mocks/mock_github"
+	"github.com/duck8823/minimal-ci/mocks/mock_runner"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-github/github"
-	"github.com/pkg/errors"
 	"io"
 	"net/http/httptest"
 	"strings"
@@ -20,11 +20,15 @@ func TestJobController_ServeHTTP(t *testing.T) {
 	t.Run("with correct payload", func(t *testing.T) {
 
 		t.Run("when issue_comment", func(t *testing.T) {
-			mock := mock_runner.NewMockRunner(ctrl)
-			mock.EXPECT().ConvertPullRequestToRef(gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return("master", nil)
-			mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+			runner := mock_runner.NewMockRunner(ctrl)
+			runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-			handler := &jobController{runner: mock}
+			githubService := mock_github.NewMockService(ctrl)
+			githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).Return(&github.PullRequest{
+				Head: &github.PullRequestBranch{},
+			}, nil)
+
+			handler := &jobController{runner: runner, github: githubService}
 
 			s := httptest.NewServer(handler)
 			defer s.Close()
@@ -80,30 +84,6 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 	})
 
-	t.Run("when runner returns error", func(t *testing.T) {
-		mock := mock_runner.NewMockRunner(ctrl)
-		mock.EXPECT().ConvertPullRequestToRef(gomock.Any(), gomock.Any(), gomock.Any()).Times(1).Return("", errors.New("error"))
-
-		handler := &jobController{runner: mock}
-
-		s := httptest.NewServer(handler)
-		defer s.Close()
-
-		body := CreateBody(t, "ci test")
-
-		req := httptest.NewRequest("POST", "/", body)
-		req.Header.Set("X-GitHub-Event", "issue_comment")
-		rec := httptest.NewRecorder()
-
-		handler.ServeHTTP(rec, req)
-
-		actual := rec.Code
-		expected := 500
-		if actual != expected {
-			t.Errorf("status must equal %+v, but got %+v", expected, actual)
-		}
-	})
-
 	t.Run("with invalid payload", func(t *testing.T) {
 		mock := mock_runner.NewMockRunner(ctrl)
 		mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
@@ -129,36 +109,60 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			}
 		})
 
-		t.Run("without comment started ci", func(t *testing.T) {
-			body := CreateBody(t, "test")
+		t.Run("with issue_comment", func(t *testing.T) {
+			event := "issue_comment"
 
-			req := httptest.NewRequest("POST", "/", body)
-			req.Header.Set("X-GitHub-Event", "issue_comment")
-			rec := httptest.NewRecorder()
+			t.Run("without comment started ci", func(t *testing.T) {
+				body := CreateBody(t, "test")
 
-			handler.ServeHTTP(rec, req)
+				req := httptest.NewRequest("POST", "/", body)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
 
-			actual := rec.Code
-			expected := 200
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
-			}
+				handler.ServeHTTP(rec, req)
+
+				actual := rec.Code
+				expected := 200
+				if actual != expected {
+					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				}
+			})
+
+			t.Run("with invalid body", func(t *testing.T) {
+				body := strings.NewReader("Invalid JSON format.")
+
+				req := httptest.NewRequest("POST", "/", body)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
+
+				handler.ServeHTTP(rec, req)
+
+				actual := rec.Code
+				expected := 500
+				if actual != expected {
+					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				}
+			})
 		})
 
-		t.Run("with invalid body", func(t *testing.T) {
-			body := strings.NewReader("Invalid JSON format.")
+		t.Run("with push", func(t *testing.T) {
+			event := "push"
 
-			req := httptest.NewRequest("POST", "/", body)
-			req.Header.Set("X-GitHub-Event", "issue_comment")
-			rec := httptest.NewRecorder()
+			t.Run("with invalid body", func(t *testing.T) {
+				body := strings.NewReader("Invalid JSON format.")
 
-			handler.ServeHTTP(rec, req)
+				req := httptest.NewRequest("POST", "/", body)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
 
-			actual := rec.Code
-			expected := 500
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
-			}
+				handler.ServeHTTP(rec, req)
+
+				actual := rec.Code
+				expected := 500
+				if actual != expected {
+					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				}
+			})
 		})
 	})
 }

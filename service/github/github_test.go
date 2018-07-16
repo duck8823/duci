@@ -2,17 +2,13 @@ package github_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/service/github"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
-	"path"
 	"testing"
-	"time"
 )
 
 type MockHandler struct {
@@ -55,7 +51,7 @@ func TestService_GetPullRequest(t *testing.T) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	s, err := github.New("")
+	s, err := github.NewWithEnv()
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -93,7 +89,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s, err := github.New("")
+		s, err := github.NewWithEnv()
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
@@ -103,8 +99,8 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, &github.Status{}); err != nil {
-			t.Errorf("failed to create commit status: %+v", err)
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
+			t.Errorf("error must not occured: but got %+v", err)
 		}
 	})
 
@@ -118,7 +114,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			t.Fatalf("error occured. %+v", err)
 		}
 
-		s, err := github.New("")
+		s, err := github.NewWithEnv()
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
@@ -128,34 +124,8 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, &github.Status{}); err == nil {
-			t.Error("must error")
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
+			t.Error("errot must occred. but got nil")
 		}
 	})
-}
-
-func TestService_Clone(t *testing.T) {
-	tempDir := path.Join(os.TempDir(), fmt.Sprintf("minimal-ci_test_%v", time.Now().Unix()))
-	if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
-		t.Fatalf("%+v", err)
-	}
-
-	s, err := github.New("")
-	if err != nil {
-		t.Fatalf("error occured. %+v", err)
-	}
-
-	repo := &MockRepo{
-		FullName: "duck8823/minimal-ci",
-		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
-	}
-
-	if _, err := s.Clone(context.New("test/task"), tempDir, repo, "refs/heads/master"); err != nil {
-		t.Errorf("must not error. %+v", err)
-	}
-
-	if _, err := os.Stat(path.Join(tempDir, ".git")); err != nil {
-		t.Errorf("must be created dir: %s", path.Join(tempDir, ".git"))
-	}
-
 }

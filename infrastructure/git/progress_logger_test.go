@@ -1,8 +1,8 @@
-package github_test
+package git_test
 
 import (
+	"github.com/duck8823/minimal-ci/infrastructure/git"
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
-	"github.com/duck8823/minimal-ci/service/github"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -20,7 +20,7 @@ func TestProgressLogger_Write(t *testing.T) {
 
 	logger.Writer = writer
 
-	progress := &github.ProgressLogger{}
+	progress := &git.ProgressLogger{}
 	progress.Write([]byte("hoge\rfuga"))
 
 	writer.Close()
