@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/duci)](https://goreportcard.com/report/github.com/duck8823/duci)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-duci is a small ci server.  
+duci \[zushi\] (<u>d</u>ocker <u>u</u>nder <u>c</u>ontinuous <u>i</u>ntegration) is a small ci server.  
 The job is triggered by pull request comment and push.  
 
 ## Target Repository
