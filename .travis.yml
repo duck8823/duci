@@ -17,6 +17,6 @@ before_script:
   - go get golang.org/x/vgo
 script:
   - vgo test -v -coverprofile=cover.out ./...
-  - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go,service/runner/mock_runner/runner.go,service/github/mock_github/github.go
+  - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go,mocks/*/*
 after_script:
   - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
