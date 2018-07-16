@@ -1,8 +1,8 @@
 package git_test
 
 import (
-	"github.com/duck8823/minimal-ci/infrastructure/git"
-	"github.com/duck8823/minimal-ci/infrastructure/logger"
+	"github.com/duck8823/duci/infrastructure/git"
+	"github.com/duck8823/duci/infrastructure/logger"
 	"io/ioutil"
 	"os"
 	"regexp"

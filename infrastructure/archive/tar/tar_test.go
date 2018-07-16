@@ -3,7 +3,7 @@ package tar_test
 import (
 	archiveTar "archive/tar"
 	"fmt"
-	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
+	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"io"
 	"io/ioutil"
 	"os"
@@ -91,7 +91,7 @@ func ReadTarArchive(t *testing.T, reader io.Reader) Files {
 func CreateTestDir(t *testing.T) string {
 	t.Helper()
 
-	tempDir := path.Join(os.TempDir(), fmt.Sprintf("minimal-ci_test_%v", time.Now().Unix()))
+	tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
 	if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
 		t.Fatalf("%+v", err)
 	}

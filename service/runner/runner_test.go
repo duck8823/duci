@@ -1,11 +1,11 @@
 package runner_test
 
 import (
-	"github.com/duck8823/minimal-ci/infrastructure/context"
-	"github.com/duck8823/minimal-ci/infrastructure/docker"
-	"github.com/duck8823/minimal-ci/mocks/mock_git"
-	"github.com/duck8823/minimal-ci/mocks/mock_github"
-	"github.com/duck8823/minimal-ci/service/runner"
+	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/docker"
+	"github.com/duck8823/duci/mocks/mock_git"
+	"github.com/duck8823/duci/mocks/mock_github"
+	"github.com/duck8823/duci/service/runner"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
@@ -65,7 +65,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		Docker:      dockerClient,
 	}
 
-	repo := &MockRepo{"duck8823/minimal-ci", "git@github.com:duck8823/minimal-ci.git"}
+	repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 	hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
 	if err != nil {
 		t.Errorf("must not error. but: %+v", err)

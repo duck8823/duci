@@ -1,10 +1,10 @@
-# minimal-ci
-[![Build Status](https://travis-ci.org/duck8823/minimal-ci.svg?branch=master)](https://travis-ci.org/duck8823/minimal-ci)
-[![Coverage Status](https://coveralls.io/repos/github/duck8823/minimal-ci/badge.svg?branch=maintainance%2Fvarious)](https://coveralls.io/github/duck8823/minimal-ci?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/minimal-ci)](https://goreportcard.com/report/github.com/duck8823/minimal-ci)
+# duci
+[![Build Status](https://travis-ci.org/duck8823/duci.svg?branch=master)](https://travis-ci.org/duck8823/duci)
+[![Coverage Status](https://coveralls.io/repos/github/duck8823/duci/badge.svg?branch=maintainance%2Fvarious)](https://coveralls.io/github/duck8823/duci?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/duci)](https://goreportcard.com/report/github.com/duck8823/duci)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-Minimal-ci is a small ci server.  
+duci \[zushi\] (<u>d</u>ocker <u>u</u>nder <u>c</u>ontinuous <u>i</u>ntegration) is a small ci server.  
 The job is triggered by pull request comment and push.  
 
 ## Target Repository
@@ -22,7 +22,7 @@ ENTRYPOINT ["fastlane"]
 CMD ["build"]
 ```
 
-When push to github, minimal-ci exec `mvn build` / `fastlane build`.  
+When push to github, duci exec `mvn build` / `fastlane build`.  
 And when comment `ci test` on github pull request, 
 exec `mvn test` / `fastlane test` in docker container.  
 
@@ -42,32 +42,32 @@ Please set the public key of the pair at https://github.com/settings/keys.
 #### Locally
 If you have already set $GOPATH, you can install it with the following command.
 ```bash
-$ go get -u github.com/duck8823/minimal-ci
-$ minimal-ci 
+$ go get -u github.com/duck8823/duci
+$ duci 
 ```
 
 #### Using Docker
 ```
-$ git clone https://github.com/duck8823/minimal-ci.git
-$ docker build -t duck8823/minimal-ci .
-$ docker run -e GITHUB_API_TOKEN=<your toekn> -v ~/.ssh:/root/.ssh:ro duck8823/minimal-ci
+$ git clone https://github.com/duck8823/duci.git
+$ docker build -t duck8823/duci .
+$ docker run -e GITHUB_API_TOKEN=<your toekn> -v ~/.ssh:/root/.ssh:ro duck8823/duci
 ```
 
 ##### docker-compose for Windows
 ```bash
-$ git clone https://github.com/duck8823/minimal-ci.git
-$ cd minimal-ci
+$ git clone https://github.com/duck8823/duci.git
+$ cd duci
 $ docker-compose -f docker-compose.win.yml up
 ```
 
 ##### docker-compose for Mac
 ```bash
-$ git clone https://github.com/duck8823/minimal-ci.git
-$ cd minimal-ci
+$ git clone https://github.com/duck8823/duci.git
+$ cd duci
 $ docker-compose -f docker-compose.mac.yml up
 ```
 
 #### Add Webhooks to GitHub repository
-Add endpoint of minimal-ci to target repository.  
+Add endpoint of duci to target repository.  
 `https://github.com/<owner>/<repository>/settings/hooks`
 

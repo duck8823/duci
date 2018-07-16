@@ -2,8 +2,8 @@ package github
 
 import (
 	ctx "context"
-	"github.com/duck8823/minimal-ci/infrastructure/context"
-	"github.com/duck8823/minimal-ci/infrastructure/logger"
+	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"

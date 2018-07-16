@@ -1,4 +1,4 @@
-module github.com/duck8823/minimal-ci
+module github.com/duck8823/duci
 
 require (
 	github.com/Microsoft/go-winio v0.4.7

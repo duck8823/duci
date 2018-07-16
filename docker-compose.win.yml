@@ -1,6 +1,6 @@
 version: "2"
 services:
-  minimal-ci:
+  duci:
     build:
       context: .
     ports:
@@ -13,6 +13,6 @@ services:
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
 #  ngrok:
 #    image: wernight/ngrok
-#    command: "ngrok http minimal-ci:8080"
+#    command: "ngrok http duci:8080"
 #    ports:
 #      - 4040:4040

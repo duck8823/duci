@@ -2,7 +2,7 @@ package context_test
 
 import (
 	ct "context"
-	"github.com/duck8823/minimal-ci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/google/uuid"
 	"testing"
 	"time"

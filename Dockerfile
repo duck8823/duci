@@ -3,7 +3,7 @@ MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache git
 
-WORKDIR /go/src/github.com/duck8823/minimal-ci
+WORKDIR /go/src/github.com/duck8823/duci
 
 ADD . .
 
@@ -13,4 +13,4 @@ RUN vgo install
 
 EXPOSE 8080
 
-CMD ["minimal-ci"]
+CMD ["duci"]

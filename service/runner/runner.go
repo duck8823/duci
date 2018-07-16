@@ -1,12 +1,12 @@
 package runner
 
 import (
-	"github.com/duck8823/minimal-ci/infrastructure/archive/tar"
-	"github.com/duck8823/minimal-ci/infrastructure/context"
-	"github.com/duck8823/minimal-ci/infrastructure/docker"
-	"github.com/duck8823/minimal-ci/infrastructure/git"
-	"github.com/duck8823/minimal-ci/infrastructure/logger"
-	"github.com/duck8823/minimal-ci/service/github"
+	"github.com/duck8823/duci/infrastructure/archive/tar"
+	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/docker"
+	"github.com/duck8823/duci/infrastructure/git"
+	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/duck8823/duci/service/github"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
@@ -74,7 +74,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 
 	r.GitHub.CreateCommitStatus(ctx, repo, head, github.PENDING, "started job")
 
-	tarFilePath := path.Join(workDir, "minimal-ci.tar")
+	tarFilePath := path.Join(workDir, "duci.tar")
 	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		return head, errors.WithStack(err)

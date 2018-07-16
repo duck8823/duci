@@ -1,7 +1,7 @@
 package git
 
 import (
-	"github.com/duck8823/minimal-ci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"

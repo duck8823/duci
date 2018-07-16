@@ -3,8 +3,8 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/duck8823/minimal-ci/mocks/mock_github"
-	"github.com/duck8823/minimal-ci/mocks/mock_runner"
+	"github.com/duck8823/duci/mocks/mock_github"
+	"github.com/duck8823/duci/mocks/mock_runner"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-github/github"
 	"io"
