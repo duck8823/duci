@@ -2,7 +2,6 @@ package github
 
 import (
 	ctx "context"
-	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/infrastructure/logger"
 	"github.com/google/go-github/github"
@@ -27,8 +26,7 @@ const (
 
 type Service interface {
 	GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error)
-	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State) error
-	CreateCommitStatusWithError(ctx context.Context, repo Repository, hash plumbing.Hash, err error) error
+	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State, description string) error
 	Clone(ctx context.Context, dir string, repo Repository, ref string) (plumbing.Hash, error)
 }
 
@@ -74,30 +72,14 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	return pr, nil
 }
 
-func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State) error {
-	msg := fmt.Sprintf("task %s", state)
+func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State, description string) error {
+	if len(description) >= 50 {
+		description = string([]rune(description)[:46]) + "..."
+	}
 	taskName := ctx.TaskName()
 	if err := s.createCommitStatus(ctx, repo, hash, &Status{
 		Context:     &taskName,
-		Description: &msg,
-		State:       &state,
-	}); err != nil {
-		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
-func (s *serviceImpl) CreateCommitStatusWithError(ctx context.Context, repo Repository, hash plumbing.Hash, err error) error {
-	msg := err.Error()
-	if len(msg) >= 50 {
-		msg = string([]rune(msg)[:46]) + "..."
-	}
-	state := ERROR
-	taskName := ctx.TaskName()
-	if err := s.createCommitStatus(ctx, repo, hash, &Status{
-		Context:     &taskName,
-		Description: &msg,
+		Description: &description,
 		State:       &state,
 	}); err != nil {
 		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)

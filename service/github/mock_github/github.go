@@ -13,53 +13,6 @@ import (
 	reflect "reflect"
 )
 
-// MockRepository is a mock of Repository interface
-type MockRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockRepositoryMockRecorder
-}
-
-// MockRepositoryMockRecorder is the mock recorder for MockRepository
-type MockRepositoryMockRecorder struct {
-	mock *MockRepository
-}
-
-// NewMockRepository creates a new mock instance
-func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
-	mock := &MockRepository{ctrl: ctrl}
-	mock.recorder = &MockRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
-	return m.recorder
-}
-
-// GetFullName mocks base method
-func (m *MockRepository) GetFullName() string {
-	ret := m.ctrl.Call(m, "GetFullName")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetFullName indicates an expected call of GetFullName
-func (mr *MockRepositoryMockRecorder) GetFullName() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFullName", reflect.TypeOf((*MockRepository)(nil).GetFullName))
-}
-
-// GetSSHURL mocks base method
-func (m *MockRepository) GetSSHURL() string {
-	ret := m.ctrl.Call(m, "GetSSHURL")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetSSHURL indicates an expected call of GetSSHURL
-func (mr *MockRepositoryMockRecorder) GetSSHURL() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSSHURL", reflect.TypeOf((*MockRepository)(nil).GetSSHURL))
-}
-
 // MockService is a mock of Service interface
 type MockService struct {
 	ctrl     *gomock.Controller
@@ -97,27 +50,15 @@ func (mr *MockServiceMockRecorder) GetPullRequest(ctx, repository, num interface
 }
 
 // CreateCommitStatus mocks base method
-func (m *MockService) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State) error {
-	ret := m.ctrl.Call(m, "CreateCommitStatus", ctx, repo, hash, state)
+func (m *MockService) CreateCommitStatus(ctx context.Context, repo github.Repository, hash plumbing.Hash, state github.State, description string) error {
+	ret := m.ctrl.Call(m, "CreateCommitStatus", ctx, repo, hash, state, description)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateCommitStatus indicates an expected call of CreateCommitStatus
-func (mr *MockServiceMockRecorder) CreateCommitStatus(ctx, repo, hash, state interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatus", reflect.TypeOf((*MockService)(nil).CreateCommitStatus), ctx, repo, hash, state)
-}
-
-// CreateCommitStatusWithError mocks base method
-func (m *MockService) CreateCommitStatusWithError(ctx context.Context, repo github.Repository, hash plumbing.Hash, err error) error {
-	ret := m.ctrl.Call(m, "CreateCommitStatusWithError", ctx, repo, hash, err)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateCommitStatusWithError indicates an expected call of CreateCommitStatusWithError
-func (mr *MockServiceMockRecorder) CreateCommitStatusWithError(ctx, repo, hash, err interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatusWithError", reflect.TypeOf((*MockService)(nil).CreateCommitStatusWithError), ctx, repo, hash, err)
+func (mr *MockServiceMockRecorder) CreateCommitStatus(ctx, repo, hash, state, description interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommitStatus", reflect.TypeOf((*MockService)(nil).CreateCommitStatus), ctx, repo, hash, state, description)
 }
 
 // Clone mocks base method

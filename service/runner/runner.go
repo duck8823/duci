@@ -43,19 +43,19 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 		hash := <-commitHash
 		if timeout.Err() != nil {
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
-			r.GitHub.CreateCommitStatusWithError(ctx, repo, <-commitHash, timeout.Err())
+			r.GitHub.CreateCommitStatus(ctx, repo, <-commitHash, github.ERROR, timeout.Err().Error())
 		}
 		return hash, timeout.Err()
 	case err := <-errs:
 		hash := <-commitHash
 		if err == docker.Failure {
 			logger.Error(ctx.UUID(), err.Error())
-			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.FAILURE)
+			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.FAILURE, "failure job")
 		} else if err != nil {
 			logger.Errorf(ctx.UUID(), "%+v", err)
-			r.GitHub.CreateCommitStatusWithError(ctx, repo, hash, err)
+			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.ERROR, err.Error())
 		} else {
-			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.SUCCESS)
+			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.SUCCESS, "success")
 		}
 		return hash, err
 	}
@@ -70,7 +70,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		return plumbing.Hash{}, errors.WithStack(err)
 	}
 
-	r.GitHub.CreateCommitStatus(ctx, repo, head, github.PENDING)
+	r.GitHub.CreateCommitStatus(ctx, repo, head, github.PENDING, "started job")
 
 	tarFilePath := path.Join(workDir, "minimal-ci.tar")
 	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/duck8823/minimal-ci/infrastructure/context"
 	"github.com/duck8823/minimal-ci/service/github"
-	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/http/httptest"
@@ -104,7 +103,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS); err != nil {
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
 			t.Errorf("error must not occured: but got %+v", err)
 		}
 	})
@@ -129,64 +128,8 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			FullName: "duck8823/minimal-ci",
 			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
 		}
-		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS); err == nil {
+		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
 			t.Error("errot must occred. but got nil")
-		}
-	})
-}
-
-func TestService_CreateCommitStatusWithError(t *testing.T) {
-	t.Run("when github server returns status ok", func(t *testing.T) {
-		mux := http.NewServeMux()
-		mux.Handle("/repos/duck8823/minimal-ci/statuses/0000000000000000000000000000000000000000", &MockHandler{
-			Status: 200,
-		})
-
-		ts := httptest.NewServer(mux)
-		defer ts.Close()
-
-		baseUrl, err := url.Parse(ts.URL + "/")
-		if err != nil {
-			t.Fatalf("error occured. %+v", err)
-		}
-
-		s, err := github.New("")
-		if err != nil {
-			t.Fatalf("error occured. %+v", err)
-		}
-		s.Client.BaseURL = baseUrl
-
-		repo := &MockRepo{
-			FullName: "duck8823/minimal-ci",
-			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
-		}
-		if err := s.CreateCommitStatusWithError(context.New("test/task"), repo, plumbing.Hash{}, errors.New("Hello Error")); err != nil {
-			t.Errorf("error must not occured: but got %+v", err)
-		}
-	})
-
-	t.Run("when github server returns status not found", func(t *testing.T) {
-		mux := http.NewServeMux()
-		ts := httptest.NewServer(mux)
-		defer ts.Close()
-
-		baseUrl, err := url.Parse(ts.URL + "/")
-		if err != nil {
-			t.Fatalf("error occured. %+v", err)
-		}
-
-		s, err := github.New("")
-		if err != nil {
-			t.Fatalf("error occured. %+v", err)
-		}
-		s.Client.BaseURL = baseUrl
-
-		repo := &MockRepo{
-			FullName: "duck8823/minimal-ci",
-			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
-		}
-		if err := s.CreateCommitStatusWithError(context.New("test/task"), repo, plumbing.Hash{}, errors.New("Hello Error")); err == nil {
-			t.Error("error must occurd. but got nil")
 		}
 	})
 }
