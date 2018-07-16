@@ -16,22 +16,13 @@ import (
 	"path"
 )
 
-type Repository interface {
-	GetFullName() string
-	GetSSHURL() string
-}
-
-type PullRequest = github.PullRequest
-
-type Status = github.RepoStatus
-
 type State = string
 
 const (
-	PENDING = "pending"
-	SUCCESS = "success"
-	ERROR   = "error"
-	FAILURE = "failure"
+	PENDING State = "pending"
+	SUCCESS State = "success"
+	ERROR   State = "error"
+	FAILURE State = "failure"
 )
 
 type Service interface {
@@ -60,7 +51,7 @@ func New(token string) (*serviceImpl, error) {
 	return &serviceImpl{Client: github.NewClient(tc), auth: auth}, nil
 }
 
-func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository, num int) (*github.PullRequest, error) {
+func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error) {
 	name := &RepositoryName{repository.GetFullName()}
 	owner, err := name.Owner()
 	if err != nil {
