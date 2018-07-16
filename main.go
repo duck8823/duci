@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/duck8823/minimal-ci/infrastructure/logger"
-	"github.com/duck8823/minimal-ci/presentation/controller"
+	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/duck8823/duci/presentation/controller"
 	"github.com/google/uuid"
 	"net/http"
 	"os"

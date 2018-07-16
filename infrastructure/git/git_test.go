@@ -2,8 +2,8 @@ package git_test
 
 import (
 	"fmt"
-	"github.com/duck8823/minimal-ci/infrastructure/context"
-	"github.com/duck8823/minimal-ci/infrastructure/git"
+	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/git"
 	"os"
 	"path"
 	"testing"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestSshGitClient_Clone(t *testing.T) {
-	tempDir := path.Join(os.TempDir(), fmt.Sprintf("minimal-ci_test_%v", time.Now().Unix()))
+	tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
 	if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -24,7 +24,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 	if _, err := s.Clone(
 		context.New("test/task"),
 		tempDir,
-		"git@github.com:duck8823/minimal-ci.git",
+		"git@github.com:duck8823/duci.git",
 		"refs/heads/master",
 	); err != nil {
 		t.Errorf("must not error. %+v", err)

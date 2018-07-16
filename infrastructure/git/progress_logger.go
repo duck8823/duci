@@ -1,7 +1,7 @@
 package git
 
 import (
-	"github.com/duck8823/minimal-ci/infrastructure/logger"
+	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"regexp"
 )

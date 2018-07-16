@@ -2,8 +2,8 @@ package github_test
 
 import (
 	"encoding/json"
-	"github.com/duck8823/minimal-ci/infrastructure/context"
-	"github.com/duck8823/minimal-ci/service/github"
+	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/service/github"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/http/httptest"
@@ -37,7 +37,7 @@ func (r *MockRepo) GetSSHURL() string {
 
 func TestService_GetPullRequest(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.Handle("/repos/duck8823/minimal-ci/pulls/5", &MockHandler{
+	mux.Handle("/repos/duck8823/duci/pulls/5", &MockHandler{
 		Body: struct {
 			Id int64 `json:"id"`
 		}{Id: 19},
@@ -58,8 +58,8 @@ func TestService_GetPullRequest(t *testing.T) {
 	s.Client.BaseURL = baseUrl
 
 	repo := &MockRepo{
-		FullName: "duck8823/minimal-ci",
-		SSHURL:   "git@github.com:duck8823/minimal-ci.git",
+		FullName: "duck8823/duci",
+		SSHURL:   "git@github.com:duck8823/duci.git",
 	}
 	pr, err := s.GetPullRequest(context.New("test/task"), repo, 5)
 	if err != nil {
@@ -77,7 +77,7 @@ func TestService_GetPullRequest(t *testing.T) {
 func TestService_CreateCommitStatus(t *testing.T) {
 	t.Run("when github server returns status ok", func(t *testing.T) {
 		mux := http.NewServeMux()
-		mux.Handle("/repos/duck8823/minimal-ci/statuses/0000000000000000000000000000000000000000", &MockHandler{
+		mux.Handle("/repos/duck8823/duci/statuses/0000000000000000000000000000000000000000", &MockHandler{
 			Status: 200,
 		})
 
@@ -96,8 +96,8 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
-			FullName: "duck8823/minimal-ci",
-			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
+			FullName: "duck8823/duci",
+			SSHURL:   "git@github.com:duck8823/duci.git",
 		}
 		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
 			t.Errorf("error must not occured: but got %+v", err)
@@ -121,8 +121,8 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		s.Client.BaseURL = baseUrl
 
 		repo := &MockRepo{
-			FullName: "duck8823/minimal-ci",
-			SSHURL:   "git@github.com:duck8823/minimal-ci.git",
+			FullName: "duck8823/duci",
+			SSHURL:   "git@github.com:duck8823/duci.git",
 		}
 		if err := s.CreateCommitStatus(context.New("test/task"), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
 			t.Error("errot must occred. but got nil")

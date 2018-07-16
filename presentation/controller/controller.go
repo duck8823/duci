@@ -3,11 +3,11 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/minimal-ci/infrastructure/context"
-	"github.com/duck8823/minimal-ci/infrastructure/docker"
-	"github.com/duck8823/minimal-ci/infrastructure/logger"
-	"github.com/duck8823/minimal-ci/service/github"
-	"github.com/duck8823/minimal-ci/service/runner"
+	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/docker"
+	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/duck8823/duci/service/github"
+	"github.com/duck8823/duci/service/runner"
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -26,7 +26,7 @@ type jobController struct {
 }
 
 func New() (*jobController, error) {
-	name := "minimal-ci"
+	name := "duci"
 
 	githubService, err := github.NewWithEnv()
 	if err != nil {
