@@ -16,6 +16,21 @@ import (
 	"testing"
 )
 
+func TestNew(t *testing.T) {
+	t.Run("with wrong docker environment", func(t *testing.T) {
+		// given
+		os.Setenv("DOCKER_HOST", "hoge")
+
+		// expect
+		if _, err := docker.New(); err == nil {
+			t.Errorf("error must occur")
+		}
+
+		// cleanup
+		os.Unsetenv("DOCKER_HOST")
+	})
+}
+
 func TestClient_Build(t *testing.T) {
 	// setup
 	cli, err := docker.New()
@@ -68,12 +83,15 @@ func TestClient_Run(t *testing.T) {
 	}
 
 	t.Run("without environments", func(t *testing.T) {
+		// setup
+		env := docker.Environments{}
+
 		t.Run("without command", func(t *testing.T) {
 			// given
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), docker.Environments{}, "hello-world")
+			containerId, err := cli.Run(context.New("test/task"), env, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -90,7 +108,7 @@ func TestClient_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), docker.Environments{}, "centos", "echo", "Hello-world")
+			containerId, err := cli.Run(context.New("test/task"), env, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -99,6 +117,26 @@ func TestClient_Run(t *testing.T) {
 			// then
 			if strings.Contains(logs, "hello-world") {
 				t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
+			}
+		})
+
+		t.Run("with missing command", func(t *testing.T) {
+			// given
+			imagePull(t, "centos:latest")
+
+			// expect
+			if _, err := cli.Run(context.New("test/task"), env, "centos", "missing_command"); err == nil {
+				t.Error("error must occur")
+			}
+		})
+
+		t.Run("when exit code is not zero", func(t *testing.T) {
+			// given
+			imagePull(t, "centos:latest")
+
+			// expect
+			if _, err := cli.Run(context.New("test/task"), env, "centos", "false"); err != docker.Failure {
+				t.Errorf("error must be docker.Failure, but got %+v", err)
 			}
 		})
 	})
