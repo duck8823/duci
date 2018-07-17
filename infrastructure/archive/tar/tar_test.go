@@ -22,8 +22,8 @@ func TestCreate(t *testing.T) {
 		// given
 		archiveDir := path.Join(testDir, "archive")
 
-		createFile(t, path.Join(archiveDir, "file"), "this is file.")
-		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
+		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0400)
+		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.", 0400)
 
 		if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
 			t.Fatalf("%+v", err)
@@ -63,7 +63,7 @@ func TestCreate(t *testing.T) {
 		os.RemoveAll(testDir)
 	})
 
-	t.Run("with wrong path", func(t *testing.T) {
+	t.Run("with wrong directory path", func(t *testing.T) {
 		// setup
 		testDir := createTestDir(t)
 
@@ -91,12 +91,7 @@ func TestCreate(t *testing.T) {
 		// given
 		archiveDir := path.Join(testDir, "archive")
 
-		createFile(t, path.Join(archiveDir, "file"), "this is file.")
-		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
-
-		if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
-			t.Fatalf("%+v", err)
-		}
+		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0400)
 
 		output := path.Join(testDir, "output.tar")
 		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
@@ -104,6 +99,31 @@ func TestCreate(t *testing.T) {
 			t.Fatalf("%+v", err)
 		}
 		tarFile.Close()
+
+		// expect
+		if err := tar.Create(archiveDir, tarFile); err == nil {
+			t.Error("error must occur")
+		}
+
+		// cleanup
+		os.RemoveAll(testDir)
+	})
+
+	t.Run("with wrong permission in target", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
+
+		// given
+		archiveDir := path.Join(testDir, "archive")
+
+		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0000)
+
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer tarFile.Close()
 
 		// expect
 		if err := tar.Create(archiveDir, tarFile); err == nil {
@@ -160,7 +180,7 @@ func createTestDir(t *testing.T) string {
 	return tempDir
 }
 
-func createFile(t *testing.T, name string, content string) {
+func createFile(t *testing.T, name string, content string, perm os.FileMode) {
 	t.Helper()
 
 	paths := strings.Split(name, "/")
@@ -169,7 +189,7 @@ func createFile(t *testing.T, name string, content string) {
 		t.Fatalf("%+v", err)
 	}
 
-	file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0400)
+	file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, perm)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
