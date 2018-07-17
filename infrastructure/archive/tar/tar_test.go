@@ -3,60 +3,116 @@ package tar_test
 import (
 	archiveTar "archive/tar"
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
+	"github.com/duck8823/duci/infrastructure/archive/tar"
+	"reflect"
 )
 
 func TestCreate(t *testing.T) {
-	testDir := createTestDir(t)
-	archiveDir := path.Join(testDir, "archive")
+	t.Run("with correct target", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
 
-	createFile(t, path.Join(archiveDir, "file"), "this is file.")
-	createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
+		// given
+		archiveDir := path.Join(testDir, "archive")
 
-	if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
-		t.Fatalf("%+v", err)
-	}
+		createFile(t, path.Join(archiveDir, "file"), "this is file.")
+		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
 
-	output := path.Join(testDir, "output.tar")
-	tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
-	if err != nil {
-		t.Fatalf("%+v", err)
-	}
-	defer tarFile.Close()
+		if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
 
-	if err := tar.Create(archiveDir, tarFile); err != nil {
-		t.Fatalf("%+v", err)
-	}
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer tarFile.Close()
 
-	file, err := os.Open(output)
-	if err != nil {
-		t.Fatalf("%+v", err)
-	}
+		// and
+		expected := Files{
+			{
+				Name:    "dir/file",
+				Content: "this is file in the dir.",
+			},
+			{
+				Name:    "file",
+				Content: "this is file.",
+			},
+		}
 
-	actual := readTarArchive(t, file)
+		// when
+		if err := tar.Create(archiveDir, tarFile); err != nil {
+			t.Fatalf("%+v", err)
+		}
+		actual := readTarArchive(t, output)
 
-	expect := Files{
-		{
-			Name:    "dir/file",
-			Content: "this is file in the dir.",
-		},
-		{
-			Name:    "file",
-			Content: "this is file.",
-		},
-	}
+		// then
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("wrong tar contents.\nactual: %+v\nwont: %+v", actual, expected)
+		}
 
-	if !reflect.DeepEqual(actual, expect) {
-		t.Errorf("wrong tar contents.\nactual: %+v\nwont: %+v", actual, expect)
-	}
+		// cleanup
+		os.RemoveAll(testDir)
+	})
+
+	t.Run("with wrong path", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
+
+		// given
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer tarFile.Close()
+
+		// expect
+		if err := tar.Create("/path/to/wrong/dir", tarFile); err == nil {
+			t.Error("error must occur")
+		}
+
+		// cleanup
+		os.RemoveAll(testDir)
+	})
+
+	t.Run("with closed output", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
+
+		// given
+		archiveDir := path.Join(testDir, "archive")
+
+		createFile(t, path.Join(archiveDir, "file"), "this is file.")
+		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
+
+		if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		tarFile.Close()
+
+		// expect
+		if err := tar.Create(archiveDir, tarFile); err == nil {
+			t.Error("error must occur")
+		}
+
+		// cleanup
+		os.RemoveAll(testDir)
+	})
 }
 
 type Files []struct {
@@ -64,10 +120,15 @@ type Files []struct {
 	Content string
 }
 
-func readTarArchive(t *testing.T, reader io.Reader) Files {
+func readTarArchive(t *testing.T, output string) Files {
+	file, err := os.Open(output)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
 	var files Files
 
-	tarReader := archiveTar.NewReader(reader)
+	tarReader := archiveTar.NewReader(file)
 	for {
 		header, err := tarReader.Next()
 		if err == io.EOF {
