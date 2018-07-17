@@ -3,15 +3,15 @@ package tar_test
 import (
 	archiveTar "archive/tar"
 	"fmt"
+	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
-	"github.com/duck8823/duci/infrastructure/archive/tar"
-	"reflect"
 )
 
 func TestCreate(t *testing.T) {
