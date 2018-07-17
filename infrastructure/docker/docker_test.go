@@ -34,9 +34,9 @@ func TestClient_Build(t *testing.T) {
 			t.Fatalf("error occured: %+v", err)
 		}
 
-		images := DockerImages(t)
+		images := dockerImages(t)
 		fullTag := fmt.Sprintf("%s:latest", tag)
-		if !Contains(images, fullTag) {
+		if !contains(images, fullTag) {
 			t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
 		}
 	})
@@ -63,12 +63,12 @@ func TestClient_Run(t *testing.T) {
 
 	t.Run("without environments", func(t *testing.T) {
 		t.Run("without command", func(t *testing.T) {
-			ImagePull(t, "hello-world:latest")
+			imagePull(t, "hello-world:latest")
 			containerId, err := cli.Run(context.New("test/task"), docker.Environments{}, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
-			logs := ContainerLogsString(t, containerId)
+			logs := containerLogsString(t, containerId)
 
 			if !strings.Contains(logs, "Hello from Docker!") {
 				t.Error("logs must contains `Hello from Docker!`")
@@ -76,12 +76,12 @@ func TestClient_Run(t *testing.T) {
 		})
 
 		t.Run("with command", func(t *testing.T) {
-			ImagePull(t, "centos:latest")
+			imagePull(t, "centos:latest")
 			containerId, err := cli.Run(context.New("test/task"), docker.Environments{}, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
-			logs := ContainerLogsString(t, containerId)
+			logs := containerLogsString(t, containerId)
 
 			if strings.Contains(logs, "hello-world") {
 				t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
@@ -90,12 +90,12 @@ func TestClient_Run(t *testing.T) {
 	})
 
 	t.Run("with environments", func(t *testing.T) {
-		ImagePull(t, "centos:latest")
+		imagePull(t, "centos:latest")
 		containerId, err := cli.Run(context.New("test/task"), docker.Environments{"ENV": "hello-world"}, "centos", "sh", "-c", "echo $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
-		logs := ContainerLogsString(t, containerId)
+		logs := containerLogsString(t, containerId)
 
 		if !strings.Contains(logs, "hello-world") {
 			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
@@ -110,15 +110,15 @@ func TestClient_Rm(t *testing.T) {
 	}
 
 	tag := "alpine:3.5"
-	ImagePull(t, tag)
-	containerId := ContainerCreate(t, tag)
+	imagePull(t, tag)
+	containerId := containerCreate(t, tag)
 
 	if err := cli.Rm(context.New("test/task"), containerId); err != nil {
 		t.Fatalf("error occured: %+v", err)
 	}
 
-	containers := DockerContainers(t)
-	if Contains(containers, tag) {
+	containers := dockerContainers(t)
+	if contains(containers, tag) {
 		t.Errorf("containers must not contains id. containers: %+v, tag: %+v", containers, containerId)
 	}
 }
@@ -130,14 +130,14 @@ func TestClient_Rmi(t *testing.T) {
 	}
 
 	tag := "alpine:2.6"
-	ImagePull(t, tag)
+	imagePull(t, tag)
 
 	if err := cli.Rmi(context.New("test/task"), tag); err != nil {
 		t.Fatalf("error occured: %+v", err)
 	}
 
-	images := DockerImages(t)
-	if Contains(images, tag) {
+	images := dockerImages(t)
+	if contains(images, tag) {
 		t.Errorf("images must not contains tag. images: %+v, tag: %+v", images, tag)
 	}
 }
@@ -173,7 +173,7 @@ func TestEnvironments_ToArray(t *testing.T) {
 	}
 }
 
-func Contains(strings []string, str string) bool {
+func contains(strings []string, str string) bool {
 	for _, s := range strings {
 		if s == str {
 			return true
@@ -182,7 +182,7 @@ func Contains(strings []string, str string) bool {
 	return false
 }
 
-func DockerImages(t *testing.T) []string {
+func dockerImages(t *testing.T) []string {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
@@ -203,7 +203,7 @@ func DockerImages(t *testing.T) []string {
 	return names
 }
 
-func DockerContainers(t *testing.T) []string {
+func dockerContainers(t *testing.T) []string {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
@@ -223,7 +223,7 @@ func DockerContainers(t *testing.T) []string {
 	return ids
 }
 
-func ContainerLogsString(t *testing.T, containerId string) string {
+func containerLogsString(t *testing.T, containerId string) string {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
@@ -247,7 +247,7 @@ func ContainerLogsString(t *testing.T, containerId string) string {
 	return string(log)
 }
 
-func ImagePull(t *testing.T, ref string) {
+func imagePull(t *testing.T, ref string) {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
@@ -264,13 +264,13 @@ func ImagePull(t *testing.T, ref string) {
 		t.Fatalf("error occured. %+v", err)
 	}
 
-	images := DockerImages(t)
-	if !Contains(images, ref) {
+	images := dockerImages(t)
+	if !contains(images, ref) {
 		t.Fatalf("docker images must be contains %s", ref)
 	}
 }
 
-func ContainerCreate(t *testing.T, ref string) string {
+func containerCreate(t *testing.T, ref string) string {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
