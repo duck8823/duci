@@ -15,11 +15,11 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	testDir := CreateTestDir(t)
+	testDir := createTestDir(t)
 	archiveDir := path.Join(testDir, "archive")
 
-	CreateFile(t, path.Join(archiveDir, "file"), "this is file.")
-	CreateFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
+	createFile(t, path.Join(archiveDir, "file"), "this is file.")
+	createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
 
 	if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
 		t.Fatalf("%+v", err)
@@ -41,7 +41,7 @@ func TestCreate(t *testing.T) {
 		t.Fatalf("%+v", err)
 	}
 
-	actual := ReadTarArchive(t, file)
+	actual := readTarArchive(t, file)
 
 	expect := Files{
 		{
@@ -64,7 +64,7 @@ type Files []struct {
 	Content string
 }
 
-func ReadTarArchive(t *testing.T, reader io.Reader) Files {
+func readTarArchive(t *testing.T, reader io.Reader) Files {
 	var files Files
 
 	tarReader := archiveTar.NewReader(reader)
@@ -88,7 +88,7 @@ func ReadTarArchive(t *testing.T, reader io.Reader) Files {
 	return files
 }
 
-func CreateTestDir(t *testing.T) string {
+func createTestDir(t *testing.T) string {
 	t.Helper()
 
 	tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
@@ -99,7 +99,7 @@ func CreateTestDir(t *testing.T) string {
 	return tempDir
 }
 
-func CreateFile(t *testing.T, name string, content string) {
+func createFile(t *testing.T, name string, content string) {
 	t.Helper()
 
 	paths := strings.Split(name, "/")
