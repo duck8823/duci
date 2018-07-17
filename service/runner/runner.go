@@ -45,7 +45,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 		hash := <-commitHash
 		if timeout.Err() != nil {
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
-			r.GitHub.CreateCommitStatus(ctx, repo, <-commitHash, github.ERROR, timeout.Err().Error())
+			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.ERROR, timeout.Err().Error())
 		}
 		return hash, timeout.Err()
 	case err := <-errs:
