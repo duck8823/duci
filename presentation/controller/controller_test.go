@@ -1,10 +1,11 @@
-package controller
+package controller_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"github.com/duck8823/duci/mocks/mock_github"
 	"github.com/duck8823/duci/mocks/mock_runner"
+	"github.com/duck8823/duci/presentation/controller"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-github/github"
 	"io"
@@ -14,12 +15,13 @@ import (
 )
 
 func TestJobController_ServeHTTP(t *testing.T) {
+	// setup
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	t.Run("with correct payload", func(t *testing.T) {
-
 		t.Run("when issue_comment", func(t *testing.T) {
+			// given
 			runner := mock_runner.NewMockRunner(ctrl)
 			runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
@@ -28,146 +30,152 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				Head: &github.PullRequestBranch{},
 			}, nil)
 
-			handler := &jobController{runner: runner, github: githubService}
+			// and
+			handler := &controller.JobController{Runner: runner, GitHub: githubService}
 
 			s := httptest.NewServer(handler)
 			defer s.Close()
 
-			body := CreateBody(t, "ci test")
+			// and
+			payload := createIssueCommentPayload(t, "ci test")
 
-			req := httptest.NewRequest("POST", "/", body)
+			req := httptest.NewRequest("POST", "/", payload)
 			req.Header.Set("X-GitHub-Event", "issue_comment")
 			rec := httptest.NewRecorder()
 
+			// when
 			handler.ServeHTTP(rec, req)
 
-			actual := rec.Code
-			expected := 200
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
+			// then
+			if rec.Code != 200 {
+				t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
 			}
 		})
 
 		t.Run("when push", func(t *testing.T) {
-			mock := mock_runner.NewMockRunner(ctrl)
-			mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+			// given
+			runner := mock_runner.NewMockRunner(ctrl)
+			runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-			handler := &jobController{runner: mock}
+			// and
+			handler := &controller.JobController{Runner: runner}
 
 			s := httptest.NewServer(handler)
 			defer s.Close()
 
-			repoName := "test/repo"
-			ref := "ref"
-			body, err := json.Marshal(&github.PushEvent{
-				Repo: &github.PushEventRepository{
-					FullName: &repoName,
-				},
-				Ref: &ref,
-			})
-			if err != nil {
-				t.Fatalf("error occured: %+v", err)
-			}
+			// and
+			payload := createPushPayload(t, "test/repo", "master")
 
-			req := httptest.NewRequest("POST", "/", bytes.NewReader(body))
+			req := httptest.NewRequest("POST", "/", payload)
 			req.Header.Set("X-GitHub-Event", "push")
 			rec := httptest.NewRecorder()
 
+			// when
 			handler.ServeHTTP(rec, req)
 
-			actual := rec.Code
-			expected := 200
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
+			// then
+			if rec.Code != 200 {
+				t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
 			}
 		})
 
 	})
 
 	t.Run("with invalid payload", func(t *testing.T) {
-		mock := mock_runner.NewMockRunner(ctrl)
-		mock.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+		// setup
+		runner := mock_runner.NewMockRunner(ctrl)
+		runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-		handler := &jobController{runner: mock}
+		handler := &controller.JobController{Runner: runner}
 
 		s := httptest.NewServer(handler)
 		defer s.Close()
 
 		t.Run("with invalid header", func(t *testing.T) {
-			body := CreateBody(t, "ci test")
+			// given
+			body := createIssueCommentPayload(t, "ci test")
 
+			// and
 			req := httptest.NewRequest("POST", "/", body)
 			req.Header.Set("X-GitHub-Event", "hogefuga")
 			rec := httptest.NewRecorder()
 
+			// when
 			handler.ServeHTTP(rec, req)
 
-			actual := rec.Code
-			expected := 500
-			if actual != expected {
-				t.Errorf("status must equal %+v, but got %+v", expected, actual)
+			// then
+			if rec.Code != 500 {
+				t.Errorf("status must equal %+v, but got %+v", 500, rec.Code)
 			}
 		})
 
 		t.Run("with issue_comment", func(t *testing.T) {
+			// given
 			event := "issue_comment"
 
 			t.Run("without comment started ci", func(t *testing.T) {
-				body := CreateBody(t, "test")
+				// given
+				body := createIssueCommentPayload(t, "test")
 
+				// and
 				req := httptest.NewRequest("POST", "/", body)
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 
+				// when
 				handler.ServeHTTP(rec, req)
 
-				actual := rec.Code
-				expected := 200
-				if actual != expected {
-					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				// then
+				if rec.Code != 200 {
+					t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
 				}
 			})
 
 			t.Run("with invalid body", func(t *testing.T) {
+				// given
 				body := strings.NewReader("Invalid JSON format.")
 
+				// and
 				req := httptest.NewRequest("POST", "/", body)
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 
+				// when
 				handler.ServeHTTP(rec, req)
 
-				actual := rec.Code
-				expected := 500
-				if actual != expected {
-					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				// then
+				if rec.Code != 500 {
+					t.Errorf("status must equal %+v, but got %+v", 500, rec.Code)
 				}
 			})
 		})
 
 		t.Run("with push", func(t *testing.T) {
+			// given
 			event := "push"
 
 			t.Run("with invalid body", func(t *testing.T) {
+				// given
 				body := strings.NewReader("Invalid JSON format.")
 
+				// and
 				req := httptest.NewRequest("POST", "/", body)
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 
+				// when
 				handler.ServeHTTP(rec, req)
 
-				actual := rec.Code
-				expected := 500
-				if actual != expected {
-					t.Errorf("status must equal %+v, but got %+v", expected, actual)
+				// then
+				if rec.Code != 500 {
+					t.Errorf("status must equal %+v, but got %+v", 500, rec.Code)
 				}
 			})
 		})
 	})
 }
 
-func CreateBody(t *testing.T, comment string) io.Reader {
+func createIssueCommentPayload(t *testing.T, comment string) io.Reader {
 	t.Helper()
 
 	number := 1
@@ -183,6 +191,22 @@ func CreateBody(t *testing.T, comment string) io.Reader {
 	payload, err := json.Marshal(event)
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
+	}
+	return bytes.NewReader(payload)
+}
+
+func createPushPayload(t *testing.T, repoName, ref string) io.Reader {
+	t.Helper()
+
+	event := github.PushEvent{
+		Repo: &github.PushEventRepository{
+			FullName: &repoName,
+		},
+		Ref: &ref,
+	}
+	payload, err := json.Marshal(event)
+	if err != nil {
+		t.Fatalf("error occured: %+v", err)
 	}
 	return bytes.NewReader(payload)
 }
