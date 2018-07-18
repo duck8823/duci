@@ -31,7 +31,7 @@ func TestNew(t *testing.T) {
 	})
 }
 
-func TestClient_Build(t *testing.T) {
+func TestClientImpl_Build(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
@@ -75,7 +75,7 @@ func TestClient_Build(t *testing.T) {
 	})
 }
 
-func TestClient_Run(t *testing.T) {
+func TestClientImpl_Run(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
@@ -159,7 +159,7 @@ func TestClient_Run(t *testing.T) {
 	})
 }
 
-func TestClient_Rm(t *testing.T) {
+func TestClientImpl_Rm(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
@@ -184,7 +184,7 @@ func TestClient_Rm(t *testing.T) {
 	}
 }
 
-func TestClient_Rmi(t *testing.T) {
+func TestClientImpl_Rmi(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {

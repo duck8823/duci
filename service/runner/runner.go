@@ -22,7 +22,7 @@ type Runner interface {
 type DockerRunner struct {
 	Git         git.Client
 	GitHub      github.Service
-	Docker      *docker.Client
+	Docker      docker.Client
 	Name        string
 	BaseWorkDir string
 }
