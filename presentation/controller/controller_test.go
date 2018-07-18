@@ -8,6 +8,7 @@ import (
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-github/github"
+	"github.com/pkg/errors"
 	"io"
 	"net/http/httptest"
 	"strings"
@@ -22,34 +23,71 @@ func TestJobController_ServeHTTP(t *testing.T) {
 	t.Run("with correct payload", func(t *testing.T) {
 		t.Run("when issue_comment", func(t *testing.T) {
 			// given
-			runner := mock_runner.NewMockRunner(ctrl)
-			runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+			event := "issue_comment"
 
-			githubService := mock_github.NewMockService(ctrl)
-			githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).Return(&github.PullRequest{
-				Head: &github.PullRequestBranch{},
-			}, nil)
+			t.Run("when github service returns no error", func(t *testing.T) {
+				// given
+				runner := mock_runner.NewMockRunner(ctrl)
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-			// and
-			handler := &controller.JobController{Runner: runner, GitHub: githubService}
+				githubService := mock_github.NewMockService(ctrl)
+				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
+					Return(&github.PullRequest{
+						Head: &github.PullRequestBranch{},
+					}, nil)
 
-			s := httptest.NewServer(handler)
-			defer s.Close()
+				// and
+				handler := &controller.JobController{Runner: runner, GitHub: githubService}
 
-			// and
-			payload := createIssueCommentPayload(t, "ci test")
+				s := httptest.NewServer(handler)
+				defer s.Close()
 
-			req := httptest.NewRequest("POST", "/", payload)
-			req.Header.Set("X-GitHub-Event", "issue_comment")
-			rec := httptest.NewRecorder()
+				// and
+				payload := createIssueCommentPayload(t, "ci test")
 
-			// when
-			handler.ServeHTTP(rec, req)
+				req := httptest.NewRequest("POST", "/", payload)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
 
-			// then
-			if rec.Code != 200 {
-				t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
-			}
+				// when
+				handler.ServeHTTP(rec, req)
+
+				// then
+				if rec.Code != 200 {
+					t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
+				}
+			})
+
+			t.Run("when github service return error", func(t *testing.T) {
+				// given
+				runner := mock_runner.NewMockRunner(ctrl)
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+
+				githubService := mock_github.NewMockService(ctrl)
+				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
+					Return(nil, errors.New("error occur"))
+
+				// and
+				handler := &controller.JobController{Runner: runner, GitHub: githubService}
+
+				s := httptest.NewServer(handler)
+				defer s.Close()
+
+				// and
+				payload := createIssueCommentPayload(t, "ci test")
+
+				req := httptest.NewRequest("POST", "/", payload)
+				req.Header.Set("X-GitHub-Event", event)
+				rec := httptest.NewRecorder()
+
+				// when
+				handler.ServeHTTP(rec, req)
+
+				// then
+				if rec.Code != 500 {
+					t.Errorf("status must equal %+v, but got %+v", 500, rec.Code)
+				}
+			})
 		})
 
 		t.Run("when push", func(t *testing.T) {
@@ -78,7 +116,6 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
 			}
 		})
-
 	})
 
 	t.Run("with invalid payload", func(t *testing.T) {
