@@ -30,7 +30,7 @@ func TestProgressLogger_Write(t *testing.T) {
 	progress.Write([]byte("hoge\rfuga"))
 	writer.Close()
 
-	actual := readLogLine(t, reader)
+	actual := readLogTrimmedTime(t, reader)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m hoge"
 
 	// then
@@ -39,7 +39,7 @@ func TestProgressLogger_Write(t *testing.T) {
 	}
 }
 
-func readLogLine(t *testing.T, reader io.Reader) string {
+func readLogTrimmedTime(t *testing.T, reader io.Reader) string {
 	t.Helper()
 
 	bytes, err := ioutil.ReadAll(reader)
