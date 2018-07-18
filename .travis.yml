@@ -17,7 +17,7 @@ before_script:
   # using vgo for resolve dependencies
   - go get golang.org/x/vgo
 script:
-  - vgo test -v -coverprofile=cover.out ./...
-  - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go,mocks/*/*
+  - vgo test -coverprofile cover.out $(vgo list ./... | grep -v mocks)
+  - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go
 after_script:
   - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
