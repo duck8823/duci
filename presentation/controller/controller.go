@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/duck8823/duci/infrastructure/context"
-	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/service/github"
 	"github.com/duck8823/duci/service/runner"
@@ -12,42 +11,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"net/http"
-	"os"
-	"path"
 	"regexp"
 	"strings"
 )
 
 var SKIP_BUILD = errors.New("build skip")
 
-type jobController struct {
-	runner runner.Runner
-	github github.Service
+type JobController struct {
+	Runner runner.Runner
+	GitHub github.Service
 }
 
-func New() (*jobController, error) {
-	name := "duci"
-
-	githubService, err := github.NewWithEnv()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	dockerClient, err := docker.New()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	dockerRunner := &runner.DockerRunner{
-		Name:        name,
-		BaseWorkDir: path.Join(os.TempDir(), name),
-		GitHub:      githubService,
-		Docker:      dockerClient,
-	}
-
-	return &jobController{dockerRunner, githubService}, nil
-}
-
-func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestId := uuid.New()
 
 	// Trigger build
@@ -73,7 +48,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go c.runner.Run(ctx, repo, ref, command...)
+		go c.Runner.Run(ctx, repo, ref, command...)
 	case "push":
 		event := &go_github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
@@ -81,7 +56,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go c.runner.Run(context.New("push"), event.GetRepo(), event.GetRef())
+		go c.Runner.Run(context.New("push"), event.GetRepo(), event.GetRef())
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
@@ -93,7 +68,7 @@ func (c *jobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (c *jobController) parseIssueComment(event *go_github.IssueCommentEvent) (ctx context.Context, repo *go_github.Repository, ref string, command []string, err error) {
+func (c *JobController) parseIssueComment(event *go_github.IssueCommentEvent) (ctx context.Context, repo *go_github.Repository, ref string, command []string, err error) {
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
 		return nil, nil, "", nil, SKIP_BUILD
 	}
@@ -101,7 +76,7 @@ func (c *jobController) parseIssueComment(event *go_github.IssueCommentEvent) (c
 	command = strings.Split(phrase, " ")
 	ctx = context.New(fmt.Sprintf("pr/%s", command[0]))
 
-	pr, err := c.github.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
+	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
 		return nil, nil, "", nil, errors.WithStack(err)
 	}

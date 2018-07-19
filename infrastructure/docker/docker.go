@@ -27,19 +27,26 @@ func (e Environments) ToArray() []string {
 
 var Failure = errors.New("Task Failure")
 
-type Client struct {
+type Client interface {
+	Build(ctx context.Context, file io.Reader, tag string) error
+	Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error)
+	Rm(ctx context.Context, containerId string) error
+	Rmi(ctx context.Context, tag string) error
+}
+
+type clientImpl struct {
 	moby *moby.Client
 }
 
-func New() (*Client, error) {
+func New() (Client, error) {
 	cli, err := moby.NewEnvClient()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &Client{moby: cli}, nil
+	return &clientImpl{moby: cli}, nil
 }
 
-func (c *Client) Build(ctx context.Context, file io.Reader, tag string) error {
+func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string) error {
 	resp, err := c.moby.ImageBuild(ctx, file, types.ImageBuildOptions{Tags: []string{tag}})
 	if err != nil {
 		return errors.WithStack(err)
@@ -50,7 +57,7 @@ func (c *Client) Build(ctx context.Context, file io.Reader, tag string) error {
 	return nil
 }
 
-func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error) {
+func (c *clientImpl) Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error) {
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image: tag,
 		Env:   env.ToArray(),
@@ -105,14 +112,14 @@ func (c *Client) Run(ctx context.Context, env Environments, tag string, cmd ...s
 	return con.ID, nil
 }
 
-func (c *Client) Rm(ctx context.Context, containerId string) error {
+func (c *clientImpl) Rm(ctx context.Context, containerId string) error {
 	if err := c.moby.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func (c *Client) Rmi(ctx context.Context, tag string) error {
+func (c *clientImpl) Rmi(ctx context.Context, tag string) error {
 	if _, err := c.moby.ImageRemove(ctx, tag, types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}

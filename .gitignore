@@ -4,3 +4,5 @@
 # golang
 duci
 go.sum
+cover.out
+cover.html

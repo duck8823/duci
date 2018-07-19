@@ -15,48 +15,124 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	testDir := CreateTestDir(t)
-	archiveDir := path.Join(testDir, "archive")
+	t.Run("with correct target", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
 
-	CreateFile(t, path.Join(archiveDir, "file"), "this is file.")
-	CreateFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.")
+		// given
+		archiveDir := path.Join(testDir, "archive")
 
-	if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
-		t.Fatalf("%+v", err)
-	}
+		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0400)
+		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.", 0400)
 
-	output := path.Join(testDir, "output.tar")
-	tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
-	if err != nil {
-		t.Fatalf("%+v", err)
-	}
-	defer tarFile.Close()
+		if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
 
-	if err := tar.Create(archiveDir, tarFile); err != nil {
-		t.Fatalf("%+v", err)
-	}
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer tarFile.Close()
 
-	file, err := os.Open(output)
-	if err != nil {
-		t.Fatalf("%+v", err)
-	}
+		// and
+		expected := Files{
+			{
+				Name:    "dir/file",
+				Content: "this is file in the dir.",
+			},
+			{
+				Name:    "file",
+				Content: "this is file.",
+			},
+		}
 
-	actual := ReadTarArchive(t, file)
+		// when
+		if err := tar.Create(archiveDir, tarFile); err != nil {
+			t.Fatalf("%+v", err)
+		}
+		actual := readTarArchive(t, output)
 
-	expect := Files{
-		{
-			Name:    "dir/file",
-			Content: "this is file in the dir.",
-		},
-		{
-			Name:    "file",
-			Content: "this is file.",
-		},
-	}
+		// then
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("wrong tar contents.\nactual: %+v\nwont: %+v", actual, expected)
+		}
 
-	if !reflect.DeepEqual(actual, expect) {
-		t.Errorf("wrong tar contents.\nactual: %+v\nwont: %+v", actual, expect)
-	}
+		// cleanup
+		os.RemoveAll(testDir)
+	})
+
+	t.Run("with wrong directory path", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
+
+		// given
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer tarFile.Close()
+
+		// expect
+		if err := tar.Create("/path/to/wrong/dir", tarFile); err == nil {
+			t.Error("error must occur")
+		}
+
+		// cleanup
+		os.RemoveAll(testDir)
+	})
+
+	t.Run("with closed output", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
+
+		// given
+		archiveDir := path.Join(testDir, "archive")
+
+		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0400)
+
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		tarFile.Close()
+
+		// expect
+		if err := tar.Create(archiveDir, tarFile); err == nil {
+			t.Error("error must occur")
+		}
+
+		// cleanup
+		os.RemoveAll(testDir)
+	})
+
+	t.Run("with wrong permission in target", func(t *testing.T) {
+		// setup
+		testDir := createTestDir(t)
+
+		// given
+		archiveDir := path.Join(testDir, "archive")
+
+		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0000)
+
+		output := path.Join(testDir, "output.tar")
+		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer tarFile.Close()
+
+		// expect
+		if err := tar.Create(archiveDir, tarFile); err == nil {
+			t.Error("error must occur")
+		}
+
+		// cleanup
+		os.RemoveAll(testDir)
+	})
 }
 
 type Files []struct {
@@ -64,10 +140,15 @@ type Files []struct {
 	Content string
 }
 
-func ReadTarArchive(t *testing.T, reader io.Reader) Files {
+func readTarArchive(t *testing.T, output string) Files {
+	file, err := os.Open(output)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
 	var files Files
 
-	tarReader := archiveTar.NewReader(reader)
+	tarReader := archiveTar.NewReader(file)
 	for {
 		header, err := tarReader.Next()
 		if err == io.EOF {
@@ -88,7 +169,7 @@ func ReadTarArchive(t *testing.T, reader io.Reader) Files {
 	return files
 }
 
-func CreateTestDir(t *testing.T) string {
+func createTestDir(t *testing.T) string {
 	t.Helper()
 
 	tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
@@ -99,7 +180,7 @@ func CreateTestDir(t *testing.T) string {
 	return tempDir
 }
 
-func CreateFile(t *testing.T, name string, content string) {
+func createFile(t *testing.T, name string, content string, perm os.FileMode) {
 	t.Helper()
 
 	paths := strings.Split(name, "/")
@@ -108,7 +189,7 @@ func CreateFile(t *testing.T, name string, content string) {
 		t.Fatalf("%+v", err)
 	}
 
-	file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0400)
+	file, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, perm)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}

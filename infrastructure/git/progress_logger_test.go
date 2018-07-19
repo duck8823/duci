@@ -3,6 +3,7 @@ package git_test
 import (
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
+	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -13,17 +14,33 @@ import (
 var regex = regexp.MustCompile(`\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}`)
 
 func TestProgressLogger_Write(t *testing.T) {
+	// setup
 	reader, writer, err := os.Pipe()
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
+	defer reader.Close()
 
 	logger.Writer = writer
 
+	// given
 	progress := &git.ProgressLogger{}
-	progress.Write([]byte("hoge\rfuga"))
 
+	// when
+	progress.Write([]byte("hoge\rfuga"))
 	writer.Close()
+
+	actual := readLogTrimmedTime(t, reader)
+	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m hoge"
+
+	// then
+	if actual != expected {
+		t.Errorf("must remove CR flag or later. wont: %+v, but got: %+v", expected, actual)
+	}
+}
+
+func readLogTrimmedTime(t *testing.T, reader io.Reader) string {
+	t.Helper()
 
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
@@ -35,10 +52,5 @@ func TestProgressLogger_Write(t *testing.T) {
 		t.Fatalf("invalid format. %+v", log)
 	}
 
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m hoge"
-
-	if actual != expected {
-		t.Errorf("must remove CR flag or later. wont: %+v, but got: %+v", expected, actual)
-	}
+	return strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 }

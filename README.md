@@ -68,6 +68,7 @@ $ docker-compose -f docker-compose.mac.yml up
 ```
 
 #### Add Webhooks to GitHub repository
+duci start to listen webhook with port `8080`.  
 Add endpoint of duci to target repository.  
 `https://github.com/<owner>/<repository>/settings/hooks`
 

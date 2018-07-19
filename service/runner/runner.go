@@ -22,7 +22,7 @@ type Runner interface {
 type DockerRunner struct {
 	Git         git.Client
 	GitHub      github.Service
-	Docker      *docker.Client
+	Docker      docker.Client
 	Name        string
 	BaseWorkDir string
 }
@@ -92,9 +92,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		return head, errors.WithStack(err)
 	}
 
-	if _, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...); err != nil {
-		return head, errors.WithStack(err)
-	}
+	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
 
-	return head, nil
+	return head, err
 }

@@ -29,6 +29,7 @@ require (
 	golang.org/x/sys v0.0.0-20180501092740-78d5f264b493
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.0.0
+	gopkg.in/h2non/gock.v1 v1.0.9
 	gopkg.in/src-d/go-billy.v4 v4.1.1
 	gopkg.in/src-d/go-git.v4 v4.3.1
 	gopkg.in/warnings.v0 v0.1.2

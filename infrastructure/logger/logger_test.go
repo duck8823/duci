@@ -18,108 +18,102 @@ var (
 )
 
 func TestDebug(t *testing.T) {
-	InitLogger(t)
+	// setup
+	initLogger(t)
 
+	// when
 	logger.Debug(uuid.UUID{}, "Hello World.")
 
-	log := ReadLog(t)
-	if !regex.MatchString(log) {
-		t.Fatalf("invalid format. %+v", log)
-	}
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-
+	actual := readLogTrimmedTime(t)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[36;1m[DEBUG]\033[0m Hello World."
+
+	// then
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 }
 
 func TestDebugf(t *testing.T) {
-	InitLogger(t)
+	// setup
+	initLogger(t)
 
+	// when
 	logger.Debugf(uuid.UUID{}, "Hello %s.", "World")
 
-	log := ReadLog(t)
-	if !regex.MatchString(log) {
-		t.Fatalf("invalid format. %+v", log)
-	}
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-
+	actual := readLogTrimmedTime(t)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[36;1m[DEBUG]\033[0m Hello World."
+
+	// then
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 }
 
 func TestInfo(t *testing.T) {
-	InitLogger(t)
+	// setup
+	initLogger(t)
 
+	// when
 	logger.Info(uuid.UUID{}, "Hello World.")
 
-	log := ReadLog(t)
-	if !regex.MatchString(log) {
-		t.Fatalf("invalid format. %+v", log)
-	}
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-
+	actual := readLogTrimmedTime(t)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m Hello World."
+
+	// then
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 }
 
 func TestInfof(t *testing.T) {
-	InitLogger(t)
+	// setup
+	initLogger(t)
 
+	// when
 	logger.Infof(uuid.UUID{}, "Hello %s.", "World")
 
-	log := ReadLog(t)
-	if !regex.MatchString(log) {
-		t.Fatalf("invalid format. %+v", log)
-	}
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-
+	actual := readLogTrimmedTime(t)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[1m[INFO]\033[0m Hello World."
+
+	// then
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 }
 
 func TestError(t *testing.T) {
-	InitLogger(t)
+	// setup
+	initLogger(t)
 
+	// when
 	logger.Error(uuid.UUID{}, "Hello World.")
 
-	log := ReadLog(t)
-	if !regex.MatchString(log) {
-		t.Fatalf("invalid format. %+v", log)
-	}
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-
+	actual := readLogTrimmedTime(t)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[41;1m[ERROR]\033[0m Hello World."
+
+	// then
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 }
 
 func TestErrorf(t *testing.T) {
-	InitLogger(t)
+	// setup
+	initLogger(t)
 
+	// when
 	logger.Errorf(uuid.UUID{}, "Hello %s.", "World")
 
-	log := ReadLog(t)
-	if !regex.MatchString(log) {
-		t.Fatalf("invalid format. %+v", log)
-	}
-	actual := strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
-
+	actual := readLogTrimmedTime(t)
 	expected := "[00000000-0000-0000-0000-000000000000]  \033[41;1m[ERROR]\033[0m Hello World."
+
+	// then
 	if actual != expected {
 		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 }
 
-func InitLogger(t *testing.T) {
+func initLogger(t *testing.T) {
 	t.Helper()
 
 	reader, writer, _ = os.Pipe()
@@ -127,7 +121,7 @@ func InitLogger(t *testing.T) {
 	logger.Writer = writer
 }
 
-func ReadLog(t *testing.T) string {
+func readLogTrimmedTime(t *testing.T) string {
 	t.Helper()
 
 	writer.Close()
@@ -136,5 +130,9 @@ func ReadLog(t *testing.T) string {
 		t.Error()
 	}
 
-	return string(bytes)
+	log := string(bytes)
+	if !regex.MatchString(log) {
+		t.Fatalf("invalid format. %+v", log)
+	}
+	return strings.TrimRight(regex.ReplaceAllString(log, ""), "\n")
 }
