@@ -2,17 +2,17 @@ package runner_test
 
 import (
 	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/mocks/mock_docker"
 	"github.com/duck8823/duci/mocks/mock_git"
 	"github.com/duck8823/duci/mocks/mock_github"
 	"github.com/duck8823/duci/service/runner"
 	"github.com/golang/mock/gomock"
+	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
 	"path"
 	"testing"
-	"github.com/pkg/errors"
-	"github.com/duck8823/duci/infrastructure/docker"
 )
 
 func TestRunnerImpl_Run(t *testing.T) {

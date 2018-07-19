@@ -92,7 +92,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		return head, errors.WithStack(err)
 	}
 
-	 _, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
+	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
 
 	return head, err
 }
