@@ -26,10 +26,9 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	Client *github.Client
+	cli *github.Client
 }
 
-// TODO change return type to interface using mock server ( gock? )
 func NewWithEnv() (*serviceImpl, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_API_TOKEN")},
@@ -49,7 +48,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	pr, resp, err := s.Client.PullRequests.Get(
+	pr, resp, err := s.cli.PullRequests.Get(
 		ctx,
 		owner,
 		repo,
@@ -83,7 +82,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 		State:       &state,
 	}
 
-	if _, _, err := s.Client.Repositories.CreateStatus(
+	if _, _, err := s.cli.Repositories.CreateStatus(
 		ctx,
 		owner,
 		repo,
