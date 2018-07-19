@@ -40,5 +40,9 @@ func main() {
 
 	http.Handle("/", ctrl)
 
-	http.ListenAndServe(":8080", nil)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		logger.Errorf(uuid.UUID{}, "Failed to run server.\n%+v", err)
+		os.Exit(1)
+		return
+	}
 }
