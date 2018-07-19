@@ -1,10 +1,12 @@
 # duci
+![Language](https://img.shields.io/badge/language-go-74CCDC.svg)
+![GitHub release](https://img.shields.io/github/release/duck8823/duci.svg?colorB=7E7E7E)
 [![Build Status](https://travis-ci.org/duck8823/duci.svg?branch=master)](https://travis-ci.org/duck8823/duci)
 [![Coverage Status](https://coveralls.io/repos/github/duck8823/duci/badge.svg?branch=master)](https://coveralls.io/github/duck8823/duci?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/duci)](https://goreportcard.com/report/github.com/duck8823/duci)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-duci \[zushi\] (<u>d</u>ocker <u>u</u>nder <u>c</u>ontinuous <u>i</u>ntegration) is a small ci server.  
+duci \[zushi\] (<u>D</u>ocker <u>U</u>nder <u>C</u>ontinuous <u>I</u>ntegration) is a small ci server.  
 The job is triggered by pull request comment and push.  
 
 ## Target Repository
