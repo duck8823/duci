@@ -7,6 +7,10 @@ go:
   - tip
   - "1.10"
 
+cache:
+  directories:
+    - $GOPATH/src/mod/cache
+
 install: true
 before_script:
   # ssh settings
