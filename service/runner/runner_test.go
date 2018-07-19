@@ -11,13 +11,15 @@ import (
 	"os"
 	"path"
 	"testing"
+	"github.com/pkg/errors"
+	"github.com/duck8823/duci/infrastructure/docker"
 )
 
 func TestRunnerImpl_Run(t *testing.T) {
-	t.Run("with correct return values", func(t *testing.T) {
-		// setup
-		ctrl := gomock.NewController(t)
+	// setup
+	ctrl := gomock.NewController(t)
 
+	t.Run("with correct return values", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
 		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -75,6 +77,256 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// then
 		if err != nil {
 			t.Errorf("must not error. but: %+v", err)
+		}
+
+		if hash == empty {
+			t.Error("hash must not empty")
+		}
+	})
+
+	t.Run("when failed to git clone", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, errors.New("error"))
+
+		// and
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+		// then
+		if err == nil {
+			t.Error("must occur error")
+		}
+
+		if hash != empty {
+			t.Errorf("commit hash must be equal empty, but got %+v", hash)
+		}
+	})
+
+	t.Run("when workdir not exists", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+
+		// and
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: "/path/to/not/exists/dir",
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+		// then
+		if err == nil {
+			t.Error("must occur error")
+		}
+
+		if hash == empty {
+			t.Error("hash must not empty")
+		}
+	})
+
+	t.Run("when docker build failure", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+
+		// and
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(errors.New("test"))
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+		// then
+		if err == nil {
+			t.Error("must occur error")
+		}
+
+		if hash == empty {
+			t.Error("hash must not empty")
+		}
+	})
+
+	t.Run("when docker run error", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+
+		// and
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(nil)
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return("", errors.New("test"))
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+		// then
+		if err == nil {
+			t.Error("must occur error")
+		}
+
+		if hash == empty {
+			t.Error("hash must not empty")
+		}
+	})
+
+	t.Run("when docker run failure", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+
+		// and
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(nil)
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return("", docker.Failure)
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+		// then
+		if err != docker.Failure {
+			t.Errorf("error must be docker.Failure, but got %+v", err)
 		}
 
 		if hash == empty {
