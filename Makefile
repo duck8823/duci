@@ -3,7 +3,7 @@ build:
 	vgo build
 
 test:
-	vgo test -coverprofile cover.out $$(vgo list ./... | grep -v mocks)
+	vgo test -coverprofile cover.out $$(vgo list ./... | grep -v mock_)
 	vgo tool cover -html cover.out -o cover.html
 	open cover.html
 

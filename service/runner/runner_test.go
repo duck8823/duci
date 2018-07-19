@@ -3,9 +3,9 @@ package runner_test
 import (
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
-	"github.com/duck8823/duci/mocks/mock_docker"
-	"github.com/duck8823/duci/mocks/mock_git"
-	"github.com/duck8823/duci/mocks/mock_github"
+	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
+	"github.com/duck8823/duci/infrastructure/git/mock_git"
+	"github.com/duck8823/duci/service/github/mock_github"
 	"github.com/duck8823/duci/service/runner"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"

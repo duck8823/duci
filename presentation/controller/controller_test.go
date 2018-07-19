@@ -3,9 +3,9 @@ package controller_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/duck8823/duci/mocks/mock_github"
-	"github.com/duck8823/duci/mocks/mock_runner"
 	"github.com/duck8823/duci/presentation/controller"
+	"github.com/duck8823/duci/service/github/mock_github"
+	"github.com/duck8823/duci/service/runner/mock_runner"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
