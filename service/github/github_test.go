@@ -58,6 +58,9 @@ func TestService_GetPullRequest(t *testing.T) {
 		if pr.GetID() != id {
 			t.Errorf("id must be equal %+v, but got %+v. \npr=%+v", id, pr.GetID(), pr)
 		}
+
+		// cleanup
+		gock.Clean()
 	})
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
@@ -84,6 +87,9 @@ func TestService_GetPullRequest(t *testing.T) {
 		if pr != nil {
 			t.Errorf("pr must nil, but got %+v", pr)
 		}
+
+		// cleanup
+		gock.Clean()
 	})
 
 	t.Run("with invalid repository", func(t *testing.T) {
