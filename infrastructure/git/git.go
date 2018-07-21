@@ -7,8 +7,6 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
-	"os"
-	"path"
 )
 
 type Client interface {
@@ -19,8 +17,8 @@ type sshGitClient struct {
 	auth transport.AuthMethod
 }
 
-func New() (Client, error) {
-	auth, err := ssh.NewPublicKeysFromFile("git", path.Join(os.Getenv("HOME"), ".ssh/id_rsa"), "")
+func New(sshKeyPath string) (Client, error) {
+	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
 	if err != nil {
 		return nil, err
 	}

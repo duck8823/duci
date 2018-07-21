@@ -1,12 +1,12 @@
 package runner_test
 
 import (
+	"github.com/duck8823/duci/application/service/github/mock_github"
+	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/duck8823/duci/infrastructure/git/mock_git"
-	"github.com/duck8823/duci/service/github/mock_github"
-	"github.com/duck8823/duci/service/runner"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"

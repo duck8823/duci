@@ -5,8 +5,8 @@
 package mock_runner
 
 import (
+	github "github.com/duck8823/duci/application/service/github"
 	context "github.com/duck8823/duci/infrastructure/context"
-	github "github.com/duck8823/duci/service/github"
 	gomock "github.com/golang/mock/gomock"
 	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"

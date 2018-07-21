@@ -1,12 +1,12 @@
 package runner
 
 import (
+	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
-	"github.com/duck8823/duci/service/github"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
