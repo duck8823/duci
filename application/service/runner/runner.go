@@ -88,11 +88,20 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	readFile, _ := os.Open(tarFilePath)
 	defer readFile.Close()
 
-	if err := r.Docker.Build(ctx, readFile, tagName); err != nil {
+	dockerfile := "./Dockerfile"
+	if exists(path.Join(workDir, ".duci/Dockerfile")) {
+		dockerfile = ".duci/Dockerfile"
+	}
+	if err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
 		return head, errors.WithStack(err)
 	}
 
 	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
 
 	return head, err
+}
+
+func exists(name string) bool {
+	_, err := os.Stat(name)
+	return !os.IsNotExist(err)
 }

@@ -28,7 +28,7 @@ func (e Environments) ToArray() []string {
 var Failure = errors.New("Task Failure")
 
 type Client interface {
-	Build(ctx context.Context, file io.Reader, tag string) error
+	Build(ctx context.Context, file io.Reader, tag string, dockerfile string) error
 	Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error)
 	Rm(ctx context.Context, containerId string) error
 	Rmi(ctx context.Context, tag string) error
@@ -46,8 +46,12 @@ func New() (Client, error) {
 	return &clientImpl{moby: cli}, nil
 }
 
-func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string) error {
-	resp, err := c.moby.ImageBuild(ctx, file, types.ImageBuildOptions{Tags: []string{tag}})
+func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dockerfile string) error {
+	opts := types.ImageBuildOptions{
+		Tags:       []string{tag},
+		Dockerfile: dockerfile,
+	}
+	resp, err := c.moby.ImageBuild(ctx, file, opts)
 	if err != nil {
 		return errors.WithStack(err)
 	}

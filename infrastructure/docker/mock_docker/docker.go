@@ -36,15 +36,15 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // Build mocks base method
-func (m *MockClient) Build(ctx context.Context, file io.Reader, tag string) error {
-	ret := m.ctrl.Call(m, "Build", ctx, file, tag)
+func (m *MockClient) Build(ctx context.Context, file io.Reader, tag, dockerfile string) error {
+	ret := m.ctrl.Call(m, "Build", ctx, file, tag, dockerfile)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Build indicates an expected call of Build
-func (mr *MockClientMockRecorder) Build(ctx, file, tag interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockClient)(nil).Build), ctx, file, tag)
+func (mr *MockClientMockRecorder) Build(ctx, file, tag, dockerfile interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockClient)(nil).Build), ctx, file, tag, dockerfile)
 }
 
 // Run mocks base method

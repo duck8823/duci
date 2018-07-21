@@ -20,68 +20,140 @@ func TestRunnerImpl_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	t.Run("with correct return values", func(t *testing.T) {
-		// given
-		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Times(2).
-			Return(nil)
+		t.Run("when Dockerfile in proj root", func(t *testing.T) {
+			// given
+			mockGitHub := mock_github.NewMockService(ctrl)
+			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(2).
+				Return(nil)
 
-		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Times(1).
-			DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
-				if err := os.MkdirAll(dir, 0700); err != nil {
-					return plumbing.Hash{}, err
-				}
+			// and
+			mockGit := mock_git.NewMockClient(ctrl)
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(1).
+				DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
+					if err := os.MkdirAll(dir, 0700); err != nil {
+						return plumbing.Hash{}, err
+					}
 
-				dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
-				if err != nil {
-					return plumbing.Hash{}, err
-				}
-				defer dockerfile.Close()
+					dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+					if err != nil {
+						return plumbing.Hash{}, err
+					}
+					defer dockerfile.Close()
 
-				dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
+					dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
 
-				return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
-			})
+					return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
+				})
 
-		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
-		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
-			Times(1).
-			Return(nil)
-		mockDocker.EXPECT().
-			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Times(1).
-			Return("", nil)
+			// and
+			mockDocker := mock_docker.NewMockClient(ctrl)
+			mockDocker.EXPECT().
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq("./Dockerfile")).
+				Times(1).
+				Return(nil)
+			mockDocker.EXPECT().
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not("./Dockerfile")).
+				Return(errors.New("must not call this"))
+			mockDocker.EXPECT().
+				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(1).
+				Return("", nil)
 
-		r := &runner.DockerRunner{
-			Name:        "test-runner",
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
-			Git:         mockGit,
-			GitHub:      mockGitHub,
-			Docker:      mockDocker,
-		}
+			r := &runner.DockerRunner{
+				Name:        "test-runner",
+				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+				Git:         mockGit,
+				GitHub:      mockGitHub,
+				Docker:      mockDocker,
+			}
 
-		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+			// and
+			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
-		// and
-		var empty plumbing.Hash
+			// and
+			var empty plumbing.Hash
 
-		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+			// when
+			hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
 
-		// then
-		if err != nil {
-			t.Errorf("must not error. but: %+v", err)
-		}
+			// then
+			if err != nil {
+				t.Errorf("must not error. but: %+v", err)
+			}
 
-		if hash == empty {
-			t.Error("hash must not empty")
-		}
+			if hash == empty {
+				t.Error("hash must not empty")
+			}
+		})
+
+		t.Run("when Dockerfile in sub directory", func(t *testing.T) {
+			// given
+			mockGitHub := mock_github.NewMockService(ctrl)
+			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(2).
+				Return(nil)
+
+			// and
+			mockGit := mock_git.NewMockClient(ctrl)
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(1).
+				DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
+					if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
+						return plumbing.Hash{}, err
+					}
+
+					dockerfile, err := os.OpenFile(path.Join(dir, ".duci/Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+					if err != nil {
+						return plumbing.Hash{}, err
+					}
+					defer dockerfile.Close()
+
+					dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
+
+					return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
+				})
+
+			// and
+			mockDocker := mock_docker.NewMockClient(ctrl)
+			mockDocker.EXPECT().
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
+				Return(nil)
+			mockDocker.EXPECT().
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
+				Return(errors.New("must not call this"))
+			mockDocker.EXPECT().
+				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(1).
+				Return("", nil)
+
+			r := &runner.DockerRunner{
+				Name:        "test-runner",
+				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+				Git:         mockGit,
+				GitHub:      mockGitHub,
+				Docker:      mockDocker,
+			}
+
+			// and
+			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+			// and
+			var empty plumbing.Hash
+
+			// when
+			hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+			// then
+			if err != nil {
+				t.Errorf("must not error. but: %+v", err)
+			}
+
+			if hash == empty {
+				t.Error("hash must not empty")
+			}
+		})
 	})
 
 	t.Run("when failed to git clone", func(t *testing.T) {
@@ -100,7 +172,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -149,7 +221,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -198,7 +270,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(errors.New("test"))
 		mockDocker.EXPECT().
@@ -248,7 +320,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 		mockDocker.EXPECT().
@@ -299,7 +371,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 		mockDocker.EXPECT().
