@@ -13,24 +13,17 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("when missing ssh key", func(t *testing.T) {
-		// setup
-		home := os.Getenv("HOME")
-		os.Setenv("HOME", "/path/to/wrong/")
-
 		// expect
-		if _, err := git.New(); err == nil {
+		if _, err := git.New("/path/to/wrong/"); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.Setenv("HOME", home)
 	})
 }
 
 func TestSshGitClient_Clone(t *testing.T) {
 	t.Run("with correct key", func(t *testing.T) {
 		// setup
-		client, err := git.New()
+		client, err := git.New(path.Join(os.Getenv("HOME"), ".ssh/id_rsa"))
 		if err != nil {
 			t.Fatalf("error occured. %+v", err)
 		}
