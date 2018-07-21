@@ -88,7 +88,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	readFile, _ := os.Open(tarFilePath)
 	defer readFile.Close()
 
-	dockerfile := "Dockerfile"
+	dockerfile := "./Dockerfile"
 	if exists(path.Join(workDir, ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
