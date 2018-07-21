@@ -19,6 +19,7 @@ import (
 func TestNew(t *testing.T) {
 	t.Run("with wrong docker environment", func(t *testing.T) {
 		// given
+		dockerHost := os.Getenv("DOCKER_HOST")
 		os.Setenv("DOCKER_HOST", "hoge")
 
 		// expect
@@ -27,7 +28,7 @@ func TestNew(t *testing.T) {
 		}
 
 		// cleanup
-		os.Unsetenv("DOCKER_HOST")
+		os.Setenv("DOCKER_HOST", dockerHost)
 	})
 }
 
