@@ -16,7 +16,7 @@ I suggest to use `ENTRYPOINT` in Dockerfile.
 e.g.
 ```Dockerfile
 ENTRYPOINT ["mvn"]
-CMD ["build"]
+CMD ["compile"]
 ```
 
 ```Dockerfile
@@ -24,7 +24,7 @@ ENTRYPOINT ["fastlane"]
 CMD ["build"]
 ```
 
-When push to github, duci exec `mvn build` / `fastlane build`.  
+When push to github, duci exec `mvn compile` / `fastlane build`.  
 And when comment `ci test` on github pull request, 
 exec `mvn test` / `fastlane test` in docker container.  
 
