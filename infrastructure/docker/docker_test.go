@@ -39,24 +39,47 @@ func TestClientImpl_Build(t *testing.T) {
 	}
 
 	t.Run("with correct archive", func(t *testing.T) {
-		// given
-		tag := strings.ToLower(random.String(64))
+		t.Run("without sub directory", func(t *testing.T) {
+			// given
+			tag := strings.ToLower(random.String(64))
 
-		tar, err := os.Open("testdata/correct_archive.tar")
-		if err != nil {
-			t.Fatalf("error occured: %+v", err)
-		}
+			tar, err := os.Open("testdata/correct_archive.tar")
+			if err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
 
-		// when
-		if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
-			t.Fatalf("error occured: %+v", err)
-		}
-		images := dockerImages(t)
+			// when
+			if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
+			images := dockerImages(t)
 
-		// then
-		if !contains(images, fmt.Sprintf("%s:latest", tag)) {
-			t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
-		}
+			// then
+			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
+				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
+			}
+		})
+
+		t.Run("with sub directory", func(t *testing.T) {
+			// given
+			tag := strings.ToLower(random.String(64))
+
+			tar, err := os.Open("testdata/correct_archive_subdir.tar")
+			if err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
+
+			// when
+			if err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile"); err != nil {
+				t.Fatalf("error occured: %+v", err)
+			}
+			images := dockerImages(t)
+
+			// then
+			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
+				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
+			}
+		})
 	})
 
 	t.Run("with invalid archive", func(t *testing.T) {
