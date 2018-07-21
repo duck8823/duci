@@ -1,0 +1,4 @@
+---
+server:
+  workdir: /path/to/workdir
+  port: 8823
