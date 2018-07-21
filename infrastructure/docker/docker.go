@@ -49,7 +49,7 @@ func New() (Client, error) {
 func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dockerfile string) error {
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag},
-		Dockerfile: "./Dockerfile",
+		Dockerfile: dockerfile,
 	}
 	resp, err := c.moby.ImageBuild(ctx, file, opts)
 	if err != nil {
