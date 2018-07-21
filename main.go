@@ -6,6 +6,7 @@ import (
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/docker"
+	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/google/uuid"
@@ -17,6 +18,12 @@ func main() {
 	flag.Var(application.Config, "c", "configuration file path")
 	flag.Parse()
 
+	gitClient, err := git.New(application.Config.Server.SSHKeyPath)
+	if err != nil {
+		logger.Errorf(uuid.UUID{}, "Failed to create git client.\n%+v", err)
+		os.Exit(1)
+		return
+	}
 	githubService, err := github.NewWithEnv()
 	if err != nil {
 		logger.Errorf(uuid.UUID{}, "Failed to create github service.\n%+v", err)
@@ -33,6 +40,7 @@ func main() {
 	dockerRunner := &runner.DockerRunner{
 		Name:        application.Name,
 		BaseWorkDir: application.Config.Server.WorkDir,
+		Git:         gitClient,
 		GitHub:      githubService,
 		Docker:      dockerClient,
 	}
