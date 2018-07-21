@@ -9,14 +9,24 @@ import (
 
 func TestConfiguration_String(t *testing.T) {
 	// given
-	workDir := "/path/to/workdir"
-	application.Config.Server.WorkDir = workDir
+	conf := &application.Configuration{
+		Server: &application.Server{
+			WorkDir:    "/path/to/work_dir",
+			SSHKeyPath: "/path/to/ssh_key_path",
+			Port:       1234,
+		},
+	}
 
 	// and
-	expected := fmt.Sprintf("{\"server\":{\"workdir\":\"%s\",\"port\":8080}}", workDir)
+	expected := fmt.Sprintf(
+		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\"}}",
+		conf.Server.WorkDir,
+		conf.Server.Port,
+		conf.Server.SSHKeyPath,
+	)
 
 	// when
-	actual := application.Config.String()
+	actual := conf.String()
 
 	// then
 	if actual != expected {
@@ -29,8 +39,9 @@ func TestConfiguration_Set(t *testing.T) {
 		// given
 		expected := &application.Configuration{
 			Server: &application.Server{
-				WorkDir: "/path/to/workdir",
-				Port:    8823,
+				WorkDir:    "/path/to/workdir",
+				Port:       8823,
+				SSHKeyPath: "/path/to/ssh_key",
 			},
 		}
 

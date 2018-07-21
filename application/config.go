@@ -20,15 +20,17 @@ type Configuration struct {
 }
 
 type Server struct {
-	WorkDir string `yaml:"workdir" json:"workdir"`
-	Port    int    `yaml:"port" json:"port"`
+	WorkDir    string `yaml:"workdir" json:"workdir"`
+	Port       int    `yaml:"port" json:"port"`
+	SSHKeyPath string `yaml:"ssh_key_path" json:"sshKeyPath"`
 }
 
 func init() {
 	Config = &Configuration{
 		Server: &Server{
-			WorkDir: path.Join(os.TempDir(), Name),
-			Port:    8080,
+			WorkDir:    path.Join(os.TempDir(), Name),
+			Port:       8080,
+			SSHKeyPath: path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 		},
 	}
 }
