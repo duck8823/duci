@@ -3,8 +3,6 @@ package application
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/logger"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"os"
@@ -18,12 +16,12 @@ var (
 )
 
 type Configuration struct {
-	Server *Server `yaml:"server"`
+	Server *Server `yaml:"server" json:"server"`
 }
 
 type Server struct {
-	WorkDir string `yaml:"workdir"`
-	Port    int    `yaml:"port"`
+	WorkDir string `yaml:"workdir" json:"workdir"`
+	Port    int    `yaml:"port" json:"port"`
 }
 
 func init() {
@@ -36,11 +34,7 @@ func init() {
 }
 
 func (c *Configuration) String() string {
-	bytes, err := json.Marshal(c)
-	if err != nil {
-		logger.Errorf(uuid.UUID{}, "%+v", err)
-		return ""
-	}
+	bytes, _ := json.Marshal(c)
 	return string(bytes)
 }
 
