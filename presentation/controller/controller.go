@@ -3,10 +3,10 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/duck8823/duci/application/service/github"
+	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/logger"
-	"github.com/duck8823/duci/service/github"
-	"github.com/duck8823/duci/service/runner"
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"

@@ -1,7 +1,7 @@
 package github_test
 
 import (
-	"github.com/duck8823/duci/service/github"
+	"github.com/duck8823/duci/application/service/github"
 	"testing"
 )
 
