@@ -49,7 +49,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 		mockDocker.EXPECT().
@@ -100,7 +100,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -149,7 +149,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -198,7 +198,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(errors.New("test"))
 		mockDocker.EXPECT().
@@ -248,7 +248,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 		mockDocker.EXPECT().
@@ -299,7 +299,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any()).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 		mockDocker.EXPECT().

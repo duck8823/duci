@@ -48,7 +48,7 @@ func TestClientImpl_Build(t *testing.T) {
 		}
 
 		// when
-		if err := cli.Build(context.New("test/task"), tar, tag); err != nil {
+		if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
 		images := dockerImages(t)
@@ -69,7 +69,7 @@ func TestClientImpl_Build(t *testing.T) {
 		}
 
 		// expect
-		if err := cli.Build(context.New("test/task"), tar, tag); err == nil {
+		if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err == nil {
 			t.Error("error must not be nil")
 		}
 	})
