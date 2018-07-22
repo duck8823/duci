@@ -13,12 +13,13 @@ duci \[zushi\] (<u>D</u>ocker <u>U</u>nder <u>C</u>ontinuous <u>I</u>ntegration)
 ## DSL is Unnecessary For CI
 Let's define the task in the task runner.  
 In the Dockerfile, let's define the necessary infrastructure for the task.  
-duci only execute the task in docker container. 
+duci just execute the task in docker container. 
 
-## Feature
-- The task is triggered by pull request comment and push  
-- create commit status
-- execute tasks asynchronously
+## Features
+- Run task in Docker container
+- The task is triggered by pull request comment and push 
+- Create GitHub commit status
+- Execute tasks asynchronously
 
 ## How to use
 ### Target Repository
@@ -60,43 +61,50 @@ This server needs environment variable `GITHUB_API_TOKEN` to create status.
 export GITHUB_API_TOKEN=<your token>
 ```
 
-#### Setting SSH
+## Server Settings
+### Setting SSH
 This server clone from github.com with **SSH** protocol
 using private key `$HOME/.ssh/id_rsa`.  
 Please set the public key of the pair at https://github.com/settings/keys.
 
-#### Run Server
-##### Locally
+### Run Server
 If you have already set $GOPATH, you can install it with the following command.
 ```bash
 $ go get -u github.com/duck8823/duci
 $ duci 
 ```
+### Add Webhooks to GitHub repository
+duci start to listen webhook with port `8080` and endpoint `/`.  
+Add endpoint of duci to target repository.  
+`https://github.com/<owner>/<repository>/settings/hooks`
 
-##### Using Docker
+## Using Docker
+You can use Docker to run server.
 ```
-$ git clone https://github.com/duck8823/duci.git
-$ cd duci
-$ docker build -t duck8823/duci .
-$ docker run -e GITHUB_API_TOKEN=<your toekn> -v ~/.ssh:/root/.ssh:ro duck8823/duci
+$ docker run -p 8080:8080 \
+             -e GITHUB_API_TOKEN=<your toekn> \
+             -v /var/run/docker.sock:/var/run/docker.sock \
+             -v ~/.ssh:/root/.ssh:ro \ 
+             duck8823/duci
 ```
 
-###### docker-compose for Windows
+##### docker-compose for Windows
 ```bash
 $ git clone https://github.com/duck8823/duci.git
 $ cd duci
 $ docker-compose -f docker-compose.win.yml up
 ```
 
-###### docker-compose for Mac
+##### docker-compose for Mac
 ```bash
 $ git clone https://github.com/duck8823/duci.git
 $ cd duci
 $ docker-compose -f docker-compose.mac.yml up
 ```
 
-#### Add Webhooks to GitHub repository
-duci start to listen webhook with port `8080` and endpoint `/`.  
-Add endpoint of duci to target repository.  
-`https://github.com/<owner>/<repository>/settings/hooks`
+## License
+MIT License
 
+Copyright (c) 2018 Shunsuke Maeda
+
+See [LICENSE](./LICENSE) file
