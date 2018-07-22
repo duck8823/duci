@@ -9,6 +9,7 @@ import (
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/yaml.v2"
 	"os"
 	"path"
 	"strconv"
@@ -95,8 +96,18 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
 		return head, errors.WithStack(err)
 	}
+	var opts docker.RuntimeOptions
+	if exists(path.Join(workDir, ".duci/config.yml")) {
+		configFile, err := os.Open(path.Join(workDir, ".duci/config.yml"))
+		if err != nil {
+			return head, errors.WithStack(err)
+		}
+		if err := yaml.NewDecoder(configFile).Decode(&opts); err != nil {
+			return head, errors.WithStack(err)
+		}
+	}
 
-	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
+	_, err = r.Docker.Run(ctx, opts, tagName, command...)
 
 	return head, err
 }

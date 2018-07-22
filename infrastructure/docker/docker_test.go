@@ -108,14 +108,14 @@ func TestClientImpl_Run(t *testing.T) {
 
 	t.Run("without environments", func(t *testing.T) {
 		// setup
-		env := docker.Environments{}
+		opts := docker.RuntimeOptions{}
 
 		t.Run("without command", func(t *testing.T) {
 			// given
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), env, "hello-world")
+			containerId, err := cli.Run(context.New("test/task"), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -132,7 +132,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), env, "centos", "echo", "Hello-world")
+			containerId, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -149,7 +149,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), env, "centos", "missing_command"); err == nil {
+			if _, err := cli.Run(context.New("test/task"), opts, "centos", "missing_command"); err == nil {
 				t.Error("error must occur")
 			}
 		})
@@ -159,7 +159,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), env, "centos", "false"); err != docker.Failure {
+			if _, err := cli.Run(context.New("test/task"), opts, "centos", "false"); err != docker.Failure {
 				t.Errorf("error must be docker.Failure, but got %+v", err)
 			}
 		})
@@ -169,8 +169,13 @@ func TestClientImpl_Run(t *testing.T) {
 		// given
 		imagePull(t, "centos:latest")
 
+		// and
+		opts := docker.RuntimeOptions{
+			Environments: docker.Environments{"ENV": "hello-world"},
+		}
+
 		// when
-		containerId, err := cli.Run(context.New("test/task"), docker.Environments{"ENV": "hello-world"}, "centos", "sh", "-c", "echo $ENV")
+		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
