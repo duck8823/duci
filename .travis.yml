@@ -22,6 +22,15 @@ before_script:
   - go get golang.org/x/vgo
 script:
   - vgo test -coverprofile cover.out $(vgo list ./... | grep -v mock_)
+after_success:
   - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go
-after_script:
-  - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
+before_deploy:
+  - go get -u github.com/golang/dep/cmd/dep
+  - dep init
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: $TRAVIS_GO_VERSION = "1.10"
