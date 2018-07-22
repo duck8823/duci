@@ -16,12 +16,14 @@ duci only execute the task in docker container.
 
 ## Feature
 - The task is triggered by pull request comment and push  
-- duci create commit status
+- create commit status
 - execute tasks asynchronously
 
 ## How to use
 ### Target Repository
 The target repository must have Dockerfile.  
+If there is file `.duci/Dockerfile`, duci read it preferentially.  
+  
 I suggest to use `ENTRYPOINT` in Dockerfile.
 
 e.g.
@@ -38,6 +40,17 @@ CMD ["build"]
 When push to github, duci exec `mvn compile` / `fastlane build`.  
 And when comment `ci test` on github pull request, 
 exec `mvn test` / `fastlane test` in docker container.  
+
+### Using Volumes
+You can use volumes options for external dependency, cache and etc.  
+Set configurations in `.duci/config.yml`  
+
+```yaml
+---
+server:
+  volumes:
+    - '/path/to/host/dir:/path/to/container/dir'
+```
 
 ### Run Server
 #### Add Environment Variable
