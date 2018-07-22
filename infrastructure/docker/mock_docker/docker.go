@@ -48,8 +48,8 @@ func (mr *MockClientMockRecorder) Build(ctx, file, tag, dockerfile interface{}) 
 }
 
 // Run mocks base method
-func (m *MockClient) Run(ctx context.Context, env docker.Environments, tag string, cmd ...string) (string, error) {
-	varargs := []interface{}{ctx, env, tag}
+func (m *MockClient) Run(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, error) {
+	varargs := []interface{}{ctx, opts, tag}
 	for _, a := range cmd {
 		varargs = append(varargs, a)
 	}
@@ -60,8 +60,8 @@ func (m *MockClient) Run(ctx context.Context, env docker.Environments, tag strin
 }
 
 // Run indicates an expected call of Run
-func (mr *MockClientMockRecorder) Run(ctx, env, tag interface{}, cmd ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{ctx, env, tag}, cmd...)
+func (mr *MockClientMockRecorder) Run(ctx, opts, tag interface{}, cmd ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{ctx, opts, tag}, cmd...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockClient)(nil).Run), varargs...)
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/moby/moby/client"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -19,6 +20,7 @@ import (
 func TestNew(t *testing.T) {
 	t.Run("with wrong docker environment", func(t *testing.T) {
 		// given
+		dockerHost := os.Getenv("DOCKER_HOST")
 		os.Setenv("DOCKER_HOST", "hoge")
 
 		// expect
@@ -27,7 +29,7 @@ func TestNew(t *testing.T) {
 		}
 
 		// cleanup
-		os.Unsetenv("DOCKER_HOST")
+		os.Setenv("DOCKER_HOST", dockerHost)
 	})
 }
 
@@ -107,14 +109,14 @@ func TestClientImpl_Run(t *testing.T) {
 
 	t.Run("without environments", func(t *testing.T) {
 		// setup
-		env := docker.Environments{}
+		opts := docker.RuntimeOptions{}
 
 		t.Run("without command", func(t *testing.T) {
 			// given
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), env, "hello-world")
+			containerId, err := cli.Run(context.New("test/task"), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -131,7 +133,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), env, "centos", "echo", "Hello-world")
+			containerId, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -148,7 +150,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), env, "centos", "missing_command"); err == nil {
+			if _, err := cli.Run(context.New("test/task"), opts, "centos", "missing_command"); err == nil {
 				t.Error("error must occur")
 			}
 		})
@@ -158,7 +160,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), env, "centos", "false"); err != docker.Failure {
+			if _, err := cli.Run(context.New("test/task"), opts, "centos", "false"); err != docker.Failure {
 				t.Errorf("error must be docker.Failure, but got %+v", err)
 			}
 		})
@@ -168,8 +170,44 @@ func TestClientImpl_Run(t *testing.T) {
 		// given
 		imagePull(t, "centos:latest")
 
+		// and
+		opts := docker.RuntimeOptions{
+			Environments: docker.Environments{"ENV": "hello-world"},
+		}
+
 		// when
-		containerId, err := cli.Run(context.New("test/task"), docker.Environments{"ENV": "hello-world"}, "centos", "sh", "-c", "echo $ENV")
+		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo $ENV")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		logs := containerLogsString(t, containerId)
+
+		// then
+		if !strings.Contains(logs, "hello-world") {
+			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
+		}
+	})
+
+	t.Run("with volumes", func(t *testing.T) {
+		if os.Getenv("CI") == "duci" {
+			t.Skip("skip if CI ( Docker in Docker )")
+			// TODO reduce external dependencies
+		}
+
+		// given
+		imagePull(t, "centos:latest")
+
+		// and
+		path, err := filepath.Abs("testdata")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		opts := docker.RuntimeOptions{
+			Volumes: docker.Volumes{fmt.Sprintf("%s:/tmp/testdata", path)},
+		}
+
+		// when
+		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -257,6 +295,35 @@ func TestEnvironments_ToArray(t *testing.T) {
 		expected := testcase.expected
 		sort.Strings(actual)
 		sort.Strings(expected)
+
+		// then
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("must be equal. actual=%+v, wont=%+v", actual, expected)
+		}
+	}
+}
+
+func TestVolumes_Volumes(t *testing.T) {
+	for _, testcase := range []struct {
+		in       docker.Volumes
+		expected map[string]struct{}
+	}{
+		{
+			in:       docker.Volumes{},
+			expected: make(map[string]struct{}),
+		},
+		{
+			in: docker.Volumes{
+				"/hoge/fuga:/hoge/hoge",
+			},
+			expected: map[string]struct{}{
+				"/hoge/fuga": {},
+			},
+		},
+	} {
+		// when
+		actual := testcase.in.ToMap()
+		expected := testcase.expected
 
 		// then
 		if !reflect.DeepEqual(actual, expected) {

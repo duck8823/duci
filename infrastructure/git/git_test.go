@@ -61,6 +61,10 @@ func TestSshGitClient_Clone(t *testing.T) {
 		})
 
 		t.Run("when target directory not exists", func(t *testing.T) {
+			if os.Getuid() == 0 {
+				t.Skip("skip if root user")
+			}
+
 			// given
 			wrongPath := "/path/to/not/exists"
 

@@ -82,6 +82,6 @@ func (c *JobController) parseIssueComment(event *go_github.IssueCommentEvent) (c
 	}
 
 	repo = event.GetRepo()
-	ref = pr.GetHead().GetRef()
-	return
+	ref = fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
+	return ctx, repo, ref, command, err
 }

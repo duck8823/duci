@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bytes"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -9,6 +10,8 @@ import (
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -95,8 +98,19 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
 		return head, errors.WithStack(err)
 	}
+	var opts docker.RuntimeOptions
+	if exists(path.Join(workDir, ".duci/config.yml")) {
+		content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
+		if err != nil {
+			return head, errors.WithStack(err)
+		}
+		content = []byte(os.ExpandEnv(string(content)))
+		if err := yaml.NewDecoder(bytes.NewReader(content)).Decode(&opts); err != nil {
+			return head, errors.WithStack(err)
+		}
+	}
 
-	_, err = r.Docker.Run(ctx, docker.Environments{}, tagName, command...)
+	_, err = r.Docker.Run(ctx, opts, tagName, command...)
 
 	return head, err
 }

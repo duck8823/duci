@@ -10,9 +10,7 @@ ADD . .
 RUN go get golang.org/x/vgo
 
 ENV CC=gcc
+ENV CI=duci
 
-RUN vgo install
-
-EXPOSE 8080
-
-CMD ["duci"]
+ENTRYPOINT ["vgo"]
+CMD ["test", "./..."]

@@ -13,7 +13,13 @@ import (
 	moby "github.com/moby/moby/client"
 	"github.com/pkg/errors"
 	"io"
+	"strings"
 )
+
+type RuntimeOptions struct {
+	Environments Environments
+	Volumes      Volumes
+}
 
 type Environments map[string]interface{}
 
@@ -25,11 +31,22 @@ func (e Environments) ToArray() []string {
 	return a
 }
 
+type Volumes []string
+
+func (v Volumes) ToMap() map[string]struct{} {
+	m := make(map[string]struct{})
+	for _, volume := range v {
+		key := strings.Split(volume, ":")[0]
+		m[key] = struct{}{}
+	}
+	return m
+}
+
 var Failure = errors.New("Task Failure")
 
 type Client interface {
 	Build(ctx context.Context, file io.Reader, tag string, dockerfile string) error
-	Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error)
+	Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, error)
 	Rm(ctx context.Context, containerId string) error
 	Rmi(ctx context.Context, tag string) error
 }
@@ -61,12 +78,15 @@ func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dock
 	return nil
 }
 
-func (c *clientImpl) Run(ctx context.Context, env Environments, tag string, cmd ...string) (string, error) {
+func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, error) {
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
-		Image: tag,
-		Env:   env.ToArray(),
-		Cmd:   cmd,
-	}, nil, nil, "")
+		Image:   tag,
+		Env:     opts.Environments.ToArray(),
+		Volumes: opts.Volumes.ToMap(),
+		Cmd:     cmd,
+	}, &container.HostConfig{
+		Binds: opts.Volumes,
+	}, nil, "")
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
