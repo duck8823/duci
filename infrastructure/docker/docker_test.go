@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"path/filepath"
 )
 
 func TestNew(t *testing.T) {
@@ -186,6 +187,32 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 		}
 	})
+
+	t.Run("with volumes", func(t *testing.T) {
+		// given
+		imagePull(t, "centos:latest")
+
+		// and
+		path, err := filepath.Abs("testdata")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		opts := docker.RuntimeOptions{
+			Volumes: docker.Volumes{path: "/tmp/testdata"},
+		}
+
+		// when
+		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		logs := containerLogsString(t, containerId)
+
+		// then
+		if !strings.Contains(logs, "hello-world") {
+			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
+		}
+	})
 }
 
 func TestClientImpl_Rm(t *testing.T) {
@@ -271,7 +298,7 @@ func TestEnvironments_ToArray(t *testing.T) {
 	}
 }
 
-func TestVolumes_ToMap(t *testing.T) {
+func TestVolumes_Volumes(t *testing.T) {
 	for _, testcase := range []struct {
 		in       docker.Volumes
 		expected map[string]struct{}
@@ -282,15 +309,43 @@ func TestVolumes_ToMap(t *testing.T) {
 		},
 		{
 			in: docker.Volumes{
-				"/hoge/fuga:/hoge/hoge",
+				"/hoge/fuga":"/hoge/hoge",
 			},
-			expected: map[string]struct{} {
-				"/hoge/fuga:/hoge/hoge": {},
+			expected: map[string]struct{}{
+				"/hoge/fuga": {},
 			},
 		},
 	} {
 		// when
-		actual := testcase.in.ToMap()
+		actual := testcase.in.Volumes()
+		expected := testcase.expected
+
+		// then
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("must be equal. actual=%+v, wont=%+v", actual, expected)
+		}
+	}
+}
+
+func TestVolumes_Binds(t *testing.T) {
+	var empty []string
+	for _, testcase := range []struct {
+		in       docker.Volumes
+		expected []string
+	}{
+		{
+			in:       docker.Volumes{},
+			expected: empty,
+		},
+		{
+			in: docker.Volumes{
+				"/hoge/fuga":"/hoge/hoge:ro",
+			},
+			expected: []string{"/hoge/fuga:/hoge/hoge:ro"},
+		},
+	} {
+		// when
+		actual := testcase.in.Binds()
 		expected := testcase.expected
 
 		// then

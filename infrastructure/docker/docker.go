@@ -30,14 +30,22 @@ func (e Environments) ToArray() []string {
 	return a
 }
 
-type Volumes []string
+type Volumes map[string]string
 
-func (v Volumes) ToMap() map[string]struct{} {
+func (v Volumes) Volumes() map[string]struct{} {
 	m := make(map[string]struct{})
-	for _, volume := range v {
-		m[volume] = struct{}{}
+	for key := range v {
+		m[key] = struct{}{}
 	}
 	return m
+}
+
+func (v Volumes) Binds() []string {
+	var a []string
+	for key, val := range v {
+		a = append(a, fmt.Sprintf("%s:%v", key, val))
+	}
+	return a
 }
 
 var Failure = errors.New("Task Failure")
@@ -80,9 +88,11 @@ func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, c
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag,
 		Env:     opts.Environments.ToArray(),
-		Volumes: opts.Volumes.ToMap(),
+		Volumes: opts.Volumes.Volumes(),
 		Cmd:     cmd,
-	}, nil, nil, "")
+	}, &container.HostConfig{
+		Binds: opts.Volumes.Binds(),
+	}, nil, "")
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
