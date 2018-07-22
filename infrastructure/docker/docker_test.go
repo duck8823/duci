@@ -271,6 +271,35 @@ func TestEnvironments_ToArray(t *testing.T) {
 	}
 }
 
+func TestVolumes_ToMap(t *testing.T) {
+	for _, testcase := range []struct {
+		in       docker.Volumes
+		expected map[string]struct{}
+	}{
+		{
+			in:       docker.Volumes{},
+			expected: make(map[string]struct{}),
+		},
+		{
+			in: docker.Volumes{
+				"/hoge/fuga:/hoge/hoge",
+			},
+			expected: map[string]struct{} {
+				"/hoge/fuga:/hoge/hoge": {},
+			},
+		},
+	} {
+		// when
+		actual := testcase.in.ToMap()
+		expected := testcase.expected
+
+		// then
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("must be equal. actual=%+v, wont=%+v", actual, expected)
+		}
+	}
+}
+
 func contains(strings []string, str string) bool {
 	for _, s := range strings {
 		if s == str {
