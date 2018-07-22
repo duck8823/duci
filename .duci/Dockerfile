@@ -10,6 +10,7 @@ ADD . .
 RUN go get golang.org/x/vgo
 
 ENV CC=gcc
+ENV CI=duci
 
 ENTRYPOINT ["vgo"]
 CMD ["test", "./..."]

@@ -189,6 +189,11 @@ func TestClientImpl_Run(t *testing.T) {
 	})
 
 	t.Run("with volumes", func(t *testing.T) {
+		if os.Getenv("CI") == "duci" {
+			t.Skip("skip if CI ( Docker in Docker )")
+			// TODO reduce external dependencies
+		}
+
 		// given
 		imagePull(t, "centos:latest")
 
