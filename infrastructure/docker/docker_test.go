@@ -10,11 +10,11 @@ import (
 	"github.com/moby/moby/client"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
-	"path/filepath"
 )
 
 func TestNew(t *testing.T) {
@@ -198,7 +198,7 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Fatalf("error occured: %+v", err)
 		}
 		opts := docker.RuntimeOptions{
-			Volumes: docker.Volumes{path: "/tmp/testdata"},
+			Volumes: docker.Volumes{fmt.Sprintf("%s:/tmp/testdata", path)},
 		}
 
 		// when
@@ -309,7 +309,7 @@ func TestVolumes_Volumes(t *testing.T) {
 		},
 		{
 			in: docker.Volumes{
-				"/hoge/fuga":"/hoge/hoge",
+				"/hoge/fuga:/hoge/hoge",
 			},
 			expected: map[string]struct{}{
 				"/hoge/fuga": {},
@@ -317,35 +317,7 @@ func TestVolumes_Volumes(t *testing.T) {
 		},
 	} {
 		// when
-		actual := testcase.in.Volumes()
-		expected := testcase.expected
-
-		// then
-		if !reflect.DeepEqual(actual, expected) {
-			t.Errorf("must be equal. actual=%+v, wont=%+v", actual, expected)
-		}
-	}
-}
-
-func TestVolumes_Binds(t *testing.T) {
-	var empty []string
-	for _, testcase := range []struct {
-		in       docker.Volumes
-		expected []string
-	}{
-		{
-			in:       docker.Volumes{},
-			expected: empty,
-		},
-		{
-			in: docker.Volumes{
-				"/hoge/fuga":"/hoge/hoge:ro",
-			},
-			expected: []string{"/hoge/fuga:/hoge/hoge:ro"},
-		},
-	} {
-		// when
-		actual := testcase.in.Binds()
+		actual := testcase.in.ToMap()
 		expected := testcase.expected
 
 		// then

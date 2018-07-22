@@ -13,6 +13,7 @@ import (
 	moby "github.com/moby/moby/client"
 	"github.com/pkg/errors"
 	"io"
+	"strings"
 )
 
 type RuntimeOptions struct {
@@ -30,22 +31,15 @@ func (e Environments) ToArray() []string {
 	return a
 }
 
-type Volumes map[string]string
+type Volumes []string
 
-func (v Volumes) Volumes() map[string]struct{} {
+func (v Volumes) ToMap() map[string]struct{} {
 	m := make(map[string]struct{})
-	for key := range v {
+	for _, volume := range v {
+		key := strings.Split(volume, ":")[0]
 		m[key] = struct{}{}
 	}
 	return m
-}
-
-func (v Volumes) Binds() []string {
-	var a []string
-	for key, val := range v {
-		a = append(a, fmt.Sprintf("%s:%v", key, val))
-	}
-	return a
 }
 
 var Failure = errors.New("Task Failure")
@@ -88,10 +82,10 @@ func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, c
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag,
 		Env:     opts.Environments.ToArray(),
-		Volumes: opts.Volumes.Volumes(),
+		Volumes: opts.Volumes.ToMap(),
 		Cmd:     cmd,
 	}, &container.HostConfig{
-		Binds: opts.Volumes.Binds(),
+		Binds: opts.Volumes,
 	}, nil, "")
 	if err != nil {
 		return "", errors.WithStack(err)
