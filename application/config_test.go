@@ -5,6 +5,7 @@ import (
 	"github.com/duck8823/duci/application"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestConfiguration_String(t *testing.T) {
@@ -79,5 +80,18 @@ func TestConfiguration_Addr(t *testing.T) {
 	// then
 	if actual != ":8823" {
 		t.Errorf("addr should equal :8823, but got %s", actual)
+	}
+}
+
+func TestConfiguration_Timeout(t *testing.T) {
+	// given
+	application.Config.Server.Timeout = 8823
+
+	// when
+	actual := application.Config.Timeout()
+
+	// then
+	if actual != 8823 * time.Second {
+		t.Errorf("addr should equal 8823 sec, but got %+v", actual)
 	}
 }
