@@ -12,12 +12,11 @@ builds:
       - amd64
       - 386
 archive:
-  format: zip
-  name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  format: tar.gz
+  format_overrides:
+    - goos: windows
+      format: zip
+  name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
   files:
     - README.md
     - LICENSE
-  replacements:
-    darwin: mac
-    amd64: 64bit
-    386: 32bit
