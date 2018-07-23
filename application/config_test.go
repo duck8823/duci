@@ -91,7 +91,7 @@ func TestConfiguration_Timeout(t *testing.T) {
 	actual := application.Config.Timeout()
 
 	// then
-	if actual != 8823 * time.Second {
+	if actual != 8823*time.Second {
 		t.Errorf("addr should equal 8823 sec, but got %+v", actual)
 	}
 }

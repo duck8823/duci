@@ -1,6 +1,7 @@
 package runner_test
 
 import (
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/github/mock_github"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 )
 
 func TestRunnerImpl_Run(t *testing.T) {
@@ -465,6 +467,62 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// then
 		if err != docker.Failure {
+			t.Errorf("error must be docker.Failure, but got %+v", err)
+		}
+
+		if hash == empty {
+			t.Error("hash must not empty")
+		}
+	})
+
+	t.Run("when runner timeout", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+
+		// and
+		application.Config.Server.Timeout = 1
+
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(nil)
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, error) {
+				time.Sleep(2 * time.Second)
+				return "container_id", nil
+			})
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+
+		// then
+		if err.Error() != "context deadline exceeded" {
 			t.Errorf("error must be docker.Failure, but got %+v", err)
 		}
 
