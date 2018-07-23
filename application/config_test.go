@@ -5,6 +5,7 @@ import (
 	"github.com/duck8823/duci/application"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestConfiguration_String(t *testing.T) {
@@ -14,15 +15,17 @@ func TestConfiguration_String(t *testing.T) {
 			WorkDir:    "/path/to/work_dir",
 			SSHKeyPath: "/path/to/ssh_key_path",
 			Port:       1234,
+			Timeout:    60,
 		},
 	}
 
 	// and
 	expected := fmt.Sprintf(
-		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\"}}",
+		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"timeout\":%d}}",
 		conf.Server.WorkDir,
 		conf.Server.Port,
 		conf.Server.SSHKeyPath,
+		conf.Server.Timeout,
 	)
 
 	// when
@@ -42,6 +45,7 @@ func TestConfiguration_Set(t *testing.T) {
 				WorkDir:    "/path/to/workdir",
 				Port:       8823,
 				SSHKeyPath: "/path/to/ssh_key",
+				Timeout:    600,
 			},
 		}
 
@@ -76,5 +80,18 @@ func TestConfiguration_Addr(t *testing.T) {
 	// then
 	if actual != ":8823" {
 		t.Errorf("addr should equal :8823, but got %s", actual)
+	}
+}
+
+func TestConfiguration_Timeout(t *testing.T) {
+	// given
+	application.Config.Server.Timeout = 8823
+
+	// when
+	actual := application.Config.Timeout()
+
+	// then
+	if actual != 8823*time.Second {
+		t.Errorf("addr should equal 8823 sec, but got %+v", actual)
 	}
 }
