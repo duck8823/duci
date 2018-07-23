@@ -2,6 +2,7 @@ package runner
 
 import (
 	"bytes"
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -34,7 +35,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 	commitHash := make(chan plumbing.Hash, 1)
 	errs := make(chan error, 1)
 
-	timeout, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	timeout, cancel := context.WithTimeout(ctx, application.Config.Timeout())
 	defer cancel()
 
 	go func() {

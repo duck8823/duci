@@ -14,15 +14,17 @@ func TestConfiguration_String(t *testing.T) {
 			WorkDir:    "/path/to/work_dir",
 			SSHKeyPath: "/path/to/ssh_key_path",
 			Port:       1234,
+			Timeout:    60,
 		},
 	}
 
 	// and
 	expected := fmt.Sprintf(
-		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\"}}",
+		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"timeout\":%d}}",
 		conf.Server.WorkDir,
 		conf.Server.Port,
 		conf.Server.SSHKeyPath,
+		conf.Server.Timeout,
 	)
 
 	// when
@@ -42,6 +44,7 @@ func TestConfiguration_Set(t *testing.T) {
 				WorkDir:    "/path/to/workdir",
 				Port:       8823,
 				SSHKeyPath: "/path/to/ssh_key",
+				Timeout:    600,
 			},
 		}
 

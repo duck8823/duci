@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"os"
 	"path"
+	"time"
 )
 
 const Name = "duci"
@@ -23,6 +24,7 @@ type Server struct {
 	WorkDir    string `yaml:"workdir" json:"workdir"`
 	Port       int    `yaml:"port" json:"port"`
 	SSHKeyPath string `yaml:"ssh_key_path" json:"sshKeyPath"`
+	Timeout    int64  `yaml:"timeout" json:"timeout"`
 }
 
 func init() {
@@ -31,6 +33,7 @@ func init() {
 			WorkDir:    path.Join(os.TempDir(), Name),
 			Port:       8080,
 			SSHKeyPath: path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+			Timeout:    600,
 		},
 	}
 }
@@ -50,4 +53,8 @@ func (c *Configuration) Set(path string) error {
 
 func (c *Configuration) Addr() string {
 	return fmt.Sprintf(":%d", c.Server.Port)
+}
+
+func (c *Configuration) Timeout() time.Duration {
+	return time.Duration(c.Server.Timeout) * time.Second
 }
