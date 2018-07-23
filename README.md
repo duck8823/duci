@@ -23,10 +23,10 @@ duci just execute the task in docker container.
 
 ## How to use
 ### Target Repository
-The target repository must have Dockerfile.  
-If there is file `.duci/Dockerfile`, duci read it preferentially.  
+The target repository must have Dockerfile in repository root or `.duci/Dockerfile`.  
+If there is `.duci/Dockerfile`, duci read it preferentially.  
   
-I suggest to use `ENTRYPOINT` in Dockerfile.
+In Dockerfile, I suggest to use `ENTRYPOINT`.
 
 e.g.
 ```Dockerfile
@@ -39,9 +39,8 @@ ENTRYPOINT ["fastlane"]
 CMD ["build"]
 ```
 
-When push to github, duci exec `mvn compile` / `fastlane build`.  
-And when comment `ci test` on github pull request, 
-exec `mvn test` / `fastlane test` in docker container.  
+When push to github, duci execute `mvn compile` / `fastlane build`.  
+And when comment `ci test` on github pull request, execute `mvn test` / `fastlane test`.  
 
 ### Using Volumes
 You can use volumes options for external dependency, cache and etc.  
@@ -62,17 +61,18 @@ export GITHUB_API_TOKEN=<your token>
 ```
 
 ## Server Settings
-### Setting SSH
-This server clone from github.com with **SSH** protocol
-using private key `$HOME/.ssh/id_rsa`.  
-Please set the public key of the pair at https://github.com/settings/keys.
-
 ### Run Server
 If you have already set $GOPATH, you can install it with the following command.
 ```bash
 $ go get -u github.com/duck8823/duci
 $ duci 
 ```
+
+### Setting SSH
+This server clone from github.com with **SSH** protocol
+using private key `$HOME/.ssh/id_rsa`.  
+Please set the public key of the pair at https://github.com/settings/keys.
+
 ### Add Webhooks to GitHub repository
 duci start to listen webhook with port `8080` and endpoint `/`.  
 Add endpoint of duci to target repository.  
