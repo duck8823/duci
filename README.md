@@ -48,9 +48,8 @@ Set configurations in `.duci/config.yml`
 
 ```yaml
 ---
-server:
-  volumes:
-    - '/path/to/host/dir:/path/to/container/dir'
+volumes:
+  - '/path/to/host/dir:/path/to/container/dir'
 ```
 
 ### Run Server
