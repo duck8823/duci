@@ -500,7 +500,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, error) {
-				time.Sleep(2 * time.Second)
+				time.Sleep(3 * time.Second)
 				return "container_id", nil
 			})
 
