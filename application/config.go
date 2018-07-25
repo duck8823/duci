@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"os"
 	"path"
+	"runtime"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func init() {
 			Port:        8080,
 			SSHKeyPath:  path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 			Timeout:     600,
-			Concurrency: 4,
+			Concurrency: runtime.NumCPU(),
 		},
 	}
 }

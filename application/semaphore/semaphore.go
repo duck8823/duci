@@ -3,10 +3,11 @@ package semaphore
 import (
 	"github.com/duck8823/duci/application"
 	"github.com/pkg/errors"
+	"runtime"
 )
 
 var (
-	sem         = make(chan struct{}, 1) // default concurrency
+	sem         = make(chan struct{}, runtime.NumCPU()) // default concurrency
 	initialized = false
 )
 
