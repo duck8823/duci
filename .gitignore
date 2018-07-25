@@ -6,7 +6,11 @@ duci
 go.sum
 cover.out
 cover.html
+
 ## dep
 Gopkg.lock
 Gopkg.toml
 vendor
+
+# app
+/config.yml
