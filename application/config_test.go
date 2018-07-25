@@ -47,8 +47,8 @@ func TestConfiguration_Set(t *testing.T) {
 				WorkDir:     "/path/to/workdir",
 				Port:        8823,
 				SSHKeyPath:  "/path/to/ssh_key",
-				Timeout:     600,
-				Concurrency: 4,
+				Timeout:     300,
+				Concurrency: 5,
 			},
 		}
 

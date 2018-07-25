@@ -3,3 +3,5 @@ server:
   workdir: /path/to/workdir
   port: 8823
   ssh_key_path: /path/to/ssh_key
+  timeout: 300
+  concurrency: 5
