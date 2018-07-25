@@ -16,7 +16,7 @@ func Make() error {
 	if initialized {
 		return errors.New("semaphore already created.")
 	}
-	sem = make(chan struct{}, application.Config.Server.Concurrency)
+	sem = make(chan struct{}, application.Config.Job.Concurrency)
 	initialized = true
 	return nil
 }

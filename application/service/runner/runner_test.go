@@ -489,7 +489,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
 
 		// and
-		application.Config.Server.Timeout = 1
+		application.Config.Job.Timeout = 1
 
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
