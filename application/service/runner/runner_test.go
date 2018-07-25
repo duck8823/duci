@@ -489,7 +489,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
 
 		// and
-		application.Config.Server.Timeout = 1
+		application.Config.Job.Timeout = 1
 
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
@@ -500,7 +500,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, error) {
-				time.Sleep(2 * time.Second)
+				time.Sleep(3 * time.Second)
 				return "container_id", nil
 			})
 

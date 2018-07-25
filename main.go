@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/duck8823/duci/application"
+	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/docker"
@@ -14,10 +15,18 @@ import (
 	"os"
 )
 
-func main() {
+func init() {
 	flag.Var(application.Config, "c", "configuration file path")
 	flag.Parse()
 
+	if err := semaphore.Make(); err != nil {
+		logger.Errorf(uuid.UUID{}, "Failed to initialize a semaphore.\n%+v", err)
+		os.Exit(1)
+		return
+	}
+}
+
+func main() {
 	gitClient, err := git.New(application.Config.Server.SSHKeyPath)
 	if err != nil {
 		logger.Errorf(uuid.UUID{}, "Failed to create git client.\n%+v", err)

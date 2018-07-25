@@ -3,6 +3,7 @@ package runner
 import (
 	"bytes"
 	"github.com/duck8823/duci/application"
+	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -39,9 +40,11 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 	defer cancel()
 
 	go func() {
+		semaphore.Acquire()
 		hash, err := r.run(ctx, repo, ref, command...)
 		commitHash <- hash
 		errs <- err
+		semaphore.Release()
 	}()
 
 	select {
