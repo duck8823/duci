@@ -15,7 +15,7 @@ import (
 	"os"
 )
 
-func main() {
+func init() {
 	flag.Var(application.Config, "c", "configuration file path")
 	flag.Parse()
 
@@ -24,7 +24,9 @@ func main() {
 		os.Exit(1)
 		return
 	}
+}
 
+func main() {
 	gitClient, err := git.New(application.Config.Server.SSHKeyPath)
 	if err != nil {
 		logger.Errorf(uuid.UUID{}, "Failed to create git client.\n%+v", err)
