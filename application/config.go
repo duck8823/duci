@@ -21,19 +21,21 @@ type Configuration struct {
 }
 
 type Server struct {
-	WorkDir    string `yaml:"workdir" json:"workdir"`
-	Port       int    `yaml:"port" json:"port"`
-	SSHKeyPath string `yaml:"ssh_key_path" json:"sshKeyPath"`
-	Timeout    int64  `yaml:"timeout" json:"timeout"`
+	WorkDir     string `yaml:"workdir" json:"workdir"`
+	Port        int    `yaml:"port" json:"port"`
+	SSHKeyPath  string `yaml:"ssh_key_path" json:"sshKeyPath"`
+	Timeout     int64  `yaml:"timeout" json:"timeout"`
+	Concurrency int    `yaml:"concurrency" json:"concurrency"`
 }
 
 func init() {
 	Config = &Configuration{
 		Server: &Server{
-			WorkDir:    path.Join(os.TempDir(), Name),
-			Port:       8080,
-			SSHKeyPath: path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
-			Timeout:    600,
+			WorkDir:     path.Join(os.TempDir(), Name),
+			Port:        8080,
+			SSHKeyPath:  path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+			Timeout:     600,
+			Concurrency: 4,
 		},
 	}
 }

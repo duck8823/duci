@@ -12,20 +12,22 @@ func TestConfiguration_String(t *testing.T) {
 	// given
 	conf := &application.Configuration{
 		Server: &application.Server{
-			WorkDir:    "/path/to/work_dir",
-			SSHKeyPath: "/path/to/ssh_key_path",
-			Port:       1234,
-			Timeout:    60,
+			WorkDir:     "/path/to/work_dir",
+			SSHKeyPath:  "/path/to/ssh_key_path",
+			Port:        1234,
+			Timeout:     60,
+			Concurrency: 8,
 		},
 	}
 
 	// and
 	expected := fmt.Sprintf(
-		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"timeout\":%d}}",
+		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"timeout\":%d,\"concurrency\":%d}}",
 		conf.Server.WorkDir,
 		conf.Server.Port,
 		conf.Server.SSHKeyPath,
 		conf.Server.Timeout,
+		conf.Server.Concurrency,
 	)
 
 	// when
@@ -42,10 +44,11 @@ func TestConfiguration_Set(t *testing.T) {
 		// given
 		expected := &application.Configuration{
 			Server: &application.Server{
-				WorkDir:    "/path/to/workdir",
-				Port:       8823,
-				SSHKeyPath: "/path/to/ssh_key",
-				Timeout:    600,
+				WorkDir:     "/path/to/workdir",
+				Port:        8823,
+				SSHKeyPath:  "/path/to/ssh_key",
+				Timeout:     600,
+				Concurrency: 4,
 			},
 		}
 
