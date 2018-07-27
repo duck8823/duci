@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -56,7 +57,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go c.Runner.Run(context.New("push"), event.GetRepo(), event.GetRef())
+		go c.Runner.Run(context.New(fmt.Sprintf("%s/push", application.Name)), event.GetRepo(), event.GetRef())
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
@@ -74,7 +75,7 @@ func (c *JobController) parseIssueComment(event *go_github.IssueCommentEvent) (c
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 	command = strings.Split(phrase, " ")
-	ctx = context.New(fmt.Sprintf("pr/%s", command[0]))
+	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]))
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
