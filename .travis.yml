@@ -25,12 +25,13 @@ script:
 after_success:
   - goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go
 before_deploy:
+  - go get -u github.com/buchanae/github-release-notes
   - go get -u github.com/golang/dep/cmd/dep
   - dep init
 deploy:
   - provider: script
     skip_cleanup: true
-    script: curl -sL https://git.io/goreleaser | bash
+    script: curl -sL https://git.io/goreleaser | bash < $( github-release-notes -org duck8823 -repo duci -since-latest-release )
     on:
       tags: true
       condition: $TRAVIS_GO_VERSION = "1.10"
