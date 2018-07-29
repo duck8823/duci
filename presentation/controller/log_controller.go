@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/duck8823/duci/infrastructure/store"
 	"github.com/google/uuid"
@@ -32,7 +33,7 @@ func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for _, msg := range job.Stream[read:] {
-			w.Write([]byte(msg.Text))
+			json.NewEncoder(w).Encode(msg)
 			flusher.Flush()
 			read++
 		}
