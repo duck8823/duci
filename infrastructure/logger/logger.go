@@ -2,7 +2,7 @@ package logger
 
 import (
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/store"
+	"github.com/duck8823/duci/infrastructure/logger/store"
 	"github.com/google/uuid"
 	"io"
 	"os"
@@ -18,7 +18,7 @@ func Debug(uuid uuid.UUID, message string) {
 	if message[len(message)-1] != '\n' {
 		message += "\n"
 	}
-	store.Append(uuid, "DEBUG", message)
+	logger_store.Append(uuid, "DEBUG", message)
 	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[36;1m[DEBUG]\033[0m %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
@@ -31,7 +31,7 @@ func Info(uuid uuid.UUID, message string) {
 	if message[len(message)-1] != '\n' {
 		message += "\n"
 	}
-	store.Append(uuid, "INFO", message)
+	logger_store.Append(uuid, "INFO", message)
 	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[1m[INFO]\033[0m %s", uuid, time.Now().Format(timeFormat), message)))
 }
 
@@ -44,7 +44,7 @@ func Error(uuid uuid.UUID, message string) {
 	if message[len(message)-1] != '\n' {
 		message += "\n"
 	}
-	store.Append(uuid, "ERROR", message)
+	logger_store.Append(uuid, "ERROR", message)
 	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[41;1m[ERROR]\033[0m %s", uuid, time.Now().Format(timeFormat), message)))
 }
 

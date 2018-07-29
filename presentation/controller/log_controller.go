@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/store"
+	"github.com/duck8823/duci/infrastructure/logger/store"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -25,9 +25,9 @@ func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var read int
-	var job *store.Job
+	var job *logger_store.Job
 	for true {
-		job, err = store.Get(id)
+		job, err = logger_store.Get(id)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error occurred: %+v", err), http.StatusInternalServerError)
 			return

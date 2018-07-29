@@ -1,4 +1,4 @@
-package store
+package logger_store
 
 import (
 	"bytes"
