@@ -21,8 +21,8 @@ type Message struct {
 }
 
 var (
-	db       *leveldb.DB
-	NotFound = errors.New("leveldb: not found")
+	db       *leveldb.DB = nil
+	NotFound             = errors.New("leveldb: not found")
 )
 
 func Open(path string) error {
@@ -36,6 +36,9 @@ func Open(path string) error {
 }
 
 func Append(uuid uuid.UUID, level, message string) error {
+	if db == nil {
+		return errors.New("database not open")
+	}
 	data, err := db.Get([]byte(uuid.String()), nil)
 	job := &Job{}
 	if err != NotFound {
@@ -60,6 +63,9 @@ func Append(uuid uuid.UUID, level, message string) error {
 }
 
 func Get(uuid uuid.UUID) (*Job, error) {
+	if db == nil {
+		return nil, errors.New("database not open")
+	}
 	data, err := db.Get([]byte(uuid.String()), nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -73,6 +79,9 @@ func Get(uuid uuid.UUID) (*Job, error) {
 }
 
 func Finish(uuid uuid.UUID) error {
+	if db == nil {
+		return errors.New("database not open")
+	}
 	data, _ := db.Get([]byte(uuid.String()), nil)
 	job := &Job{}
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(job); err != nil {
@@ -92,6 +101,9 @@ func Finish(uuid uuid.UUID) error {
 }
 
 func Close() error {
+	if db == nil {
+		return errors.New("database not open")
+	}
 	if err := db.Close(); err != nil {
 		return errors.WithStack(err)
 	}
