@@ -10,6 +10,7 @@ import (
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/duck8823/duci/infrastructure/store"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
@@ -54,6 +55,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.ERROR, timeout.Err().Error())
 		}
+		store.Finish(ctx.UUID())
 		return hash, timeout.Err()
 	case err := <-errs:
 		hash := <-commitHash
@@ -66,6 +68,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 		} else {
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.SUCCESS, "success")
 		}
+		store.Finish(ctx.UUID())
 		return hash, err
 	}
 }

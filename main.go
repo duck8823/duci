@@ -9,10 +9,13 @@ import (
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/duck8823/duci/infrastructure/store"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+	"path"
 )
 
 func init() {
@@ -56,7 +59,18 @@ func main() {
 
 	ctrl := &controller.JobController{Runner: dockerRunner, GitHub: githubService}
 
-	http.Handle("/", ctrl)
+	if err := store.Open(path.Join(os.TempDir(), "leveldb")); err != nil {
+		logger.Errorf(uuid.UUID{}, "Failed to initialize database.\n%+v", err)
+		os.Exit(1)
+		return
+	}
+	defer store.Close()
+
+	rtr := mux.NewRouter()
+	rtr.Handle("/", ctrl).Methods("POST")
+	rtr.Handle("/logs/{uuid:.+}", &controller.LogController{}).Methods("GET")
+
+	http.Handle("/", rtr)
 
 	if err := http.ListenAndServe(application.Config.Addr(), nil); err != nil {
 		logger.Errorf(uuid.UUID{}, "Failed to run server.\n%+v", err)
