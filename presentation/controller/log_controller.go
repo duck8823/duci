@@ -3,13 +3,16 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/logger/store"
+	"github.com/duck8823/duci/application/service/log"
+	"github.com/duck8823/duci/domain/model"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-type LogController struct{}
+type LogController struct {
+	LogService log.StoreService
+}
 
 func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	flusher, ok := w.(http.Flusher)
@@ -25,9 +28,9 @@ func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var read int
-	var job *logger_store.Job
+	var job *model.Job
 	for true {
-		job, err = logger_store.Get(id)
+		job, err = c.LogService.Get(id)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error occurred: %+v", err), http.StatusInternalServerError)
 			return

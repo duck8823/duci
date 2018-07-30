@@ -5,17 +5,16 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
+	"github.com/duck8823/duci/application/service/log"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
-	"github.com/duck8823/duci/infrastructure/logger/store"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
-	"path"
 )
 
 func init() {
@@ -59,16 +58,17 @@ func main() {
 
 	ctrl := &controller.JobController{Runner: dockerRunner, GitHub: githubService}
 
-	if err := logger_store.Open(path.Join(os.TempDir(), "leveldb")); err != nil {
+	logService, err := log.NewStoreService()
+	if err != nil {
 		logger.Errorf(uuid.UUID{}, "Failed to initialize database.\n%+v", err)
 		os.Exit(1)
 		return
 	}
-	defer logger_store.Close()
+	defer logService.Close()
 
 	rtr := mux.NewRouter()
 	rtr.Handle("/", ctrl).Methods("POST")
-	rtr.Handle("/logs/{uuid:.+}", &controller.LogController{}).Methods("GET")
+	rtr.Handle("/logs/{uuid:.+}", &controller.LogController{logService}).Methods("GET")
 
 	http.Handle("/", rtr)
 
