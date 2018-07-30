@@ -40,8 +40,11 @@ func Append(uuid uuid.UUID, level, message string) error {
 		return errors.New("database not open")
 	}
 	data, err := db.Get([]byte(uuid.String()), nil)
+	if err != nil && err.Error() != NotFound.Error() {
+		return errors.WithStack(err)
+	}
 	job := &Job{}
-	if err != NotFound {
+	if data != nil {
 		json.NewDecoder(bytes.NewReader(data)).Decode(job)
 	}
 
