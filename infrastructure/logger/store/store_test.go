@@ -46,6 +46,9 @@ func TestOpen(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	t.Run("when database not open", func(t *testing.T) {
+		// setup
+		logger_store.Close()
+
 		// when
 		job, err := logger_store.Get(uuid.New())
 
@@ -136,6 +139,9 @@ func TestGet(t *testing.T) {
 
 func TestAppend(t *testing.T) {
 	t.Run("when database not open", func(t *testing.T) {
+		// setup
+		logger_store.Close()
+
 		// expected
 		if err := logger_store.Append(uuid.New(), "level", "hello world"); err == nil {
 			t.Error("must occur error")
@@ -236,6 +242,9 @@ func TestAppend(t *testing.T) {
 
 func TestFinish(t *testing.T) {
 	t.Run("when database not open", func(t *testing.T) {
+		// setup
+		logger_store.Close()
+
 		// expected
 		if err := logger_store.Finish(uuid.New()); err == nil {
 			t.Error("must occur error")
@@ -319,6 +328,9 @@ func TestFinish(t *testing.T) {
 
 func TestClose(t *testing.T) {
 	t.Run("when not opened", func(t *testing.T) {
+		// setup
+		logger_store.Close()
+
 		// expect
 		if err := logger_store.Close(); err == nil {
 			t.Error("error must not be nil")

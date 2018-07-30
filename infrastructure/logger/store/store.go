@@ -107,5 +107,6 @@ func Close() error {
 	if err := db.Close(); err != nil {
 		return errors.WithStack(err)
 	}
+	db = nil
 	return nil
 }
