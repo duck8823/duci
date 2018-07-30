@@ -25,7 +25,7 @@ func TestOpen(t *testing.T) {
 		}
 
 		// expect
-		if _, err := os.Open(dir); err != nil {
+		if err := logger_store.Open(dir); err != nil {
 			t.Errorf("must not occur error: %+v", err)
 		}
 
@@ -38,7 +38,7 @@ func TestOpen(t *testing.T) {
 		dir := "/path/to/not/found"
 
 		// expect
-		if _, err := os.Open(dir); err == nil {
+		if err := logger_store.Open(dir); err == nil {
 			t.Error("must occur error")
 		}
 	})
@@ -75,7 +75,13 @@ func TestGet(t *testing.T) {
 		// given
 		existId, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("errour occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
+		}
+
+		// and
+		wrongDataId, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -95,6 +101,9 @@ func TestGet(t *testing.T) {
 			t.Fatalf("error occured: %+v", err)
 		}
 		if err := db.Put([]byte(existId.String()), data, nil); err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		if err := db.Put([]byte(wrongDataId.String()), []byte("hello world"), nil); err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
 		db.Close()
@@ -123,6 +132,20 @@ func TestGet(t *testing.T) {
 			// then
 			if err.Error() != logger_store.NotFound.Error() {
 				t.Errorf("error must be %+v, but got %+v", logger_store.NotFound, err)
+			}
+
+			if actual != nil {
+				t.Errorf("job must be nil, buft got %+v", err)
+			}
+		})
+
+		t.Run("when try to get wrong data", func(t *testing.T) {
+			// when
+			actual, err := logger_store.Get(wrongDataId)
+
+			// then
+			if err == nil {
+				t.Errorf("error must be nil, but got %+v", err)
 			}
 
 			if actual != nil {
@@ -161,7 +184,13 @@ func TestAppend(t *testing.T) {
 		// given
 		existId, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("errour occured: %+v", err)
+			t.Fatalf("errour occurred: %+v", err)
+		}
+
+		// and
+		wrongDataId, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -181,6 +210,9 @@ func TestAppend(t *testing.T) {
 			t.Fatalf("error occured: %+v", err)
 		}
 		if err := db.Put([]byte(existId.String()), data, nil); err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		if err := db.Put([]byte(wrongDataId.String()), []byte("hello world"), nil); err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
 		db.Close()
@@ -211,15 +243,23 @@ func TestAppend(t *testing.T) {
 
 		t.Run("with not stored data", func(t *testing.T) {
 			// given
-			newId := uuid.New()
+			newId, _ := uuid.NewRandom()
 
 			// when
-			logger_store.Append(newId, "Error", "Append Message")
-
-			// and
-			actual, _ := logger_store.Get(newId)
+			err := logger_store.Append(newId, "Error", "Append Message")
 
 			// then
+			if err != nil {
+				t.Fatalf("error must not occur, but got %+v", err)
+			}
+
+			// and
+			actual, err := logger_store.Get(newId)
+			if err != nil {
+				t.Fatalf("error occurred: %+v", err)
+			}
+
+			// and
 			if len(actual.Stream) != 1 {
 				t.Errorf("length of stream must be 2, but got %d", len(actual.Stream))
 			}
@@ -230,6 +270,20 @@ func TestAppend(t *testing.T) {
 
 			if actual.Stream[0].Text != "Append Message" {
 				t.Errorf("appended level wont `Append Message`, but got `%s`", actual.Stream[0].Text)
+			}
+		})
+
+		t.Run("when try to get wrong data", func(t *testing.T) {
+			// when
+			actual, err := logger_store.Get(wrongDataId)
+
+			// then
+			if err == nil {
+				t.Errorf("error must be nil, but got %+v", err)
+			}
+
+			if actual != nil {
+				t.Errorf("job must be nil, buft got %+v", err)
 			}
 		})
 
