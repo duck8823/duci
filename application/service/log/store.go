@@ -7,9 +7,6 @@ import (
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/syndtr/goleveldb/leveldb"
-	leveldb_errors "github.com/syndtr/goleveldb/leveldb/errors"
-	"github.com/syndtr/goleveldb/leveldb/storage"
 	"time"
 )
 
@@ -27,7 +24,7 @@ type storeServiceImpl struct {
 }
 
 func NewStoreService() (StoreService, error) {
-	database, err := leveldb.Open(storage.NewMemStorage(), nil)
+	database, err := logger.OpenMemDb()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -36,7 +33,7 @@ func NewStoreService() (StoreService, error) {
 
 func (s *storeServiceImpl) Append(uuid uuid.UUID, level, message string) error {
 	data, err := s.db.Get([]byte(uuid.String()), nil)
-	if err != nil && err != leveldb_errors.ErrNotFound {
+	if err != nil && err != logger.NotFoundError {
 		return errors.WithStack(err)
 	}
 	job := &model.Job{}
