@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	)
+)
 
 func Create(dir string, output io.Writer) error {
 	writer := tar.NewWriter(output)
