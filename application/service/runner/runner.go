@@ -6,6 +6,7 @@ import (
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
+	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/git"
@@ -17,7 +18,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"time"
 )
 
 type Runner interface {
@@ -71,7 +71,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 }
 
 func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
-	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
+	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(clock.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
 	head, err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref)

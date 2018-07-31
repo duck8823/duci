@@ -2,14 +2,14 @@ package tar
 
 import (
 	"archive/tar"
+	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
-)
+	)
 
 func Create(dir string, output io.Writer) error {
 	writer := tar.NewWriter(output)
@@ -33,7 +33,7 @@ func Create(dir string, output io.Writer) error {
 			return errors.WithStack(err)
 		}
 
-		now := time.Now()
+		now := clock.Now()
 		header := &tar.Header{
 			Name:       strings.Replace(file.Name(), dir+"/", "", -1),
 			Mode:       0600,
