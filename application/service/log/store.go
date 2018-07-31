@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type Level = string
@@ -43,7 +43,7 @@ func (s *storeServiceImpl) Append(uuid uuid.UUID, level, message string) error {
 
 	msg := model.Message{
 		Level: level,
-		Time:  time.Now().Format("2006-01-02 15:04:05.000"),
+		Time:  clock.Now().String(),
 		Text:  message,
 	}
 	job.Stream = append(job.Stream, msg)
