@@ -32,13 +32,9 @@ func NewStoreService() (StoreService, error) {
 }
 
 func (s *storeServiceImpl) Append(uuid uuid.UUID, level, message string) error {
-	data, err := s.db.Get([]byte(uuid.String()), nil)
-	if err != nil && err != logger.NotFoundError {
+	job, err := s.findOrInitialize(uuid)
+	if err != nil {
 		return errors.WithStack(err)
-	}
-	job := &model.Job{}
-	if data != nil {
-		json.NewDecoder(bytes.NewReader(data)).Decode(job)
 	}
 
 	msg := model.Message{
@@ -48,7 +44,7 @@ func (s *storeServiceImpl) Append(uuid uuid.UUID, level, message string) error {
 	}
 	job.Stream = append(job.Stream, msg)
 
-	data, err = json.Marshal(job)
+	data, err := json.Marshal(job)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -56,6 +52,22 @@ func (s *storeServiceImpl) Append(uuid uuid.UUID, level, message string) error {
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func (s *storeServiceImpl) findOrInitialize(uuid uuid.UUID) (*model.Job, error) {
+	job := &model.Job{}
+
+	data, err := s.db.Get([]byte(uuid.String()), nil)
+	if err == logger.NotFoundError {
+		return job, nil
+	}
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	if err := json.NewDecoder(bytes.NewReader(data)).Decode(job); err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return job, nil
 }
 
 func (s *storeServiceImpl) Get(uuid uuid.UUID) (*model.Job, error) {
@@ -72,7 +84,11 @@ func (s *storeServiceImpl) Get(uuid uuid.UUID) (*model.Job, error) {
 }
 
 func (s *storeServiceImpl) Finish(uuid uuid.UUID) error {
-	data, _ := s.db.Get([]byte(uuid.String()), nil)
+	data, err := s.db.Get([]byte(uuid.String()), nil)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	job := &model.Job{}
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(job); err != nil {
 		return errors.WithStack(err)
@@ -80,11 +96,11 @@ func (s *storeServiceImpl) Finish(uuid uuid.UUID) error {
 
 	job.Finished = true
 
-	data, err := json.Marshal(job)
+	finished, err := json.Marshal(job)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := s.db.Put([]byte(uuid.String()), data, nil); err != nil {
+	if err := s.db.Put([]byte(uuid.String()), finished, nil); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
