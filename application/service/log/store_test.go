@@ -1,13 +1,16 @@
 package log
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/clock"
+	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/infrastructure/logger/mock_logger"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -82,5 +85,421 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 
 		// cleanup
 		clock.Adjust()
+	})
+
+	t.Run("when value not found", func(t *testing.T) {
+		// given
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		jst, err := time.LoadLocation("Asia/Tokyo")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		clock.Now = func() time.Time {
+			return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
+		}
+
+		// and
+		expected := &model.Job{
+			Finished: false,
+			Stream: []model.Message{
+				{Time: clock.Now().String(), Level: "INFO", Text: "Hello Testing."},
+			},
+		}
+		expectedData, err := json.Marshal(expected)
+		if err != nil {
+			t.Fatalf("error occurred: %+v", err)
+		}
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(nil, logger.NotFoundError)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Eq(expectedData), gomock.Nil()).
+			Times(1).
+			Return(nil)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Not(expectedData), gomock.Nil()).
+			Do(func(_ interface{}, data []byte, _ interface{}) {
+				t.Logf("wont: %s", string(expectedData))
+				t.Logf("got:  %s", string(data))
+			}).
+			Return(errors.New("must not call this"))
+
+		// expect
+		if err := service.Append(id, "INFO", "Hello Testing."); err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+
+		// cleanup
+		clock.Adjust()
+	})
+
+	t.Run("when store.Get returns error", func(t *testing.T) {
+		// given
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(nil, errors.New("hello testing"))
+
+		// expect
+		if err := service.Append(id, "INFO", "Hello Testing."); err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+
+	t.Run("when store.Get returns invalid data", func(t *testing.T) {
+		// given
+		storedData := []byte("invalid data")
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Any(), gomock.Nil()).
+			Times(1).
+			Do(func(_, _, _ interface{}) {
+				t.Fatalf("must not call this.")
+			})
+
+		// expect
+		if err := service.Append(id, "INFO", "Hello Testing."); err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+
+	t.Run("when store.Put returns invalid data", func(t *testing.T) {
+		// given
+		job := &model.Job{
+			Finished: false,
+			Stream:   []model.Message{{Time: "stored time", Level: "INFO", Text: "Hello World."}},
+		}
+		storedData, err := json.Marshal(job)
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		jst, err := time.LoadLocation("Asia/Tokyo")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		clock.Now = func() time.Time {
+			return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
+		}
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Any(), gomock.Nil()).
+			Times(1).
+			Return(errors.New("hello error"))
+
+		// expect
+		if err := service.Append(id, "INFO", "Hello Testing."); err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+}
+
+func TestStoreServiceImpl_Get(t *testing.T) {
+	// setup
+	ctrl := gomock.NewController(t)
+	mockStore := mock_logger.NewMockStore(ctrl)
+
+	service := &storeServiceImpl{mockStore}
+	t.Run("with error", func(t *testing.T) {
+		// setup
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// given
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(nil, errors.New("hello testing"))
+
+		// when
+		actual, err := service.Get(id)
+
+		// then
+		if actual != nil {
+			t.Errorf("job must be nil, but got %+v", actual)
+		}
+
+		if err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+
+	t.Run("with invalid data", func(t *testing.T) {
+		// given
+		storedData := []byte("invalid data")
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+
+		// when
+		actual, err := service.Get(id)
+
+		// then
+		if err == nil {
+			t.Error("error must occur, but got nil")
+		}
+
+		if actual != nil {
+			t.Errorf("job must be nil, but got %+v", err)
+		}
+	})
+
+	t.Run("with stored data", func(t *testing.T) {
+		// given
+		expected := &model.Job{
+			Finished: false,
+			Stream:   []model.Message{{Time: "stored time", Level: "INFO", Text: "Hello World."}},
+		}
+		storedData, err := json.Marshal(expected)
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+
+		// when
+		actual, err := service.Get(id)
+
+		// then
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("wont %+v, but got %+v", expected, actual)
+		}
+	})
+}
+
+func TestStoreServiceImpl_Finish(t *testing.T) {
+	// setup
+	ctrl := gomock.NewController(t)
+	mockStore := mock_logger.NewMockStore(ctrl)
+
+	service := &storeServiceImpl{mockStore}
+	t.Run("with error", func(t *testing.T) {
+		// setup
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// given
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(nil, errors.New("hello testing"))
+
+		// expect
+		if err := service.Finish(id); err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+
+	t.Run("with invalid data", func(t *testing.T) {
+		// given
+		storedData := []byte("invalid data")
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+
+		// expect
+		if err := service.Finish(id); err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+
+	t.Run("with stored data", func(t *testing.T) {
+		// given
+		given := &model.Job{
+			Finished: false,
+			Stream:   []model.Message{{Time: "stored time", Level: "INFO", Text: "Hello World."}},
+		}
+		storedData, err := json.Marshal(given)
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		expected := &model.Job{
+			Finished: true,
+			Stream:   []model.Message{{Time: "stored time", Level: "INFO", Text: "Hello World."}},
+		}
+		expectedData, err := json.Marshal(expected)
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Eq(expectedData), gomock.Nil()).
+			Times(1)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Not(expectedData), gomock.Nil()).
+			Do(func(_, arg, _ interface{}) {
+				actual := &model.Job{}
+				json.NewDecoder(bytes.NewReader(arg.([]byte))).Decode(actual)
+				t.Fatalf("invalid argument: wont %+v, but got %+v", expected, actual)
+			})
+
+		// when
+		err = service.Finish(id)
+
+		// and
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+	})
+
+	t.Run("when failed put", func(t *testing.T) {
+		// given
+		given := &model.Job{
+			Finished: false,
+			Stream:   []model.Message{{Time: "stored time", Level: "INFO", Text: "Hello World."}},
+		}
+		storedData, err := json.Marshal(given)
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		mockStore.EXPECT().
+			Get(gomock.Eq(storedId), gomock.Nil()).
+			Times(1).
+			Return(storedData, nil)
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Any(), gomock.Nil()).
+			Times(1).
+			Return(errors.New("hello testing"))
+
+		// expect
+		if err := service.Finish(id); err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+}
+
+func TestStoreServiceImpl_Close(t *testing.T) {
+	// setup
+	ctrl := gomock.NewController(t)
+	mockStore := mock_logger.NewMockStore(ctrl)
+
+	service := &storeServiceImpl{mockStore}
+	t.Run("with error", func(t *testing.T) {
+		// given
+		mockStore.EXPECT().
+			Close().
+			Return(errors.New("hello testing"))
+
+		// expect
+		if err := service.Close(); err == nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+	})
+
+	t.Run("without error", func(t *testing.T) {
+		// given
+		mockStore.EXPECT().
+			Close().
+			Return(nil)
+
+		// expect
+		if err := service.Close(); err != nil {
+			t.Error("error must occur, but got nil")
+		}
 	})
 }
