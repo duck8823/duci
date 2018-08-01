@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -16,7 +15,6 @@ import (
 var (
 	reader io.ReadCloser
 	writer io.WriteCloser
-	regex  = regexp.MustCompile(`\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}`)
 )
 
 func TestDebug(t *testing.T) {
