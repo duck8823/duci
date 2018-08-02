@@ -15,6 +15,20 @@ import (
 	"time"
 )
 
+func TestNewStoreService(t *testing.T) {
+	// when
+	actual, err := NewStoreService()
+
+	// then
+	if _, ok := actual.(*storeServiceImpl); !ok {
+		t.Error("must be a StoreService, but not.")
+	}
+
+	if err != nil {
+		t.Errorf("error must not occur, but got %+v", err)
+	}
+}
+
 func TestStoreServiceImpl_Append(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
