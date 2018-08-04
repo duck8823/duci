@@ -13,6 +13,7 @@ import (
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"net/http"
 	"os"
 )
@@ -29,44 +30,19 @@ func init() {
 }
 
 func main() {
-	gitClient, err := git.New(application.Config.Server.SSHKeyPath)
+	jobCtrl, err := jobController()
 	if err != nil {
-		logger.Errorf(uuid.UUID{}, "Failed to create git client.\n%+v", err)
-		os.Exit(1)
-		return
-	}
-	githubService, err := github.NewWithEnv()
-	if err != nil {
-		logger.Errorf(uuid.UUID{}, "Failed to create github service.\n%+v", err)
-		os.Exit(1)
-		return
-	}
-	dockerClient, err := docker.New()
-	if err != nil {
-		logger.Errorf(uuid.UUID{}, "Failed to create docker client.\n%+v", err)
+		logger.Errorf(uuid.UUID{}, "Failed to initialize job controller.\n%+v", err)
 		os.Exit(1)
 		return
 	}
 
-	dockerRunner := &runner.DockerRunner{
-		Name:        application.Name,
-		BaseWorkDir: application.Config.Server.WorkDir,
-		Git:         gitClient,
-		GitHub:      githubService,
-		Docker:      dockerClient,
-	}
-
-	jobCtrl := &controller.JobController{Runner: dockerRunner, GitHub: githubService}
-
-	logService, err := log.NewStoreService()
+	logCtrl, err := logController()
 	if err != nil {
-		logger.Errorf(uuid.UUID{}, "Failed to initialize database.\n%+v", err)
+		logger.Errorf(uuid.UUID{}, "Failed to initialize log controller.\n%+v", err)
 		os.Exit(1)
 		return
 	}
-	defer logService.Close()
-
-	logCtrl := &controller.LogController{LogService: logService}
 
 	rtr := chi.NewRouter()
 	rtr.Post("/", jobCtrl.ServeHTTP)
@@ -77,4 +53,38 @@ func main() {
 		os.Exit(1)
 		return
 	}
+}
+
+func jobController() (*controller.JobController, error) {
+	gitClient, err := git.New(application.Config.Server.SSHKeyPath)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	githubService, err := github.NewWithEnv()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	dockerClient, err := docker.New()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	dockerRunner := &runner.DockerRunner{
+		Name:        application.Name,
+		BaseWorkDir: application.Config.Server.WorkDir,
+		Git:         gitClient,
+		GitHub:      githubService,
+		Docker:      dockerClient,
+	}
+
+	return &controller.JobController{Runner: dockerRunner, GitHub: githubService}, nil
+}
+
+func logController() (*controller.LogController, error) {
+	logService, err := log.NewStoreService()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &controller.LogController{LogService: logService}, nil
 }
