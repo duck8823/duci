@@ -7,6 +7,7 @@ require (
 	github.com/docker/go-connections v0.3.0
 	github.com/docker/go-units v0.3.3
 	github.com/emirpasic/gods v1.9.0
+	github.com/go-chi/chi v0.0.0-20171222161133-e83ac2304db3
 	github.com/golang/mock v1.1.1
 	github.com/golang/protobuf v1.1.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db

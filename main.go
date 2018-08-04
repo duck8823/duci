@@ -11,8 +11,8 @@ import (
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/presentation/controller"
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"net/http"
 	"os"
 )
@@ -56,7 +56,7 @@ func main() {
 		Docker:      dockerClient,
 	}
 
-	ctrl := &controller.JobController{Runner: dockerRunner, GitHub: githubService}
+	jobCtrl := &controller.JobController{Runner: dockerRunner, GitHub: githubService}
 
 	logService, err := log.NewStoreService()
 	if err != nil {
@@ -66,13 +66,13 @@ func main() {
 	}
 	defer logService.Close()
 
-	rtr := mux.NewRouter()
-	rtr.Handle("/", ctrl).Methods("POST")
-	rtr.Handle("/logs/{uuid:.+}", &controller.LogController{logService}).Methods("GET")
+	logCtrl := &controller.LogController{LogService: logService}
 
-	http.Handle("/", rtr)
+	rtr := chi.NewRouter()
+	rtr.Post("/", jobCtrl.ServeHTTP)
+	rtr.Get("/logs/{uuid}", logCtrl.ServeHTTP)
 
-	if err := http.ListenAndServe(application.Config.Addr(), nil); err != nil {
+	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
 		logger.Errorf(uuid.UUID{}, "Failed to run server.\n%+v", err)
 		os.Exit(1)
 		return

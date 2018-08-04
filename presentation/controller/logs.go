@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/duck8823/duci/application/service/log"
 	"github.com/duck8823/duci/domain/model"
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -21,7 +21,7 @@ func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := uuid.Parse(mux.Vars(r)["uuid"])
+	id, err := uuid.Parse(chi.URLParam(r, "uuid"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error occurred: %+v", err), http.StatusInternalServerError)
 		return
