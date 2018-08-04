@@ -7,6 +7,7 @@ import (
 	"github.com/duck8823/duci/domain/model"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -27,21 +28,29 @@ func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := c.logs(w, flusher, id); err != nil {
+		http.Error(w, "Sorry, Error occurred.", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (c *LogController) logs(w http.ResponseWriter, f http.Flusher, id uuid.UUID) error {
 	var read int
 	var job *model.Job
+	var err error
 	for true {
 		job, err = c.LogService.Get(id)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Error occurred: %+v", err), http.StatusInternalServerError)
-			return
+			return errors.WithStack(err)
 		}
 		for _, msg := range job.Stream[read:] {
 			json.NewEncoder(w).Encode(msg)
-			flusher.Flush()
+			f.Flush()
 			read++
 		}
 		if job.Finished {
 			break
 		}
 	}
+	return nil
 }
