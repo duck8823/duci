@@ -90,3 +90,16 @@ func (m *MockClient) Rmi(ctx context.Context, tag string) error {
 func (mr *MockClientMockRecorder) Rmi(ctx, tag interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rmi", reflect.TypeOf((*MockClient)(nil).Rmi), ctx, tag)
 }
+
+// ExitCode mocks base method
+func (m *MockClient) ExitCode(ctx context.Context, containerId string) (int64, error) {
+	ret := m.ctrl.Call(m, "ExitCode", ctx, containerId)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExitCode indicates an expected call of ExitCode
+func (mr *MockClientMockRecorder) ExitCode(ctx, containerId interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExitCode", reflect.TypeOf((*MockClient)(nil).ExitCode), ctx, containerId)
+}

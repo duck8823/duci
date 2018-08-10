@@ -45,6 +45,7 @@ type Client interface {
 	Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Logger, error)
 	Rm(ctx context.Context, containerId string) error
 	Rmi(ctx context.Context, tag string) error
+	ExitCode(ctx context.Context, containerId string) (int64, error)
 }
 
 type clientImpl struct {
@@ -114,4 +115,12 @@ func (c *clientImpl) Rmi(ctx context.Context, tag string) error {
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func (c *clientImpl) ExitCode(ctx context.Context, containerId string) (int64, error) {
+	code, err := c.moby.ContainerWait(ctx, containerId)
+	if err != nil {
+		return code, errors.WithStack(err)
+	}
+	return code, nil
 }
