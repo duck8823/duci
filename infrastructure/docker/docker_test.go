@@ -51,9 +51,11 @@ func TestClientImpl_Build(t *testing.T) {
 			}
 
 			// when
-			if _, err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
+			logger, err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile")
+			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			wait(t, logger)
 
 			images := dockerImages(t)
 
@@ -73,9 +75,12 @@ func TestClientImpl_Build(t *testing.T) {
 			}
 
 			// when
-			if _, err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile"); err != nil {
+			logger, err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile")
+			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			wait(t, logger)
+
 			images := dockerImages(t)
 
 			// then
@@ -155,16 +160,6 @@ func TestClientImpl_Run(t *testing.T) {
 				t.Error("error must occur")
 			}
 		})
-
-		t.Run("when exit code is not zero", func(t *testing.T) {
-			// given
-			imagePull(t, "centos:latest")
-
-			// expect
-			if _, _, err := cli.Run(context.New("test/task"), opts, "centos", "false"); err != docker.Failure {
-				t.Errorf("error must be docker.Failure, but got %+v", err)
-			}
-		})
 	})
 
 	t.Run("with environments", func(t *testing.T) {
@@ -208,10 +203,12 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
+		containerId, logger, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
+		wait(t, logger)
+
 		logs := containerLogsString(t, containerId)
 
 		// then
@@ -448,4 +445,15 @@ func containerCreate(t *testing.T, ref string) string {
 		return ""
 	}
 	return con.ID
+}
+
+func wait(t *testing.T, logger docker.Logger) {
+	t.Helper()
+
+	for {
+		_, err := logger.ReadLine()
+		if err != nil {
+			break
+		}
+	}
 }
