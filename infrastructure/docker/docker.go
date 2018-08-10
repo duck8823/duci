@@ -69,7 +69,6 @@ func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dock
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	defer resp.Body.Close()
 
 	return &buildLogger{bufio.NewReader(resp.Body)}, nil
 }
