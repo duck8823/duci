@@ -51,9 +51,10 @@ func TestClientImpl_Build(t *testing.T) {
 			}
 
 			// when
-			if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
+			if _, err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+
 			images := dockerImages(t)
 
 			// then
@@ -72,7 +73,7 @@ func TestClientImpl_Build(t *testing.T) {
 			}
 
 			// when
-			if err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile"); err != nil {
+			if _, err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile"); err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
 			images := dockerImages(t)
@@ -94,7 +95,7 @@ func TestClientImpl_Build(t *testing.T) {
 		}
 
 		// expect
-		if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err == nil {
+		if _, err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err == nil {
 			t.Error("error must not be nil")
 		}
 	})
@@ -116,7 +117,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), opts, "hello-world")
+			containerId, _, err := cli.Run(context.New("test/task"), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -133,7 +134,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
+			containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -150,7 +151,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), opts, "centos", "missing_command"); err == nil {
+			if _, _, err := cli.Run(context.New("test/task"), opts, "centos", "missing_command"); err == nil {
 				t.Error("error must occur")
 			}
 		})
@@ -160,7 +161,7 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), opts, "centos", "false"); err != docker.Failure {
+			if _, _, err := cli.Run(context.New("test/task"), opts, "centos", "false"); err != docker.Failure {
 				t.Errorf("error must be docker.Failure, but got %+v", err)
 			}
 		})
@@ -176,7 +177,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo $ENV")
+		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -207,7 +208,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
+		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}

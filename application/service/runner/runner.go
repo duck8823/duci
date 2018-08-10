@@ -99,7 +99,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if exists(path.Join(workDir, ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
-	if err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
+	if _, err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
 		return head, errors.WithStack(err)
 	}
 	var opts docker.RuntimeOptions
@@ -114,7 +114,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		}
 	}
 
-	_, err = r.Docker.Run(ctx, opts, tagName, command...)
+	_, _, err = r.Docker.Run(ctx, opts, tagName, command...)
 
 	return head, err
 }

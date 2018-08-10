@@ -54,14 +54,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq("./Dockerfile")).
 				Times(1).
-				Return(nil)
+				Return(nil, nil)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not("./Dockerfile")).
-				Return(errors.New("must not call this"))
+				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", nil)
+				Return("", nil, nil)
 
 			r := &runner.DockerRunner{
 				Name:        "test-runner",
@@ -121,14 +121,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 			mockDocker := mock_docker.NewMockClient(ctrl)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
-				Return(nil)
+				Return(nil, nil)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
-				Return(errors.New("must not call this"))
+				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", nil)
+				Return("", nil, nil)
 
 			r := &runner.DockerRunner{
 				Name:        "test-runner",
@@ -189,14 +189,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(nil)
+			Return(nil, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Eq(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", nil)
+			Return("", nil, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Not(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
-			Return("", errors.New("must not call this"))
+			Return("", nil, errors.New("must not call this"))
 
 		r := &runner.DockerRunner{
 			Name:        "test-runner",
@@ -341,7 +341,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(errors.New("test"))
+			Return(nil, errors.New("test"))
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
@@ -391,11 +391,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			Return(nil, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", errors.New("test"))
+			Return("", nil, errors.New("test"))
 
 		r := &runner.DockerRunner{
 			Name:        "test-runner",
@@ -442,11 +442,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			Return(nil, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", docker.Failure)
+			Return("", nil, docker.Failure)
 
 		r := &runner.DockerRunner{
 			Name:        "test-runner",
@@ -495,13 +495,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			Return(nil, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, error) {
+			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Logger, error) {
 				time.Sleep(3 * time.Second)
-				return "container_id", nil
+				return "container_id", nil, nil
 			})
 
 		r := &runner.DockerRunner{
