@@ -492,7 +492,7 @@ func removeContainer(t *testing.T, containerId string) {
 	}
 }
 
-func wait(t *testing.T, logger docker.Logger) {
+func wait(t *testing.T, logger docker.Log) {
 	t.Helper()
 
 	for {

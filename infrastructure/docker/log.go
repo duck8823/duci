@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type Logger interface {
+type Log interface {
 	ReadLine() (*LogLine, error)
 }
 

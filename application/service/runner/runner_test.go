@@ -499,7 +499,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Logger, error) {
+			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Log, error) {
 				time.Sleep(3 * time.Second)
 				return "container_id", nil, nil
 			})

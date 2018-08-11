@@ -41,8 +41,8 @@ func (v Volumes) ToMap() map[string]struct{} {
 var Failure = errors.New("Task Failure")
 
 type Client interface {
-	Build(ctx context.Context, file io.Reader, tag string, dockerfile string) (Logger, error)
-	Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Logger, error)
+	Build(ctx context.Context, file io.Reader, tag string, dockerfile string) (Log, error)
+	Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Log, error)
 	Rm(ctx context.Context, containerId string) error
 	Rmi(ctx context.Context, tag string) error
 	ExitCode(ctx context.Context, containerId string) (int64, error)
@@ -60,7 +60,7 @@ func New() (Client, error) {
 	return &clientImpl{moby: cli}, nil
 }
 
-func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dockerfile string) (Logger, error) {
+func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dockerfile string) (Log, error) {
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag},
 		Dockerfile: dockerfile,
@@ -73,7 +73,7 @@ func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dock
 	return &buildLogger{bufio.NewReader(resp.Body)}, nil
 }
 
-func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Logger, error) {
+func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Log, error) {
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag,
 		Env:     opts.Environments.ToArray(),
