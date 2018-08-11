@@ -68,6 +68,10 @@ func jobController() (*controller.JobController, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	logStore, err := log.NewStoreService()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 
 	dockerRunner := &runner.DockerRunner{
 		Name:        application.Name,
@@ -75,6 +79,7 @@ func jobController() (*controller.JobController, error) {
 		Git:         gitClient,
 		GitHub:      githubService,
 		Docker:      dockerClient,
+		LogStore:    logStore,
 	}
 
 	return &controller.JobController{Runner: dockerRunner, GitHub: githubService}, nil

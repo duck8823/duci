@@ -5,6 +5,7 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
+	"github.com/duck8823/duci/application/service/log"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -14,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -28,6 +30,7 @@ type DockerRunner struct {
 	Git         git.Client
 	GitHub      github.Service
 	Docker      docker.Client
+	LogStore    log.StoreService
 	Name        string
 	BaseWorkDir string
 }
@@ -99,9 +102,21 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if exists(path.Join(workDir, ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
-	if _, err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
+	buildLog, err := r.Docker.Build(ctx, readFile, tagName, dockerfile)
+	if err != nil {
 		return head, errors.WithStack(err)
 	}
+	for {
+		line, err := buildLog.ReadLine()
+		if err != nil && err != io.EOF {
+			return head, errors.WithStack(err)
+		}
+		r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message))
+		if err == io.EOF {
+			break
+		}
+	}
+
 	var opts docker.RuntimeOptions
 	if exists(path.Join(workDir, ".duci/config.yml")) {
 		content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
@@ -114,7 +129,17 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		}
 	}
 
-	_, _, err = r.Docker.Run(ctx, opts, tagName, command...)
+	_, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
+	for {
+		line, err := runLog.ReadLine()
+		if err != nil && err != io.EOF {
+			return head, errors.WithStack(err)
+		}
+		r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message))
+		if err == io.EOF {
+			break
+		}
+	}
 
 	return head, err
 }
