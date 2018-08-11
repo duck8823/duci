@@ -42,6 +42,8 @@ func TestClientImpl_Build(t *testing.T) {
 
 	t.Run("with correct archive", func(t *testing.T) {
 		t.Run("without sub directory", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			tag := strings.ToLower(random.String(64))
 
@@ -66,6 +68,8 @@ func TestClientImpl_Build(t *testing.T) {
 		})
 
 		t.Run("with sub directory", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			tag := strings.ToLower(random.String(64))
 
@@ -91,6 +95,8 @@ func TestClientImpl_Build(t *testing.T) {
 	})
 
 	t.Run("with invalid archive", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		tag := strings.ToLower(random.String(64))
 
@@ -118,6 +124,8 @@ func TestClientImpl_Run(t *testing.T) {
 		opts := docker.RuntimeOptions{}
 
 		t.Run("without command", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			imagePull(t, "hello-world:latest")
 
@@ -135,6 +143,8 @@ func TestClientImpl_Run(t *testing.T) {
 		})
 
 		t.Run("with command", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			imagePull(t, "centos:latest")
 
@@ -152,6 +162,8 @@ func TestClientImpl_Run(t *testing.T) {
 		})
 
 		t.Run("with missing command", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			imagePull(t, "centos:latest")
 
@@ -163,6 +175,8 @@ func TestClientImpl_Run(t *testing.T) {
 	})
 
 	t.Run("with environments", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		imagePull(t, "centos:latest")
 
@@ -189,6 +203,7 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Skip("skip if CI ( Docker in Docker )")
 			// TODO reduce external dependencies
 		}
+		t.Parallel()
 
 		// given
 		imagePull(t, "centos:latest")
