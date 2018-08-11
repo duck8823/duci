@@ -130,10 +130,12 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, _, err := cli.Run(context.New("test/task"), opts, "hello-world")
+			containerId, logger, err := cli.Run(context.New("test/task"), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			wait(t, logger)
+
 			logs := containerLogsString(t, containerId)
 
 			// then
@@ -149,10 +151,12 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
+			containerId, logger, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			wait(t, logger)
+
 			logs := containerLogsString(t, containerId)
 
 			// then
@@ -186,10 +190,12 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo $ENV")
+		containerId, logger, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo hello $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
+		wait(t, logger)
+
 		logs := containerLogsString(t, containerId)
 
 		// then
