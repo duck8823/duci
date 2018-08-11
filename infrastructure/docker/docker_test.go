@@ -142,6 +142,9 @@ func TestClientImpl_Run(t *testing.T) {
 			if !strings.Contains(logs, "Hello from Docker!") {
 				t.Error("logs must contains `Hello from Docker!`")
 			}
+
+			// cleanup
+			removeContainer(t, containerId)
 		})
 
 		t.Run("with command", func(t *testing.T) {
@@ -163,6 +166,9 @@ func TestClientImpl_Run(t *testing.T) {
 			if strings.Contains(logs, "hello-world") {
 				t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 			}
+
+			// cleanup
+			removeContainer(t, containerId)
 		})
 
 		t.Run("with missing command", func(t *testing.T) {
@@ -202,6 +208,9 @@ func TestClientImpl_Run(t *testing.T) {
 		if !strings.Contains(logs, "hello-world") {
 			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 		}
+
+		// cleanup
+		removeContainer(t, containerId)
 	})
 
 	t.Run("with volumes", func(t *testing.T) {
@@ -236,6 +245,9 @@ func TestClientImpl_Run(t *testing.T) {
 		if !strings.Contains(logs, "hello-world") {
 			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 		}
+
+		// cleanup
+		removeContainer(t, containerId)
 	})
 }
 
@@ -466,6 +478,18 @@ func containerCreate(t *testing.T, ref string) string {
 		return ""
 	}
 	return con.ID
+}
+
+func removeContainer(t *testing.T, containerId string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+	if err := cli.ContainerRemove(context.New("test/task"), containerId, types.ContainerRemoveOptions{}); err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
 }
 
 func wait(t *testing.T, logger docker.Logger) {
