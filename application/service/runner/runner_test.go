@@ -511,7 +511,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 	})
 
-	t.Run("when docker run failure", func(t *testing.T) {
+	t.Run("when docker run failure ( with exit code 1 )", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
 		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -533,11 +533,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", nil, docker.Failure)
+			Return("", &MockLog{}, nil)
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(int64(1), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -565,7 +565,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
 
 		// then
-		if err.Error() != docker.Failure.Error() {
+		if err != docker.Failure {
 			t.Errorf("error must be %s, but got %s", docker.Failure, err)
 		}
 

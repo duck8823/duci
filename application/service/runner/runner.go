@@ -22,6 +22,9 @@ import (
 	"strconv"
 )
 
+
+var Failure = errors.New("Task Failure")
+
 type Runner interface {
 	Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error)
 }
@@ -60,7 +63,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 		return hash, timeout.Err()
 	case err := <-errs:
 		hash := <-commitHash
-		if err == docker.Failure {
+		if err == Failure {
 			logger.Error(ctx.UUID(), err.Error())
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.FAILURE, "failure job")
 		} else if err != nil {
@@ -152,7 +155,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		return head, errors.WithStack(err)
 	}
 	if code != 0 {
-		return head, docker.Failure
+		return head, Failure
 	}
 
 	return head, err

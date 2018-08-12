@@ -38,8 +38,6 @@ func (v Volumes) ToMap() map[string]struct{} {
 	return m
 }
 
-var Failure = errors.New("Task Failure")
-
 type Client interface {
 	Build(ctx context.Context, file io.Reader, tag string, dockerfile string) (Log, error)
 	Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Log, error)
