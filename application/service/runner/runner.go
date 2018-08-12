@@ -22,7 +22,6 @@ import (
 	"strconv"
 )
 
-
 var Failure = errors.New("Task Failure")
 
 type Runner interface {
