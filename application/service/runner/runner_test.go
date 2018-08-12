@@ -65,6 +65,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
 				Return("", &MockLog{}, nil)
+			mockDocker.EXPECT().
+				ExitCode(gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(int64(0), nil)
 
 			// and
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -140,6 +144,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
 				Return("", &MockLog{}, nil)
+			mockDocker.EXPECT().
+				ExitCode(gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(int64(0), nil)
 
 			// and
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -216,6 +224,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Not(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Return("", nil, errors.New("must not call this"))
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -273,6 +285,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -330,6 +346,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -388,6 +408,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -447,6 +471,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return("", nil, errors.New("test"))
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -506,6 +534,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return("", nil, docker.Failure)
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -570,6 +602,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 				time.Sleep(3 * time.Second)
 				return "container_id", &MockLog{}, nil
 			})
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
