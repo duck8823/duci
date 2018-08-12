@@ -533,7 +533,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
 
 		// then
-		if err != docker.Failure {
+		if err.Error() != docker.Failure.Error() {
 			t.Errorf("error must be %s, but got %s", docker.Failure, err)
 		}
 
