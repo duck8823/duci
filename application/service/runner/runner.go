@@ -111,7 +111,9 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		if err != nil && err != io.EOF {
 			return head, errors.WithStack(err)
 		}
-		r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message))
+		if err := r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message)); err != nil {
+			return head, errors.WithStack(err)
+		}
 		if err == io.EOF {
 			break
 		}
@@ -130,12 +132,17 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	}
 
 	_, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
+	if err != nil {
+		return head, errors.WithStack(err)
+	}
 	for {
 		line, err := runLog.ReadLine()
 		if err != nil && err != io.EOF {
 			return head, errors.WithStack(err)
 		}
-		r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message))
+		if err := r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message)); err != nil {
+			return head, errors.WithStack(err)
+		}
 		if err == io.EOF {
 			break
 		}
