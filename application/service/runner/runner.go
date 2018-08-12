@@ -131,7 +131,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		}
 	}
 
-	_, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
+	containerId, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
 	if err != nil {
 		return head, errors.WithStack(err)
 	}
@@ -146,6 +146,13 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		if err == io.EOF {
 			break
 		}
+	}
+	code, err := r.Docker.ExitCode(ctx, containerId)
+	if err != nil {
+		return head, errors.WithStack(err)
+	}
+	if code != 0 {
+		return head, docker.Failure
 	}
 
 	return head, err
