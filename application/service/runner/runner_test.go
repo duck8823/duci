@@ -73,7 +73,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			// and
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
 			mockLogStore.EXPECT().
-				Append(gomock.Any(), gomock.Any(), gomock.Any()).
+				Append(gomock.Any(), gomock.Any()).
 				AnyTimes().
 				Return(nil)
 
@@ -152,7 +152,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			// and
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
 			mockLogStore.EXPECT().
-				Append(gomock.Any(), gomock.Any(), gomock.Any()).
+				Append(gomock.Any(), gomock.Any()).
 				AnyTimes().
 				Return(nil)
 
@@ -232,7 +232,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -293,7 +293,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -354,7 +354,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -416,7 +416,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -479,7 +479,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -542,7 +542,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -610,7 +610,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
-			Append(gomock.Any(), gomock.Any(), gomock.Any()).
+			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 

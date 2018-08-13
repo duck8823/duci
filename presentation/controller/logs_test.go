@@ -4,6 +4,7 @@ import (
 	ctx "context"
 	"github.com/duck8823/duci/application/service/log/mock_log"
 	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/go-chi/chi"
 	"github.com/golang/mock/gomock"
@@ -60,9 +61,8 @@ func TestLogsController_ServeHTTP(t *testing.T) {
 			job := &model.Job{
 				Finished: true,
 				Stream: []model.Message{{
-					Level: "INFO",
-					Time:  "now",
-					Text:  "Hello World",
+					Time: clock.Now(),
+					Text: "Hello World",
 				}},
 			}
 

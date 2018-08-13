@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/duck8823/duci/domain/model"
-	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -14,7 +13,7 @@ type Level = string
 
 type StoreService interface {
 	Get(uuid uuid.UUID) (*model.Job, error)
-	Append(uuid uuid.UUID, level Level, message string) error
+	Append(uuid uuid.UUID, message model.Message) error
 	Finish(uuid uuid.UUID) error
 	Close() error
 }
@@ -31,18 +30,13 @@ func NewStoreService() (StoreService, error) {
 	return &storeServiceImpl{database}, nil
 }
 
-func (s *storeServiceImpl) Append(uuid uuid.UUID, level, message string) error {
+func (s *storeServiceImpl) Append(uuid uuid.UUID, message model.Message) error {
 	job, err := s.findOrInitialize(uuid)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	msg := model.Message{
-		Level: level,
-		Time:  clock.Now().String(),
-		Text:  message,
-	}
-	job.Stream = append(job.Stream, msg)
+	job.Stream = append(job.Stream, message)
 
 	data, err := json.Marshal(job)
 	if err != nil {

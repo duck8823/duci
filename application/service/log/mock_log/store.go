@@ -5,7 +5,6 @@
 package mock_log
 
 import (
-	log "github.com/duck8823/duci/application/service/log"
 	model "github.com/duck8823/duci/domain/model"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
@@ -49,15 +48,15 @@ func (mr *MockStoreServiceMockRecorder) Get(uuid interface{}) *gomock.Call {
 }
 
 // Append mocks base method
-func (m *MockStoreService) Append(uuid uuid.UUID, level log.Level, message string) error {
-	ret := m.ctrl.Call(m, "Append", uuid, level, message)
+func (m *MockStoreService) Append(uuid uuid.UUID, message model.Message) error {
+	ret := m.ctrl.Call(m, "Append", uuid, message)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Append indicates an expected call of Append
-func (mr *MockStoreServiceMockRecorder) Append(uuid, level, message interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Append", reflect.TypeOf((*MockStoreService)(nil).Append), uuid, level, message)
+func (mr *MockStoreServiceMockRecorder) Append(uuid, message interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Append", reflect.TypeOf((*MockStoreService)(nil).Append), uuid, message)
 }
 
 // Finish mocks base method

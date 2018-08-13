@@ -6,6 +6,7 @@ import (
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/log"
+	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/context"
@@ -113,7 +114,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		if err != nil && err != io.EOF {
 			return head, errors.WithStack(err)
 		}
-		if err := r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message)); err != nil {
+		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
 			return head, errors.WithStack(err)
 		}
 		if err == io.EOF {
@@ -142,7 +143,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		if err != nil && err != io.EOF {
 			return head, errors.WithStack(err)
 		}
-		if err := r.LogStore.Append(ctx.UUID(), "INFO", string(line.Message)); err != nil {
+		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
 			return head, errors.WithStack(err)
 		}
 		if err == io.EOF {
