@@ -11,6 +11,7 @@ require (
 	github.com/golang/mock v1.1.1
 	github.com/golang/protobuf v1.1.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
+	github.com/google/go-cmp v0.2.0
 	github.com/google/go-github v0.0.0-20180125185944-e48060a28fac
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135
 	github.com/google/logger v0.0.0-20180208223940-54b4ae679a63

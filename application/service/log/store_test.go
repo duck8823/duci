@@ -9,8 +9,8 @@ import (
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/infrastructure/logger/mock_logger"
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -358,7 +358,7 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 			t.Errorf("error must not occur, but got %+v", err)
 		}
 
-		if !reflect.DeepEqual(actual, expected) {
+		if !cmp.Equal(actual.Stream[0].Time, expected.Stream[0].Time) {
 			t.Errorf("wont %+v, but got %+v", expected, actual)
 		}
 
