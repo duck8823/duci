@@ -253,6 +253,9 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err := service.Append(id, model.Message{Text: "Hello Testing."}); err == nil {
 			t.Error("error must occur, but got nil")
 		}
+
+		// cleanup
+		clock.Adjust()
 	})
 }
 
