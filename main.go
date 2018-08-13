@@ -18,6 +18,10 @@ import (
 	"os"
 )
 
+var (
+	logStore log.StoreService
+)
+
 func init() {
 	flag.Var(application.Config, "c", "configuration file path")
 	flag.Parse()
@@ -26,6 +30,14 @@ func init() {
 		logger.Errorf(uuid.UUID{}, "Failed to initialize a semaphore.\n%+v", err)
 		os.Exit(1)
 		return
+	}
+
+	if logStoreService, err := log.NewStoreService(); err != nil {
+		logger.Errorf(uuid.UUID{}, "Failed to initialize a semaphore.\n%+v", err)
+		os.Exit(1)
+		return
+	} else {
+		logStore = logStoreService
 	}
 }
 
@@ -37,12 +49,7 @@ func main() {
 		return
 	}
 
-	logCtrl, err := logController()
-	if err != nil {
-		logger.Errorf(uuid.UUID{}, "Failed to initialize log controller.\n%+v", err)
-		os.Exit(1)
-		return
-	}
+	logCtrl := &controller.LogController{LogService: logStore}
 
 	rtr := chi.NewRouter()
 	rtr.Post("/", jobCtrl.ServeHTTP)
@@ -68,10 +75,6 @@ func jobController() (*controller.JobController, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	logStore, err := log.NewStoreService()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
 
 	dockerRunner := &runner.DockerRunner{
 		Name:        application.Name,
@@ -83,13 +86,4 @@ func jobController() (*controller.JobController, error) {
 	}
 
 	return &controller.JobController{Runner: dockerRunner, GitHub: githubService}, nil
-}
-
-func logController() (*controller.LogController, error) {
-	logService, err := log.NewStoreService()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return &controller.LogController{LogService: logService}, nil
 }

@@ -24,12 +24,12 @@ func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	id, err := uuid.Parse(chi.URLParam(r, "uuid"))
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error occurred: %+v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error occurred: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	if err := c.logs(w, flusher, id); err != nil {
-		http.Error(w, "Sorry, Error occurred.", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Sorry, Error occurred: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 }

@@ -14,7 +14,7 @@ var (
 )
 
 func Debug(uuid uuid.UUID, message string) {
-	if message[len(message)-1] != '\n' {
+	if len(message) < 1 || message[len(message)-1] != '\n' {
 		message += "\n"
 	}
 	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[36;1m[DEBUG]\033[0m %s", uuid, clock.Now().Format(timeFormat), message)))
@@ -26,7 +26,7 @@ func Debugf(uuid uuid.UUID, format string, args ...interface{}) {
 }
 
 func Info(uuid uuid.UUID, message string) {
-	if message[len(message)-1] != '\n' {
+	if len(message) < 1 || message[len(message)-1] != '\n' {
 		message += "\n"
 	}
 	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[1m[INFO]\033[0m %s", uuid, clock.Now().Format(timeFormat), message)))
@@ -38,7 +38,7 @@ func Infof(uuid uuid.UUID, format string, args ...interface{}) {
 }
 
 func Error(uuid uuid.UUID, message string) {
-	if message[len(message)-1] != '\n' {
+	if len(message) < 1 || message[len(message)-1] != '\n' {
 		message += "\n"
 	}
 	Writer.Write([]byte(fmt.Sprintf("[%s] %s \033[41;1m[ERROR]\033[0m %s", uuid, clock.Now().Format(timeFormat), message)))
