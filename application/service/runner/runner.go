@@ -109,17 +109,8 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if err != nil {
 		return head, errors.WithStack(err)
 	}
-	for {
-		line, err := buildLog.ReadLine()
-		if err != nil && err != io.EOF {
-			return head, errors.WithStack(err)
-		}
-		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
-			return head, errors.WithStack(err)
-		}
-		if err == io.EOF {
-			break
-		}
+	if err := r.logAppend(ctx, buildLog); err != nil {
+		return head, errors.WithStack(err)
 	}
 
 	var opts docker.RuntimeOptions
@@ -138,18 +129,10 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if err != nil {
 		return head, errors.WithStack(err)
 	}
-	for {
-		line, err := runLog.ReadLine()
-		if err != nil && err != io.EOF {
-			return head, errors.WithStack(err)
-		}
-		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
-			return head, errors.WithStack(err)
-		}
-		if err == io.EOF {
-			break
-		}
+	if err := r.logAppend(ctx, runLog); err != nil {
+		return head, errors.WithStack(err)
 	}
+
 	code, err := r.Docker.ExitCode(ctx, containerId)
 	if err != nil {
 		return head, errors.WithStack(err)
@@ -159,6 +142,21 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	}
 
 	return head, err
+}
+
+func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
+	for {
+		line, err := log.ReadLine()
+		if err != nil && err != io.EOF {
+			return errors.WithStack(err)
+		}
+		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
+			return errors.WithStack(err)
+		}
+		if err == io.EOF {
+			return nil
+		}
+	}
 }
 
 func exists(name string) bool {
