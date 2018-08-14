@@ -130,11 +130,11 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, logger, err := cli.Run(context.New("test/task"), opts, "hello-world")
+			containerId, _, err := cli.Run(context.New("test/task"), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
-			wait(t, logger)
+			containerWait(t, containerId)
 
 			logs := containerLogsString(t, containerId)
 
@@ -154,11 +154,11 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, logger, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
+			containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
-			wait(t, logger)
+			containerWait(t, containerId)
 
 			logs := containerLogsString(t, containerId)
 
@@ -196,11 +196,11 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, logger, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo hello $ENV")
+		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo hello $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
-		wait(t, logger)
+		containerWait(t, containerId)
 
 		logs := containerLogsString(t, containerId)
 
@@ -233,11 +233,11 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, logger, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
+		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
-		wait(t, logger)
+		containerWait(t, containerId)
 
 		logs := containerLogsString(t, containerId)
 
@@ -478,6 +478,18 @@ func containerCreate(t *testing.T, ref string) string {
 		return ""
 	}
 	return con.ID
+}
+
+func containerWait(t *testing.T, containerId string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+	if _, err := cli.ContainerWait(context.New("test/task"), containerId); err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
 }
 
 func removeContainer(t *testing.T, containerId string) {
