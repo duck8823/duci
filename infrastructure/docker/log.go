@@ -33,12 +33,9 @@ type runLogger struct {
 
 func (l *runLogger) ReadLine() (*LogLine, error) {
 	for {
-		line, _, err := l.reader.ReadLine()
-		if err != nil && err != io.EOF {
-			return nil, errors.WithStack(err)
-		}
-		if len(line) < 8 {
-			continue
+		line, _, readErr := l.reader.ReadLine()
+		if readErr != nil && readErr != io.EOF {
+			return nil, errors.WithStack(readErr)
 		}
 
 		messages, err := trimPrefix(line)
@@ -48,11 +45,15 @@ func (l *runLogger) ReadLine() (*LogLine, error) {
 
 		// prevent to CR
 		progress := bytes.Split(messages, []byte{'\r'})
-		return &LogLine{Timestamp: clock.Now(), Message: progress[0]}, err
+		return &LogLine{Timestamp: clock.Now(), Message: progress[0]}, readErr
 	}
 }
 
 func trimPrefix(line []byte) ([]byte, error) {
+	if len(line) < 8 {
+		return []byte{}, nil
+	}
+
 	// detect log prefix
 	// see https://godoc.org/github.com/docker/docker/client#Client.ContainerLogs
 	if !((line[0] == 1 || line[0] == 2) && (line[1] == 0 && line[2] == 0 && line[3] == 0)) {
