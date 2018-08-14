@@ -300,6 +300,72 @@ func TestClientImpl_Rmi(t *testing.T) {
 	}
 }
 
+func TestClientImpl_ExitCode(t *testing.T) {
+	t.Run("with exit code 0", func(t *testing.T) {
+		// given
+		cli, err := docker.New()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		imagePull(t, "alpine:latest")
+
+		// and
+		containerId, _, err := cli.Run(context.New("test/task"), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 0")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// when
+		code, err := cli.ExitCode(context.New("test/task"), containerId)
+
+		// then
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+
+		if code != 0 {
+			t.Errorf("not equal wont 0, but got %d", code)
+		}
+
+		// cleanup
+		removeContainer(t, containerId)
+	})
+
+	t.Run("with exit code 1", func(t *testing.T) {
+		// given
+		cli, err := docker.New()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		imagePull(t, "alpine:latest")
+
+		// and
+		containerId, _, err := cli.Run(context.New("test/task"), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 1")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// when
+		code, err := cli.ExitCode(context.New("test/task"), containerId)
+
+		// then
+		if err != nil {
+			t.Error("error must occur, but got nil")
+		}
+
+		if code != 1 {
+			t.Errorf("not equal wont 1, but got %d", code)
+		}
+
+		// cleanup
+		removeContainer(t, containerId)
+	})
+}
+
 func TestEnvironments_ToArray(t *testing.T) {
 	var empty []string
 	for _, testcase := range []struct {
