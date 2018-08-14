@@ -3,6 +3,7 @@ package docker
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/pkg/errors"
 	"io"
@@ -24,7 +25,11 @@ type buildLogger struct {
 
 func (l *buildLogger) ReadLine() (*LogLine, error) {
 	line, _, err := l.reader.ReadLine()
-	return &LogLine{Timestamp: clock.Now(), Message: line}, err
+	s := &struct {
+		Stream string `json:"stream"`
+	}{}
+	json.NewDecoder(bytes.NewReader(line)).Decode(s)
+	return &LogLine{Timestamp: clock.Now(), Message: []byte(s.Stream)}, err
 }
 
 type runLogger struct {

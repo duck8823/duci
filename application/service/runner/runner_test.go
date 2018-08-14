@@ -57,14 +57,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq("./Dockerfile")).
 				Times(1).
-				Return(&MockLog{}, nil)
+				Return(&MockBuildLog{}, nil)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not("./Dockerfile")).
 				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", &MockLog{}, nil)
+				Return("", &MockJobLog{}, nil)
 			mockDocker.EXPECT().
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -74,6 +74,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
 			mockLogStore.EXPECT().
 				Append(gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(nil)
+			mockLogStore.EXPECT().
+				Finish(gomock.Any()).
 				AnyTimes().
 				Return(nil)
 
@@ -136,14 +140,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 			mockDocker := mock_docker.NewMockClient(ctrl)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
-				Return(&MockLog{}, nil)
+				Return(&MockBuildLog{}, nil)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
 				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", &MockLog{}, nil)
+				Return("", &MockJobLog{}, nil)
 			mockDocker.EXPECT().
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -153,6 +157,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
 			mockLogStore.EXPECT().
 				Append(gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(nil)
+			mockLogStore.EXPECT().
+				Finish(gomock.Any()).
 				AnyTimes().
 				Return(nil)
 
@@ -216,11 +224,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(&MockLog{}, nil)
+			Return(&MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Eq(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &MockLog{}, nil)
+			Return("", &MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Not(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Return("", nil, errors.New("must not call this"))
@@ -233,6 +241,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
 			Append(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -296,6 +308,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		r := &runner.DockerRunner{
 			Name:        "test-runner",
@@ -355,6 +371,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
 			Append(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -419,6 +439,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Append(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		r := &runner.DockerRunner{
 			Name:        "test-runner",
@@ -466,7 +490,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(&MockLog{}, nil)
+			Return(&MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -480,6 +504,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
 			Append(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -529,11 +557,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(&MockLog{}, nil)
+			Return(&MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &MockLog{}, nil)
+			Return("", &MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -543,6 +571,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
 			Append(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -594,13 +626,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(&MockLog{}, nil)
+			Return(&MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Log, error) {
 				time.Sleep(3 * time.Second)
-				return "container_id", &MockLog{}, nil
+				return "container_id", &MockJobLog{}, nil
 			})
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
@@ -611,6 +643,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
 		mockLogStore.EXPECT().
 			Append(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
@@ -656,9 +692,16 @@ func (r *MockRepo) GetSSHURL() string {
 	return r.SSHURL
 }
 
-type MockLog struct {
+type MockBuildLog struct {
 }
 
-func (l *MockLog) ReadLine() (*docker.LogLine, error) {
+func (l *MockBuildLog) ReadLine() (*docker.LogLine, error) {
+	return &docker.LogLine{Timestamp: clock.Now(), Message: []byte("{\"stream\":\"Hello World,\"}")}, io.EOF
+}
+
+type MockJobLog struct {
+}
+
+func (l *MockJobLog) ReadLine() (*docker.LogLine, error) {
 	return &docker.LogLine{Timestamp: clock.Now(), Message: []byte("Hello World,")}, io.EOF
 }
