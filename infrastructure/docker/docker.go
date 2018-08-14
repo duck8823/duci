@@ -91,6 +91,7 @@ func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, c
 	log, err := c.moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
+		Follow:     true,
 	})
 	if err != nil {
 		return "", nil, errors.WithStack(err)

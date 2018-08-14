@@ -60,6 +60,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.ERROR, timeout.Err().Error())
 		}
+		r.LogStore.Finish(ctx.UUID())
 		return hash, timeout.Err()
 	case err := <-errs:
 		hash := <-commitHash
@@ -72,6 +73,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 		} else {
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.SUCCESS, "success")
 		}
+		r.LogStore.Finish(ctx.UUID())
 		return hash, err
 	}
 }
