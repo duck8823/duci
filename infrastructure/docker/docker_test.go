@@ -42,6 +42,8 @@ func TestClientImpl_Build(t *testing.T) {
 
 	t.Run("with correct archive", func(t *testing.T) {
 		t.Run("without sub directory", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			tag := strings.ToLower(random.String(64))
 
@@ -51,9 +53,12 @@ func TestClientImpl_Build(t *testing.T) {
 			}
 
 			// when
-			if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err != nil {
+			logger, err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile")
+			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			wait(t, logger)
+
 			images := dockerImages(t)
 
 			// then
@@ -63,6 +68,8 @@ func TestClientImpl_Build(t *testing.T) {
 		})
 
 		t.Run("with sub directory", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			tag := strings.ToLower(random.String(64))
 
@@ -72,9 +79,12 @@ func TestClientImpl_Build(t *testing.T) {
 			}
 
 			// when
-			if err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile"); err != nil {
+			logger, err := cli.Build(context.New("test/task"), tar, tag, ".duci/Dockerfile")
+			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			wait(t, logger)
+
 			images := dockerImages(t)
 
 			// then
@@ -85,6 +95,8 @@ func TestClientImpl_Build(t *testing.T) {
 	})
 
 	t.Run("with invalid archive", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		tag := strings.ToLower(random.String(64))
 
@@ -94,7 +106,7 @@ func TestClientImpl_Build(t *testing.T) {
 		}
 
 		// expect
-		if err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err == nil {
+		if _, err := cli.Build(context.New("test/task"), tar, tag, "./Dockerfile"); err == nil {
 			t.Error("error must not be nil")
 		}
 	})
@@ -112,61 +124,69 @@ func TestClientImpl_Run(t *testing.T) {
 		opts := docker.RuntimeOptions{}
 
 		t.Run("without command", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), opts, "hello-world")
+			containerId, _, err := cli.Run(context.New("test/task"), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			containerWait(t, containerId)
+
 			logs := containerLogsString(t, containerId)
 
 			// then
 			if !strings.Contains(logs, "Hello from Docker!") {
 				t.Error("logs must contains `Hello from Docker!`")
 			}
+
+			// cleanup
+			removeContainer(t, containerId)
 		})
 
 		t.Run("with command", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			imagePull(t, "centos:latest")
 
 			// when
-			containerId, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
+			containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
+			containerWait(t, containerId)
+
 			logs := containerLogsString(t, containerId)
 
 			// then
 			if strings.Contains(logs, "hello-world") {
 				t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 			}
+
+			// cleanup
+			removeContainer(t, containerId)
 		})
 
 		t.Run("with missing command", func(t *testing.T) {
+			t.Parallel()
+
 			// given
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, err := cli.Run(context.New("test/task"), opts, "centos", "missing_command"); err == nil {
+			if _, _, err := cli.Run(context.New("test/task"), opts, "centos", "missing_command"); err == nil {
 				t.Error("error must occur")
-			}
-		})
-
-		t.Run("when exit code is not zero", func(t *testing.T) {
-			// given
-			imagePull(t, "centos:latest")
-
-			// expect
-			if _, err := cli.Run(context.New("test/task"), opts, "centos", "false"); err != docker.Failure {
-				t.Errorf("error must be docker.Failure, but got %+v", err)
 			}
 		})
 	})
 
 	t.Run("with environments", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		imagePull(t, "centos:latest")
 
@@ -176,16 +196,21 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo $ENV")
+		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "sh", "-c", "echo hello $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
+		containerWait(t, containerId)
+
 		logs := containerLogsString(t, containerId)
 
 		// then
 		if !strings.Contains(logs, "hello-world") {
 			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 		}
+
+		// cleanup
+		removeContainer(t, containerId)
 	})
 
 	t.Run("with volumes", func(t *testing.T) {
@@ -193,6 +218,7 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Skip("skip if CI ( Docker in Docker )")
 			// TODO reduce external dependencies
 		}
+		t.Parallel()
 
 		// given
 		imagePull(t, "centos:latest")
@@ -207,16 +233,21 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
+		containerId, _, err := cli.Run(context.New("test/task"), opts, "centos", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
+		containerWait(t, containerId)
+
 		logs := containerLogsString(t, containerId)
 
 		// then
 		if !strings.Contains(logs, "hello-world") {
 			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
 		}
+
+		// cleanup
+		removeContainer(t, containerId)
 	})
 }
 
@@ -267,6 +298,72 @@ func TestClientImpl_Rmi(t *testing.T) {
 	if contains(images, tag) {
 		t.Errorf("images must not contains tag. images: %+v, tag: %+v", images, tag)
 	}
+}
+
+func TestClientImpl_ExitCode(t *testing.T) {
+	t.Run("with exit code 0", func(t *testing.T) {
+		// given
+		cli, err := docker.New()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		imagePull(t, "alpine:latest")
+
+		// and
+		containerId, _, err := cli.Run(context.New("test/task"), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 0")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// when
+		code, err := cli.ExitCode(context.New("test/task"), containerId)
+
+		// then
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+
+		if code != 0 {
+			t.Errorf("not equal wont 0, but got %d", code)
+		}
+
+		// cleanup
+		removeContainer(t, containerId)
+	})
+
+	t.Run("with exit code 1", func(t *testing.T) {
+		// given
+		cli, err := docker.New()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		imagePull(t, "alpine:latest")
+
+		// and
+		containerId, _, err := cli.Run(context.New("test/task"), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 1")
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// when
+		code, err := cli.ExitCode(context.New("test/task"), containerId)
+
+		// then
+		if err != nil {
+			t.Error("error must occur, but got nil")
+		}
+
+		if code != 1 {
+			t.Errorf("not equal wont 1, but got %d", code)
+		}
+
+		// cleanup
+		removeContainer(t, containerId)
+	})
 }
 
 func TestEnvironments_ToArray(t *testing.T) {
@@ -447,4 +544,39 @@ func containerCreate(t *testing.T, ref string) string {
 		return ""
 	}
 	return con.ID
+}
+
+func containerWait(t *testing.T, containerId string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+	if _, err := cli.ContainerWait(context.New("test/task"), containerId); err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+}
+
+func removeContainer(t *testing.T, containerId string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+	if err := cli.ContainerRemove(context.New("test/task"), containerId, types.ContainerRemoveOptions{}); err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+}
+
+func wait(t *testing.T, logger docker.Log) {
+	t.Helper()
+
+	for {
+		_, err := logger.ReadLine()
+		if err != nil {
+			break
+		}
+	}
 }

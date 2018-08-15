@@ -5,7 +5,10 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
+	"github.com/duck8823/duci/application/service/log"
+	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
+	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/git"
@@ -13,12 +16,14 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
-	"time"
 )
+
+var Failure = errors.New("Task Failure")
 
 type Runner interface {
 	Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error)
@@ -28,6 +33,7 @@ type DockerRunner struct {
 	Git         git.Client
 	GitHub      github.Service
 	Docker      docker.Client
+	LogStore    log.StoreService
 	Name        string
 	BaseWorkDir string
 }
@@ -54,10 +60,11 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.ERROR, timeout.Err().Error())
 		}
+		r.LogStore.Finish(ctx.UUID())
 		return hash, timeout.Err()
 	case err := <-errs:
 		hash := <-commitHash
-		if err == docker.Failure {
+		if err == Failure {
 			logger.Error(ctx.UUID(), err.Error())
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.FAILURE, "failure job")
 		} else if err != nil {
@@ -66,12 +73,13 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 		} else {
 			r.GitHub.CreateCommitStatus(ctx, repo, hash, github.SUCCESS, "success")
 		}
+		r.LogStore.Finish(ctx.UUID())
 		return hash, err
 	}
 }
 
 func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
-	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(time.Now().Unix(), 10))
+	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(clock.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
 	head, err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref)
@@ -99,9 +107,14 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if exists(path.Join(workDir, ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
-	if err := r.Docker.Build(ctx, readFile, tagName, dockerfile); err != nil {
+	buildLog, err := r.Docker.Build(ctx, readFile, tagName, dockerfile)
+	if err != nil {
 		return head, errors.WithStack(err)
 	}
+	if err := r.logAppend(ctx, buildLog); err != nil {
+		return head, errors.WithStack(err)
+	}
+
 	var opts docker.RuntimeOptions
 	if exists(path.Join(workDir, ".duci/config.yml")) {
 		content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
@@ -114,9 +127,39 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		}
 	}
 
-	_, err = r.Docker.Run(ctx, opts, tagName, command...)
+	containerId, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
+	if err != nil {
+		return head, errors.WithStack(err)
+	}
+	if err := r.logAppend(ctx, runLog); err != nil {
+		return head, errors.WithStack(err)
+	}
+
+	code, err := r.Docker.ExitCode(ctx, containerId)
+	if err != nil {
+		return head, errors.WithStack(err)
+	}
+	if code != 0 {
+		return head, Failure
+	}
 
 	return head, err
+}
+
+func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
+	for {
+		line, err := log.ReadLine()
+		if err != nil && err != io.EOF {
+			return errors.WithStack(err)
+		}
+		logger.Info(ctx.UUID(), string(line.Message))
+		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
+			return errors.WithStack(err)
+		}
+		if err == io.EOF {
+			return nil
+		}
+	}
 }
 
 func exists(name string) bool {

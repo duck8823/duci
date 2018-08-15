@@ -36,10 +36,11 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // Build mocks base method
-func (m *MockClient) Build(ctx context.Context, file io.Reader, tag, dockerfile string) error {
+func (m *MockClient) Build(ctx context.Context, file io.Reader, tag, dockerfile string) (docker.Log, error) {
 	ret := m.ctrl.Call(m, "Build", ctx, file, tag, dockerfile)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(docker.Log)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Build indicates an expected call of Build
@@ -48,15 +49,16 @@ func (mr *MockClientMockRecorder) Build(ctx, file, tag, dockerfile interface{}) 
 }
 
 // Run mocks base method
-func (m *MockClient) Run(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, error) {
+func (m *MockClient) Run(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Log, error) {
 	varargs := []interface{}{ctx, opts, tag}
 	for _, a := range cmd {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "Run", varargs...)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(docker.Log)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // Run indicates an expected call of Run
@@ -87,4 +89,17 @@ func (m *MockClient) Rmi(ctx context.Context, tag string) error {
 // Rmi indicates an expected call of Rmi
 func (mr *MockClientMockRecorder) Rmi(ctx, tag interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rmi", reflect.TypeOf((*MockClient)(nil).Rmi), ctx, tag)
+}
+
+// ExitCode mocks base method
+func (m *MockClient) ExitCode(ctx context.Context, containerId string) (int64, error) {
+	ret := m.ctrl.Call(m, "ExitCode", ctx, containerId)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExitCode indicates an expected call of ExitCode
+func (mr *MockClientMockRecorder) ExitCode(ctx, containerId interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExitCode", reflect.TypeOf((*MockClient)(nil).ExitCode), ctx, containerId)
 }
