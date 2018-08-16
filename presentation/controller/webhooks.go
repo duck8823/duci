@@ -24,7 +24,12 @@ type JobController struct {
 }
 
 func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestId := uuid.New()
+	deliveryId := go_github.DeliveryID(r)
+	requestId, err := uuid.Parse(deliveryId)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error: invalid request header `X-GitHub-Delivery`: %+v", deliveryId), http.StatusBadRequest)
+		return
+	}
 
 	// Trigger build
 	githubEvent := r.Header.Get("X-GitHub-Event")
