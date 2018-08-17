@@ -9,6 +9,7 @@ import (
 	"path"
 	"testing"
 	"time"
+	"github.com/google/uuid"
 )
 
 func TestNew(t *testing.T) {
@@ -40,7 +41,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 
 			// when
 			hash, err := client.Clone(
-				context.New("test/task"),
+				context.New("test/task", uuid.New(), ""),
 				tempDir,
 				"git@github.com:duck8823/duci.git",
 				"refs/heads/master",
@@ -70,7 +71,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 
 			// when
 			_, err := client.Clone(
-				context.New("test/task"),
+				context.New("test/task", uuid.New(), ""),
 				wrongPath,
 				"git@github.com:duck8823/duci.git",
 				"refs/heads/master",

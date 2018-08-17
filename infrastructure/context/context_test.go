@@ -10,7 +10,7 @@ import (
 
 func TestContextWithUUID_UUID(t *testing.T) {
 	// given
-	ctx := context.New("test/task")
+	ctx := context.New("test/task", uuid.New(), "")
 	var empty uuid.UUID
 
 	// expect
@@ -22,7 +22,7 @@ func TestContextWithUUID_UUID(t *testing.T) {
 func TestWithTimeout(t *testing.T) {
 	t.Run("when timeout", func(t *testing.T) {
 		// when
-		ctx, cancel := context.WithTimeout(context.New("test/task"), 5*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.New("test/task", uuid.New(), ""), 5*time.Millisecond)
 		defer cancel()
 
 		go func() {
@@ -40,7 +40,7 @@ func TestWithTimeout(t *testing.T) {
 
 	t.Run("when cancel", func(t *testing.T) {
 		// when
-		ctx, cancel := context.WithTimeout(context.New("test/task"), 5*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.New("test/task", uuid.New(), ""), 5*time.Millisecond)
 		defer cancel()
 
 		go func() {
