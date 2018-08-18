@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/random"
-	"github.com/moby/moby/client"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -555,7 +555,11 @@ func containerWait(t *testing.T, containerId string) {
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
-	if _, err := cli.ContainerWait(context.New("test/task", uuid.New(), &url.URL{}), containerId); err != nil {
+	body, err2 := cli.ContainerWait(context.New("test/task", uuid.New(), &url.URL{}), containerId, container.WaitConditionNotRunning)
+	select {
+	case <-body:
+		return
+	case <-err2:
 		t.Fatalf("error occured. %+v", err)
 	}
 }
