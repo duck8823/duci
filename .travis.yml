@@ -26,6 +26,7 @@ after_success:
   - if [ "$TRAVIS_GO_VERSION" = "1.10" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
 before_deploy:
   - go get all
+  - go get golang.org/x/sys/windows
   - go get -u github.com/buchanae/github-release-notes
   - github-release-notes -org duck8823 -repo duci -since-latest-release > release-notes.txt
   - go get -u github.com/goreleaser/goreleaser
