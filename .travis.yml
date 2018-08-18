@@ -29,10 +29,11 @@ before_deploy:
   - dep init
   - go get -u github.com/buchanae/github-release-notes
   - github-release-notes -org duck8823 -repo duci -since-latest-release > release-notes.txt
+  - go get -u github.com/goreleaser/goreleaser
 deploy:
   - provider: script
     skip_cleanup: true
-    script: curl -sL https://git.io/goreleaser | bash --release-notes=release-notes.txt
+    script: goreleaser --release-notes=release-notes.txt
     on:
       tags: true
       condition: $TRAVIS_GO_VERSION = "1.10"
