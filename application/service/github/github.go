@@ -78,7 +78,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 		description = string([]rune(description)[:46]) + "..."
 	}
 	targetUrl := *ctx.Url()
-	targetUrl.Path = path.Join(targetUrl.Path, "logs")
+	targetUrl.Path = path.Join(targetUrl.Path, "logs", ctx.UUID().String())
 	targetUrlStr := targetUrl.String()
 	status := &Status{
 		Context:     &taskName,

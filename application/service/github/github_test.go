@@ -178,7 +178,8 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		description := "123456789012345678901234567890123456789012345678901234567890"
 		malformedDescription := "1234567890123456789012345678901234567890123456..."
 		state := github.SUCCESS
-		logUrl := "http://host:8080/logs"
+		requestId := uuid.New()
+		logUrl := fmt.Sprintf("http://host:8080/logs/%s", requestId.String())
 
 		gock.New("https://api.github.com").
 			Post(fmt.Sprintf("/repos/%s/statuses/%s", repo.FullName, "0000000000000000000000000000000000000000")).
@@ -193,7 +194,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 
 		// expect
 		if err := s.CreateCommitStatus(
-			context.New(taskName, uuid.New(), &url.URL{Scheme: "http", Host: "host:8080"}),
+			context.New(taskName, requestId, &url.URL{Scheme: "http", Host: "host:8080"}),
 			repo,
 			plumbing.Hash{},
 			state,
