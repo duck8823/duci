@@ -6,7 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/duck8823/duci/infrastructure/context"
-	moby "github.com/moby/moby/client"
+	moby "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"io"
 	"strings"
