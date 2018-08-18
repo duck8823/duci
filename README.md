@@ -47,7 +47,6 @@ You can use volumes options for external dependency, cache and etc.
 Set configurations in `.duci/config.yml`  
 
 ```yaml
----
 volumes:
   - '/path/to/host/dir:/path/to/container/dir'
 ```
@@ -69,8 +68,29 @@ $ duci
 
 ### Setting SSH
 This server clone from github.com with **SSH** protocol
-using private key `$HOME/.ssh/id_rsa`.  
+using private key `$HOME/.ssh/id_rsa` (default).  
 Please set the public key of the pair at https://github.com/settings/keys.
+
+### Server Configuration file
+You can specify configuration file with `-c` option.
+The configuration file must be yaml format.
+Possible values ​​are as follows.
+
+```yaml
+server:
+  workdir: '/path/to/tmp/duci'
+  port: 8080
+  sshKeyPath: '$HOME/.ssh/id_rsa'
+job:
+  timeout: 600
+  concurrency: `number of cpu`
+```
+
+You can check the default value.
+
+```bash
+$ duci -h
+```
 
 ### Add Webhooks to GitHub repository
 duci start to listen webhook with port `8080` and endpoint `/`.  
