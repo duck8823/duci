@@ -11,7 +11,9 @@ import (
 	"time"
 )
 
-const Name = "duci"
+const (
+	Name = "duci"
+)
 
 var (
 	Config *Configuration

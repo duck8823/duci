@@ -9,6 +9,7 @@ import (
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
+	"path"
 )
 
 type State = string
@@ -76,10 +77,14 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 	if len(description) >= 50 {
 		description = string([]rune(description)[:46]) + "..."
 	}
+	targetUrl := *ctx.Url()
+	targetUrl.Path = path.Join(targetUrl.Path, "logs", ctx.UUID().String())
+	targetUrlStr := targetUrl.String()
 	status := &Status{
 		Context:     &taskName,
 		Description: &description,
 		State:       &state,
+		TargetURL:   &targetUrlStr,
 	}
 
 	if _, _, err := s.cli.Repositories.CreateStatus(

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/git"
+	"github.com/google/uuid"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"net/url"
 	"os"
 	"path"
 	"testing"
@@ -40,7 +42,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 
 			// when
 			hash, err := client.Clone(
-				context.New("test/task"),
+				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
 				"git@github.com:duck8823/duci.git",
 				"refs/heads/master",
@@ -70,7 +72,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 
 			// when
 			_, err := client.Clone(
-				context.New("test/task"),
+				context.New("test/task", uuid.New(), &url.URL{}),
 				wrongPath,
 				"git@github.com:duck8823/duci.git",
 				"refs/heads/master",

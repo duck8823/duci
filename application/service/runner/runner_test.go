@@ -11,9 +11,11 @@ import (
 	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/duck8823/duci/infrastructure/git/mock_git"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"io"
+	"net/url"
 	"os"
 	"path"
 	"testing"
@@ -97,7 +99,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			var empty plumbing.Hash
 
 			// when
-			hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+			hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 			// then
 			if err != nil {
@@ -180,7 +182,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			var empty plumbing.Hash
 
 			// when
-			hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+			hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 			// then
 			if err != nil {
@@ -264,7 +266,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		var empty plumbing.Hash
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err != nil {
@@ -329,7 +331,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err == nil {
@@ -394,7 +396,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err == nil {
@@ -460,7 +462,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err == nil {
@@ -527,7 +529,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err == nil {
@@ -594,7 +596,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err != runner.Failure {
@@ -666,7 +668,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task"), repo, "master", "Hello World.")
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
 
 		// then
 		if err.Error() != "context deadline exceeded" {
