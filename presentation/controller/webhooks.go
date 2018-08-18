@@ -32,6 +32,15 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	runtimeUrl := &url.URL{
+		Scheme: "http",
+		Host:   r.Host,
+		Path:   r.URL.Path,
+	}
+	if r.URL.Scheme != "" {
+		runtimeUrl.Scheme = r.URL.Scheme
+	}
+
 	// Trigger build
 	githubEvent := r.Header.Get("X-GitHub-Event")
 	switch githubEvent {
@@ -44,7 +53,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, r.URL)
+		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
 		if err == SKIP_BUILD {
 			logger.Info(requestId, "skip build")
 			w.WriteHeader(http.StatusOK)
@@ -64,7 +73,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		taskName := fmt.Sprintf("%s/push", application.Name)
-		go c.Runner.Run(context.New(taskName, requestId, r.URL), event.GetRepo(), event.GetRef())
+		go c.Runner.Run(context.New(taskName, requestId, runtimeUrl), event.GetRepo(), event.GetRef())
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
