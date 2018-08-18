@@ -31,7 +31,7 @@ before_deploy:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: curl -sL https://git.io/goreleaser | bash < $( github-release-notes -org duck8823 -repo duci -since-latest-release )
+    script: curl -sL https://git.io/goreleaser | bash < "$( github-release-notes -org duck8823 -repo duci -since-latest-release )"
     on:
       tags: true
       condition: $TRAVIS_GO_VERSION = "1.10"
