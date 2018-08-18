@@ -25,8 +25,7 @@ script:
 after_success:
   - if [ "$TRAVIS_GO_VERSION" = "1.10" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
 before_deploy:
-  - go get -u github.com/golang/dep/cmd/dep
-  - dep init
+  - go get all
   - go get -u github.com/buchanae/github-release-notes
   - github-release-notes -org duck8823 -repo duci -since-latest-release > release-notes.txt
   - go get -u github.com/goreleaser/goreleaser
