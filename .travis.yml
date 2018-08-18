@@ -9,7 +9,7 @@ go:
 
 cache:
   directories:
-    - $GOPATH/src/mod/cache
+    - $GOPATH/pkg/mod/cache
 
 install: true
 before_script:
