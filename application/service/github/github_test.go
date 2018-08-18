@@ -9,6 +9,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"io/ioutil"
 	"testing"
+	"net/url"
 )
 
 type MockRepo struct {
@@ -49,7 +50,7 @@ func TestService_GetPullRequest(t *testing.T) {
 			})
 
 		// when
-		pr, err := s.GetPullRequest(context.New("test/task", uuid.New(), ""), repo, num)
+		pr, err := s.GetPullRequest(context.New("test/task", uuid.New(), &url.URL{}), repo, num)
 
 		// then
 		if err != nil {
@@ -78,7 +79,7 @@ func TestService_GetPullRequest(t *testing.T) {
 			Reply(404)
 
 		// when
-		pr, err := s.GetPullRequest(context.New("test/task", uuid.New(), ""), repo, num)
+		pr, err := s.GetPullRequest(context.New("test/task", uuid.New(), &url.URL{}), repo, num)
 
 		// then
 		if err == nil {
@@ -101,7 +102,7 @@ func TestService_GetPullRequest(t *testing.T) {
 		num := 5
 
 		// expect
-		if _, err := s.GetPullRequest(context.New("test/task", uuid.New(), ""), repo, num); err == nil {
+		if _, err := s.GetPullRequest(context.New("test/task", uuid.New(), &url.URL{}), repo, num); err == nil {
 			t.Error("errot must occred. but got nil")
 		}
 	})
@@ -126,7 +127,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			Reply(200)
 
 		// expect
-		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), ""), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
+		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
 			t.Errorf("error must not occured: but got %+v", err)
 		}
 
@@ -146,7 +147,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			Reply(404)
 
 		// expect
-		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), ""), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
+		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
 			t.Error("errot must occred. but got nil")
 		}
 
@@ -161,7 +162,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		}
 
 		// expect
-		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), ""), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
+		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
 			t.Error("errot must occred. but got nil")
 		}
 	})
@@ -177,7 +178,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		description := "123456789012345678901234567890123456789012345678901234567890"
 		malformedDescription := "1234567890123456789012345678901234567890123456..."
 		state := github.SUCCESS
-		url   := "host/logs"
+		logUrl := "http://host:8080/logs"
 
 		gock.New("https://api.github.com").
 			Post(fmt.Sprintf("/repos/%s/statuses/%s", repo.FullName, "0000000000000000000000000000000000000000")).
@@ -186,13 +187,13 @@ func TestService_CreateCommitStatus(t *testing.T) {
 				Context:     &taskName,
 				Description: &malformedDescription,
 				State:       &state,
-				URL:         &url,
+				TargetURL:   &logUrl,
 			}).
 			Reply(404)
 
 		// expect
 		if err := s.CreateCommitStatus(
-			context.New(taskName, uuid.New(), "host"),
+			context.New(taskName, uuid.New(), &url.URL{Scheme: "http", Host: "host:8080"}),
 			repo,
 			plumbing.Hash{},
 			state,

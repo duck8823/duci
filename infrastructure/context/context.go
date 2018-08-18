@@ -3,6 +3,7 @@ package context
 import (
 	"context"
 	"github.com/google/uuid"
+	"net/url"
 	"time"
 )
 
@@ -10,22 +11,22 @@ type Context interface {
 	context.Context
 	UUID() uuid.UUID
 	TaskName() string
-	Host() string
+	Url() *url.URL
 }
 
 type jobContext struct {
 	context.Context
 	uuid     uuid.UUID
 	taskName string
-	host     string
+	url      *url.URL
 }
 
-func New(taskName string, id uuid.UUID, host string) Context {
+func New(taskName string, id uuid.UUID, url *url.URL) Context {
 	return &jobContext{
 		Context:  context.Background(),
 		uuid:     id,
 		taskName: taskName,
-		host:     host,
+		url:      url,
 	}
 }
 
@@ -37,8 +38,8 @@ func (c *jobContext) TaskName() string {
 	return c.taskName
 }
 
-func (c *jobContext) Host() string {
-	return c.host
+func (c *jobContext) Url() *url.URL {
+	return c.url
 }
 
 func WithTimeout(parent Context, timeout time.Duration) (Context, context.CancelFunc) {
@@ -47,6 +48,6 @@ func WithTimeout(parent Context, timeout time.Duration) (Context, context.Cancel
 		Context:  ctx,
 		uuid:     parent.UUID(),
 		taskName: parent.TaskName(),
-		host:     parent.Host(),
+		url:      parent.Url(),
 	}, cancel
 }

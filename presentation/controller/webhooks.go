@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -43,7 +44,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, r.Host)
+		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, r.URL)
 		if err == SKIP_BUILD {
 			logger.Info(requestId, "skip build")
 			w.WriteHeader(http.StatusOK)
@@ -63,7 +64,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		taskName := fmt.Sprintf("%s/push", application.Name)
-		go c.Runner.Run(context.New(taskName, requestId, r.Host), event.GetRepo(), event.GetRef())
+		go c.Runner.Run(context.New(taskName, requestId, r.URL), event.GetRepo(), event.GetRef())
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
@@ -78,14 +79,14 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (c *JobController) parseIssueComment(
 	event *go_github.IssueCommentEvent,
 	requestId uuid.UUID,
-	host string,
+	url *url.URL,
 ) (ctx context.Context, repo *go_github.Repository, ref string, command []string, err error) {
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
 		return nil, nil, "", nil, SKIP_BUILD
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 	command = strings.Split(phrase, " ")
-	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestId, host)
+	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestId, url)
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {

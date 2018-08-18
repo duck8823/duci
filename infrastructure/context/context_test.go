@@ -6,11 +6,12 @@ import (
 	"github.com/google/uuid"
 	"testing"
 	"time"
+	"net/url"
 )
 
 func TestContextWithUUID_UUID(t *testing.T) {
 	// given
-	ctx := context.New("test/task", uuid.New(), "")
+	ctx := context.New("test/task", uuid.New(), &url.URL{})
 	var empty uuid.UUID
 
 	// expect
@@ -22,7 +23,7 @@ func TestContextWithUUID_UUID(t *testing.T) {
 func TestWithTimeout(t *testing.T) {
 	t.Run("when timeout", func(t *testing.T) {
 		// when
-		ctx, cancel := context.WithTimeout(context.New("test/task", uuid.New(), ""), 5*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.New("test/task", uuid.New(), &url.URL{}), 5*time.Millisecond)
 		defer cancel()
 
 		go func() {
@@ -40,7 +41,7 @@ func TestWithTimeout(t *testing.T) {
 
 	t.Run("when cancel", func(t *testing.T) {
 		// when
-		ctx, cancel := context.WithTimeout(context.New("test/task", uuid.New(), ""), 5*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.New("test/task", uuid.New(), &url.URL{}), 5*time.Millisecond)
 		defer cancel()
 
 		go func() {
