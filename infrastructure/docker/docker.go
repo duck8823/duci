@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/duck8823/duci/infrastructure/context"
 	moby "github.com/docker/docker/client"
+	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/pkg/errors"
 	"io"
 	"strings"
@@ -115,9 +115,11 @@ func (c *clientImpl) Rmi(ctx context.Context, tag string) error {
 }
 
 func (c *clientImpl) ExitCode(ctx context.Context, containerId string) (int64, error) {
-	code, err := c.moby.ContainerWait(ctx, containerId)
-	if err != nil {
-		return code, errors.WithStack(err)
+	body, err := c.moby.ContainerWait(ctx, containerId, container.WaitConditionNotRunning)
+	select {
+	case b := <-body:
+		return b.StatusCode, nil
+	case e := <-err:
+		return -1, errors.WithStack(e)
 	}
-	return code, nil
 }
