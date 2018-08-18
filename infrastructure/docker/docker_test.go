@@ -10,13 +10,13 @@ import (
 	"github.com/labstack/gommon/random"
 	"github.com/moby/moby/client"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
-	"net/url"
 )
 
 func TestNew(t *testing.T) {

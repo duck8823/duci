@@ -6,11 +6,11 @@ import (
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/google/uuid"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"net/url"
 	"os"
 	"path"
 	"testing"
 	"time"
-	"net/url"
 )
 
 func TestNew(t *testing.T) {

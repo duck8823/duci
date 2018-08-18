@@ -15,11 +15,11 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"io"
+	"net/url"
 	"os"
 	"path"
 	"testing"
 	"time"
-	"net/url"
 )
 
 func TestRunnerImpl_Run(t *testing.T) {

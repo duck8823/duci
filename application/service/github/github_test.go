@@ -8,8 +8,8 @@ import (
 	"gopkg.in/h2non/gock.v1"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"io/ioutil"
-	"testing"
 	"net/url"
+	"testing"
 )
 
 type MockRepo struct {

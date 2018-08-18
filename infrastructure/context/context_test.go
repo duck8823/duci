@@ -4,9 +4,9 @@ import (
 	ct "context"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/google/uuid"
+	"net/url"
 	"testing"
 	"time"
-	"net/url"
 )
 
 func TestContextWithUUID_UUID(t *testing.T) {
