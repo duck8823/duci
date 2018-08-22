@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/pkg/errors"
 	"io"
@@ -62,7 +63,7 @@ func trimPrefix(line []byte) ([]byte, error) {
 	// detect log prefix
 	// see https://godoc.org/github.com/docker/docker/client#Client.ContainerLogs
 	if !((line[0] == 1 || line[0] == 2) && (line[1] == 0 && line[2] == 0 && line[3] == 0)) {
-		return nil, errors.New("invalid log prefix")
+		return nil, fmt.Errorf("invalid log prefix: %+v", line[:7])
 	}
 	return line[8:], nil
 }
