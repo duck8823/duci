@@ -47,7 +47,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				defer s.Close()
 
 				// and
-				payload := createIssueCommentPayload(t, "ci test")
+				payload := createIssueCommentPayload(t, "created", "ci test")
 
 				req := httptest.NewRequest("POST", "/", payload)
 				req.Header.Set("X-GitHub-Delivery", requestId.String())
@@ -79,7 +79,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				defer s.Close()
 
 				// and
-				payload := createIssueCommentPayload(t, "ci test")
+				payload := createIssueCommentPayload(t, "created", "ci test")
 
 				req := httptest.NewRequest("POST", "/", payload)
 				req.Header.Set("X-GitHub-Delivery", requestId.String())
@@ -137,7 +137,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 		t.Run("with invalid `X-GitHub-Event` header", func(t *testing.T) {
 			// given
-			body := createIssueCommentPayload(t, "ci test")
+			body := createIssueCommentPayload(t, "created", "ci test")
 
 			// and
 			requestId, _ := uuid.NewRandom()
@@ -158,7 +158,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 		t.Run("with invalid `X-GitHub-Delivery` header", func(t *testing.T) {
 			// given
-			body := createIssueCommentPayload(t, "ci test")
+			body := createIssueCommentPayload(t, "created", "ci test")
 
 			// and
 			req := httptest.NewRequest("POST", "/", body)
@@ -182,7 +182,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 			t.Run("without comment started ci", func(t *testing.T) {
 				// given
-				body := createIssueCommentPayload(t, "test")
+				body := createIssueCommentPayload(t, "created", "test")
 
 				// and
 				req := httptest.NewRequest("POST", "/", body)
@@ -246,12 +246,13 @@ func TestJobController_ServeHTTP(t *testing.T) {
 	})
 }
 
-func createIssueCommentPayload(t *testing.T, comment string) io.Reader {
+func createIssueCommentPayload(t *testing.T, action, comment string) io.Reader {
 	t.Helper()
 
 	number := 1
 	event := &github.IssueCommentEvent{
 		Repo: &github.Repository{},
+		Action: &action,
 		Issue: &github.Issue{
 			Number: &number,
 		},
