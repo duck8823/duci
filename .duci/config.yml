@@ -2,4 +2,4 @@
 volumes:
   - /var/run/docker.sock:/var/run/docker.sock
   - ${HOME}/.ssh:/root/.ssh:ro
-  - ${GOPATH}/src/mod/cache:/go/src/mod/cache
+  - ${GOPATH}/pkg/mod/cache:/go/pkg/mod/cache

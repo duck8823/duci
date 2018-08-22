@@ -12,7 +12,7 @@ docker-test:
 	docker run --rm \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
 	           -v ${HOME}/.ssh:/root/.ssh:ro \
-	           -v ${GOPATH}/src/mod/cache:/go/src/mod/cache \
+	           -v ${GOPATH}/pkg/mod/cache:/go/pkg/mod/cache \
 	           duck8823/duci:test
 
 clean:
