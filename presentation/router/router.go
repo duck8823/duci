@@ -14,14 +14,11 @@ import (
 )
 
 func New() (http.Handler, error) {
-	githubService, err := github.NewWithEnv()
+	logStore, githubService, err := createCommonServices()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	logStore, err := log.NewStoreService()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+
 	dockerRunner, err := createRunner(logStore, githubService)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -35,6 +32,19 @@ func New() (http.Handler, error) {
 	rtr.Get("/logs/{uuid}", logCtrl.ServeHTTP)
 
 	return rtr, nil
+}
+
+func createCommonServices() (log.StoreService, github.Service, error) {
+	logStore, err := log.NewStoreService()
+	if err != nil {
+		return nil, nil, errors.WithStack(err)
+	}
+	githubService, err := github.NewWithEnv()
+	if err != nil {
+		return nil, nil, errors.WithStack(err)
+	}
+
+	return logStore, githubService, nil
 }
 
 func createRunner(logStore log.StoreService, github github.Service) (runner.Runner, error) {
