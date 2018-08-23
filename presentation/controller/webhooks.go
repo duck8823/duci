@@ -90,6 +90,10 @@ func (c *JobController) parseIssueComment(
 	requestId uuid.UUID,
 	url *url.URL,
 ) (ctx context.Context, repo *go_github.Repository, ref string, command []string, err error) {
+	if !isValidAction(event.Action) {
+		return nil, nil, "", nil, SKIP_BUILD
+	}
+
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
 		return nil, nil, "", nil, SKIP_BUILD
 	}
@@ -105,4 +109,11 @@ func (c *JobController) parseIssueComment(
 	repo = event.GetRepo()
 	ref = fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
 	return ctx, repo, ref, command, err
+}
+
+func isValidAction(action *string) bool {
+	if action == nil {
+		return false
+	}
+	return *action == "created" || *action == "edited"
 }

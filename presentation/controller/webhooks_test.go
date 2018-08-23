@@ -32,10 +32,11 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			t.Run("when github service returns no error", func(t *testing.T) {
 				// given
 				runner := mock_runner.NewMockRunner(ctrl)
-				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 				githubService := mock_github.NewMockService(ctrl)
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
+					AnyTimes().
 					Return(&github.PullRequest{
 						Head: &github.PullRequestBranch{},
 					}, nil)
@@ -46,21 +47,54 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				s := httptest.NewServer(handler)
 				defer s.Close()
 
-				// and
-				payload := createIssueCommentPayload(t, "ci test")
+				t.Run("with valid action", func(t *testing.T) {
+					actions := []string{"created", "edited"}
+					for _, action := range actions {
+						// and
+						payload := createIssueCommentPayload(t, action, "ci test")
 
-				req := httptest.NewRequest("POST", "/", payload)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
-				req.Header.Set("X-GitHub-Event", event)
-				rec := httptest.NewRecorder()
+						req := httptest.NewRequest("POST", "/", payload)
+						req.Header.Set("X-GitHub-Delivery", requestId.String())
+						req.Header.Set("X-GitHub-Event", event)
+						rec := httptest.NewRecorder()
 
-				// when
-				handler.ServeHTTP(rec, req)
+						// when
+						handler.ServeHTTP(rec, req)
 
-				// then
-				if rec.Code != 200 {
-					t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
-				}
+						// then
+						if rec.Code != 200 {
+							t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
+						}
+					}
+				})
+
+				t.Run("with invalid action", func(t *testing.T) {
+					actions := []string{"deleted", "foo", ""}
+					for _, action := range actions {
+						t.Run(action, func(t *testing.T) {
+							// given
+							body := createIssueCommentPayload(t, action, "ci test")
+
+							// and
+							req := httptest.NewRequest("POST", "/", body)
+							req.Header.Set("X-GitHub-Delivery", requestId.String())
+							req.Header.Set("X-GitHub-Event", event)
+							rec := httptest.NewRecorder()
+
+							// when
+							handler.ServeHTTP(rec, req)
+
+							// then
+							if rec.Code != 200 {
+								t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
+							}
+
+							if rec.Body.String() != "build skip" {
+								t.Errorf("body must equal %+v, but got %+v", "build skip", rec.Body.String())
+							}
+						})
+					}
+				})
 			})
 
 			t.Run("when github service return error", func(t *testing.T) {
@@ -79,7 +113,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				defer s.Close()
 
 				// and
-				payload := createIssueCommentPayload(t, "ci test")
+				payload := createIssueCommentPayload(t, "created", "ci test")
 
 				req := httptest.NewRequest("POST", "/", payload)
 				req.Header.Set("X-GitHub-Delivery", requestId.String())
@@ -137,7 +171,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 		t.Run("with invalid `X-GitHub-Event` header", func(t *testing.T) {
 			// given
-			body := createIssueCommentPayload(t, "ci test")
+			body := createIssueCommentPayload(t, "created", "ci test")
 
 			// and
 			requestId, _ := uuid.NewRandom()
@@ -158,7 +192,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 		t.Run("with invalid `X-GitHub-Delivery` header", func(t *testing.T) {
 			// given
-			body := createIssueCommentPayload(t, "ci test")
+			body := createIssueCommentPayload(t, "created", "ci test")
 
 			// and
 			req := httptest.NewRequest("POST", "/", body)
@@ -182,7 +216,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 			t.Run("without comment started ci", func(t *testing.T) {
 				// given
-				body := createIssueCommentPayload(t, "test")
+				body := createIssueCommentPayload(t, "created", "test")
 
 				// and
 				req := httptest.NewRequest("POST", "/", body)
@@ -196,6 +230,10 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				// then
 				if rec.Code != 200 {
 					t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
+				}
+
+				if rec.Body.String() != "build skip" {
+					t.Errorf("body must equal %+v, but got %+v", "build skip", rec.Body.String())
 				}
 			})
 
@@ -246,12 +284,13 @@ func TestJobController_ServeHTTP(t *testing.T) {
 	})
 }
 
-func createIssueCommentPayload(t *testing.T, comment string) io.Reader {
+func createIssueCommentPayload(t *testing.T, action, comment string) io.Reader {
 	t.Helper()
 
 	number := 1
 	event := &github.IssueCommentEvent{
-		Repo: &github.Repository{},
+		Repo:   &github.Repository{},
+		Action: &action,
 		Issue: &github.Issue{
 			Number: &number,
 		},

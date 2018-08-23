@@ -150,7 +150,8 @@ func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
 	for {
 		line, err := log.ReadLine()
 		if err != nil && err != io.EOF {
-			return errors.WithStack(err)
+			logger.Debugf(ctx.UUID(), "skip read line with error: %s", err.Error())
+			continue
 		}
 		logger.Info(ctx.UUID(), string(line.Message))
 		if err := r.LogStore.Append(ctx.UUID(), model.Message{Time: line.Timestamp, Text: string(line.Message)}); err != nil {
