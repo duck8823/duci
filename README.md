@@ -80,8 +80,8 @@ Possible values ​​are as follows.
 server:
   workdir: '/path/to/tmp/duci'
   port: 8080
-  sshKeyPath: '$HOME/.ssh/id_rsa'
-  databasePath: '$HOME/.duci/db'
+  ssh_key_path: '$HOME/.ssh/id_rsa'
+  database_path: '$HOME/.duci/db'
 github:
   api_token: $GITHUB_API_TOKEN
 job:
