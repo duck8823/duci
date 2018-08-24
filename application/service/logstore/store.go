@@ -1,4 +1,4 @@
-package log
+package logstore
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 
 type Level = string
 
-type StoreService interface {
+type Service interface {
 	Get(uuid uuid.UUID) (*model.Job, error)
 	Append(uuid uuid.UUID, message model.Message) error
 	Finish(uuid uuid.UUID) error
@@ -24,7 +24,7 @@ type storeServiceImpl struct {
 	db logger.Store
 }
 
-func NewStoreService() (StoreService, error) {
+func New() (Service, error) {
 	database, err := leveldb.OpenFile(application.Config.Server.DatabasePath, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)

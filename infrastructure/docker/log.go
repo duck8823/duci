@@ -60,10 +60,10 @@ func trimPrefix(line []byte) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	// detect log prefix
+	// detect logstore prefix
 	// see https://godoc.org/github.com/docker/docker/client#Client.ContainerLogs
 	if !((line[0] == 1 || line[0] == 2) && (line[1] == 0 && line[2] == 0 && line[3] == 0)) {
-		return nil, fmt.Errorf("invalid log prefix: %+v", line[:7])
+		return nil, fmt.Errorf("invalid logstore prefix: %+v", line[:7])
 	}
 	return line[8:], nil
 }

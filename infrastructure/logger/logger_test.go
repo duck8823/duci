@@ -38,7 +38,7 @@ func TestDebug(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
+		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 
 	// cleanup
@@ -66,7 +66,7 @@ func TestDebugf(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
+		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 
 	// cleanup
@@ -94,7 +94,7 @@ func TestInfo(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
+		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 
 	// cleanup
@@ -122,7 +122,7 @@ func TestInfof(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
+		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 
 	// cleanup
@@ -150,7 +150,7 @@ func TestError(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
+		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 
 	// cleanup
@@ -178,7 +178,7 @@ func TestErrorf(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wrong log. wont: \"%+v\", got: \"%+v\"", expected, actual)
+		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
 
 	// cleanup

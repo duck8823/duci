@@ -2,7 +2,7 @@ package controller_test
 
 import (
 	ctx "context"
-	"github.com/duck8823/duci/application/service/log/mock_log"
+	"github.com/duck8823/duci/application/service/logstore/mock_log"
 	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/presentation/controller"
@@ -21,7 +21,7 @@ func TestLogsController_ServeHTTP(t *testing.T) {
 		defer ctrl.Finish()
 
 		mockService := mock_log.NewMockStoreService(ctrl)
-		handler := &controller.LogController{LogService: mockService}
+		handler := &controller.LogController{LogStore: mockService}
 
 		// given
 		id, err := uuid.NewRandom()

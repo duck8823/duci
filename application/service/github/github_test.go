@@ -27,7 +27,7 @@ func (r *MockRepo) GetSSHURL() string {
 
 func TestService_GetPullRequest(t *testing.T) {
 	// setup
-	s, err := github.NewWithEnv()
+	s, err := github.New()
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
@@ -110,7 +110,7 @@ func TestService_GetPullRequest(t *testing.T) {
 
 func TestService_CreateCommitStatus(t *testing.T) {
 	// setup
-	s, err := github.NewWithEnv()
+	s, err := github.New()
 	if err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
