@@ -7,6 +7,8 @@ import (
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/storage"
 )
 
 type Level = string
@@ -23,7 +25,7 @@ type storeServiceImpl struct {
 }
 
 func NewStoreService() (StoreService, error) {
-	database, err := logger.OpenMemDb()
+	database, err := leveldb.Open(storage.NewMemStorage(), nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
