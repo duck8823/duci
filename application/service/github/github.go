@@ -32,7 +32,7 @@ type serviceImpl struct {
 
 func NewWithEnv() (*serviceImpl, error) {
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: application.Config.GitHub.APIToken},
+		&oauth2.Token{AccessToken: string(application.Config.GitHub.APIToken)},
 	)
 	tc := oauth2.NewClient(ctx.Background(), ts)
 

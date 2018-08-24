@@ -19,6 +19,12 @@ var (
 	Config *Configuration
 )
 
+type maskString string
+
+func (s maskString) MarshalJSON() ([]byte, error) {
+	return []byte(`"***"`), nil
+}
+
 type Configuration struct {
 	Server *Server `yaml:"server" json:"server"`
 	GitHub *GitHub `yaml:"github" json:"github"`
@@ -33,7 +39,7 @@ type Server struct {
 }
 
 type GitHub struct {
-	APIToken string `yaml:"api_token" json:"apiToken"`
+	APIToken maskString `yaml:"api_token" json:"apiToken"`
 }
 
 type Job struct {
@@ -50,7 +56,7 @@ func init() {
 			DatabasePath: path.Join(os.Getenv("HOME"), ".duci/db"),
 		},
 		GitHub: &GitHub{
-			APIToken: os.Getenv("GITHUB_API_TOKEN"),
+			APIToken: maskString(os.Getenv("GITHUB_API_TOKEN")),
 		},
 		Job: &Job{
 			Timeout:     600,
@@ -60,7 +66,10 @@ func init() {
 }
 
 func (c *Configuration) String() string {
-	bytes, _ := json.Marshal(c)
+	bytes, err := json.Marshal(c)
+	if err != nil {
+		println(fmt.Sprintf("%+v", err))
+	}
 	return string(bytes)
 }
 

@@ -30,7 +30,7 @@ func TestConfiguration_String(t *testing.T) {
 	// and
 	expected := fmt.Sprintf(
 		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"databasePath\":\"%s\"},"+
-			"\"github\":{\"apiToken\":\"github_api_token\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
+			"\"github\":{\"apiToken\":\"***\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
 		conf.Server.WorkDir,
 		conf.Server.Port,
 		conf.Server.SSHKeyPath,
