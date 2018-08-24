@@ -12,9 +12,10 @@ func TestConfiguration_String(t *testing.T) {
 	// given
 	conf := &application.Configuration{
 		Server: &application.Server{
-			WorkDir:    "/path/to/work_dir",
-			SSHKeyPath: "/path/to/ssh_key_path",
-			Port:       1234,
+			WorkDir:      "/path/to/work_dir",
+			SSHKeyPath:   "/path/to/ssh_key_path",
+			DatabasePath: "path/to/databasePath",
+			Port:         1234,
 		},
 		Job: &application.Job{
 			Timeout:     60,
@@ -24,10 +25,11 @@ func TestConfiguration_String(t *testing.T) {
 
 	// and
 	expected := fmt.Sprintf(
-		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
+		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"databasePath\":\"%s\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
 		conf.Server.WorkDir,
 		conf.Server.Port,
 		conf.Server.SSHKeyPath,
+		conf.Server.DatabasePath,
 		conf.Job.Timeout,
 		conf.Job.Concurrency,
 	)
@@ -46,9 +48,10 @@ func TestConfiguration_Set(t *testing.T) {
 		// given
 		expected := &application.Configuration{
 			Server: &application.Server{
-				WorkDir:    "/path/to/workdir",
-				Port:       8823,
-				SSHKeyPath: "/path/to/ssh_key",
+				WorkDir:      "/path/to/workdir",
+				Port:         8823,
+				SSHKeyPath:   "/path/to/ssh_key",
+				DatabasePath: "/path/to/database",
 			},
 			Job: &application.Job{
 				Timeout:     300,
