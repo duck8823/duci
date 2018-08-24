@@ -1,4 +1,4 @@
-package log
+package logstore
 
 import (
 	"bytes"
@@ -17,11 +17,11 @@ import (
 
 func TestNewStoreService(t *testing.T) {
 	// when
-	actual, err := NewStoreService()
+	actual, err := New()
 
 	// then
 	if _, ok := actual.(*storeServiceImpl); !ok {
-		t.Error("must be a StoreService, but not.")
+		t.Error("must be a Service, but not.")
 	}
 
 	if err != nil {

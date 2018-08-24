@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-var SKIP_BUILD = errors.New("build skip")
+var SkipBuild = errors.New("build skip")
 
 type JobController struct {
 	Runner runner.Runner
@@ -54,7 +54,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
-		if err == SKIP_BUILD {
+		if err == SkipBuild {
 			logger.Info(requestId, "skip build")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(err.Error()))
@@ -91,11 +91,11 @@ func (c *JobController) parseIssueComment(
 	url *url.URL,
 ) (ctx context.Context, repo *go_github.Repository, ref string, command []string, err error) {
 	if !isValidAction(event.Action) {
-		return nil, nil, "", nil, SKIP_BUILD
+		return nil, nil, "", nil, SkipBuild
 	}
 
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
-		return nil, nil, "", nil, SKIP_BUILD
+		return nil, nil, "", nil, SkipBuild
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 	command = strings.Split(phrase, " ")

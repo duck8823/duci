@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/application/service/log"
+	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/domain/model"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
@@ -12,7 +12,7 @@ import (
 )
 
 type LogController struct {
-	LogService log.StoreService
+	LogStore logstore.Service
 }
 
 func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -38,8 +38,8 @@ func (c *LogController) logs(w http.ResponseWriter, f http.Flusher, id uuid.UUID
 	var read int
 	var job *model.Job
 	var err error
-	for true {
-		job, err = c.LogService.Get(id)
+	for {
+		job, err = c.LogStore.Get(id)
 		if err != nil {
 			return errors.WithStack(err)
 		}

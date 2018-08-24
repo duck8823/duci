@@ -30,7 +30,7 @@ type serviceImpl struct {
 	cli *github.Client
 }
 
-func NewWithEnv() (*serviceImpl, error) {
+func New() (Service, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: string(application.Config.GitHub.APIToken)},
 	)

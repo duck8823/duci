@@ -5,7 +5,7 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/application/service/github"
-	"github.com/duck8823/duci/application/service/log"
+	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/clock"
@@ -33,7 +33,7 @@ type DockerRunner struct {
 	Git         git.Client
 	GitHub      github.Service
 	Docker      docker.Client
-	LogStore    log.StoreService
+	LogStore    logstore.Service
 	Name        string
 	BaseWorkDir string
 }
