@@ -71,6 +71,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
 				Return(int64(0), nil)
+			mockDocker.EXPECT().
+				Rm(gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(nil)
 
 			// and
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -154,6 +158,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
 				Return(int64(0), nil)
+			mockDocker.EXPECT().
+				Rm(gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(nil)
 
 			// and
 			mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -238,6 +246,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -303,6 +315,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -368,6 +384,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -434,6 +454,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -501,6 +525,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -541,6 +569,75 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 	})
 
+	t.Run("when fail to remove container", func(t *testing.T) {
+		// given
+		expected := errors.New("test")
+
+		// and
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockGit := mock_git.NewMockClient(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+
+		// and
+		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
+			Return(&MockBuildLog{}, nil)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
+			Return(nil, errors.New("must not call this"))
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return("", &MockJobLog{}, nil)
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(expected)
+
+		// and
+		mockLogStore := mock_log.NewMockStoreService(ctrl)
+		mockLogStore.EXPECT().
+			Append(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+		mockLogStore.EXPECT().
+			Finish(gomock.Any()).
+			AnyTimes().
+			Return(nil)
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			Git:         mockGit,
+			GitHub:      mockGitHub,
+			Docker:      mockDocker,
+			LogStore:    mockLogStore,
+		}
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		_, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+
+		// then
+		if err.Error() != expected.Error() {
+			t.Errorf("err must be %+v, but got %+v", expected, err)
+		}
+	})
+
 	t.Run("when docker run failure ( with exit code 1 )", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
@@ -568,6 +665,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(1), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)
@@ -640,6 +741,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(int64(0), nil)
+		mockDocker.EXPECT().
+			Rm(gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
 
 		// and
 		mockLogStore := mock_log.NewMockStoreService(ctrl)

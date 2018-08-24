@@ -139,6 +139,9 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	if err != nil {
 		return head, errors.WithStack(err)
 	}
+	if err := r.Docker.Rm(ctx, containerId); err != nil {
+		return head, errors.WithStack(err)
+	}
 	if code != 0 {
 		return head, Failure
 	}
