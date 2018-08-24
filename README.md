@@ -81,6 +81,7 @@ server:
   workdir: '/path/to/tmp/duci'
   port: 8080
   sshKeyPath: '$HOME/.ssh/id_rsa'
+  databasePath: '$HOME/.duci/db'
 job:
   timeout: 600
   concurrency: `number of cpu`
