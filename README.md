@@ -82,6 +82,8 @@ server:
   port: 8080
   sshKeyPath: '$HOME/.ssh/id_rsa'
   databasePath: '$HOME/.duci/db'
+github:
+  api_token: $GITHUB_API_TOKEN
 job:
   timeout: 600
   concurrency: `number of cpu`
