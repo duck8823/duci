@@ -1,10 +1,12 @@
 package application
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -66,8 +68,8 @@ func init() {
 }
 
 func (c *Configuration) String() string {
-	bytes, _ := json.Marshal(c)
-	return string(bytes)
+	data, _ := json.Marshal(c)
+	return string(data)
 }
 
 func (c *Configuration) Set(path string) error {
@@ -75,7 +77,9 @@ func (c *Configuration) Set(path string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	return yaml.NewDecoder(file).Decode(c)
+	data, _ := ioutil.ReadAll(file)
+	data = []byte(os.ExpandEnv(string(data)))
+	return yaml.NewDecoder(bytes.NewReader(data)).Decode(c)
 }
 
 func (c *Configuration) Addr() string {

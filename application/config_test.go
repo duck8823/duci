@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/duck8823/duci/application"
 	"github.com/google/go-cmp/cmp"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -77,6 +78,26 @@ func TestConfiguration_Set(t *testing.T) {
 
 		if !reflect.DeepEqual(application.Config, expected) {
 			t.Errorf("find differences:\n %+v", cmp.Diff(application.Config, expected))
+		}
+	})
+
+	t.Run("parse environment variable", func(t *testing.T) {
+		// given
+		expected := "hello world"
+
+		// and
+		os.Setenv("TEST_CONF_ENV", expected)
+
+		//
+		err := application.Config.Set("testdata/config_with_env.yml")
+
+		// then
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+
+		if application.Config.Server.WorkDir != expected {
+			t.Errorf("wont %+v, but got %+v", expected, application.Config.Server.WorkDir)
 		}
 	})
 
