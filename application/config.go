@@ -66,10 +66,7 @@ func init() {
 }
 
 func (c *Configuration) String() string {
-	bytes, err := json.Marshal(c)
-	if err != nil {
-		println(fmt.Sprintf("%+v", err))
-	}
+	bytes, _ := json.Marshal(c)
 	return string(bytes)
 }
 
