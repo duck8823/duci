@@ -21,6 +21,7 @@ var (
 
 type Configuration struct {
 	Server *Server `yaml:"server" json:"server"`
+	GitHub *GitHub `yaml:"github" json:"github"`
 	Job    *Job    `yaml:"job" json:"job"`
 }
 
@@ -29,6 +30,10 @@ type Server struct {
 	Port         int    `yaml:"port" json:"port"`
 	SSHKeyPath   string `yaml:"ssh_key_path" json:"sshKeyPath"`
 	DatabasePath string `yaml:"database_path" json:"databasePath"`
+}
+
+type GitHub struct {
+	APIToken string `yaml:"api_token" json:"apiToken"`
 }
 
 type Job struct {
@@ -43,6 +48,9 @@ func init() {
 			Port:         8080,
 			SSHKeyPath:   path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 			DatabasePath: path.Join(os.Getenv("HOME"), ".duci/db"),
+		},
+		GitHub: &GitHub{
+			APIToken: os.Getenv("GITHUB_API_TOKEN"),
 		},
 		Job: &Job{
 			Timeout:     600,

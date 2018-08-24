@@ -2,13 +2,13 @@ package github
 
 import (
 	ctx "context"
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"os"
 	"path"
 )
 
@@ -32,7 +32,7 @@ type serviceImpl struct {
 
 func NewWithEnv() (*serviceImpl, error) {
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_API_TOKEN")},
+		&oauth2.Token{AccessToken: application.Config.GitHub.APIToken},
 	)
 	tc := oauth2.NewClient(ctx.Background(), ts)
 

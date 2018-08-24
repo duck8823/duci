@@ -18,6 +18,9 @@ func TestConfiguration_String(t *testing.T) {
 			DatabasePath: "path/to/databasePath",
 			Port:         1234,
 		},
+		GitHub: &application.GitHub{
+			APIToken: "github_api_token",
+		},
 		Job: &application.Job{
 			Timeout:     60,
 			Concurrency: 8,
@@ -26,7 +29,8 @@ func TestConfiguration_String(t *testing.T) {
 
 	// and
 	expected := fmt.Sprintf(
-		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"databasePath\":\"%s\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
+		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"sshKeyPath\":\"%s\",\"databasePath\":\"%s\"},"+
+			"\"github\":{\"apiToken\":\"github_api_token\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
 		conf.Server.WorkDir,
 		conf.Server.Port,
 		conf.Server.SSHKeyPath,
@@ -53,6 +57,9 @@ func TestConfiguration_Set(t *testing.T) {
 				Port:         8823,
 				SSHKeyPath:   "/path/to/ssh_key",
 				DatabasePath: "/path/to/database",
+			},
+			GitHub: &application.GitHub{
+				APIToken: "github_api_token",
 			},
 			Job: &application.Job{
 				Timeout:     300,
