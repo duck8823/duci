@@ -34,12 +34,12 @@ type Configuration struct {
 type Server struct {
 	WorkDir      string `yaml:"workdir" json:"workdir"`
 	Port         int    `yaml:"port" json:"port"`
-	SSHKeyPath   string `yaml:"ssh_key_path" json:"sshKeyPath"`
 	DatabasePath string `yaml:"database_path" json:"databasePath"`
 }
 
 type GitHub struct {
-	APIToken maskString `yaml:"api_token" json:"apiToken"`
+	SSHKeyPath string     `yaml:"ssh_key_path" json:"sshKeyPath"`
+	APIToken   maskString `yaml:"api_token" json:"apiToken"`
 }
 
 type Job struct {
@@ -52,11 +52,11 @@ func init() {
 		Server: &Server{
 			WorkDir:      path.Join(os.TempDir(), Name),
 			Port:         8080,
-			SSHKeyPath:   path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 			DatabasePath: path.Join(os.Getenv("HOME"), ".duci/db"),
 		},
 		GitHub: &GitHub{
-			APIToken: maskString(os.Getenv("GITHUB_API_TOKEN")),
+			SSHKeyPath: path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+			APIToken:   maskString(os.Getenv("GITHUB_API_TOKEN")),
 		},
 		Job: &Job{
 			Timeout:     600,

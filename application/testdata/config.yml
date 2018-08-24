@@ -2,9 +2,9 @@
 server:
   workdir: /path/to/workdir
   port: 8823
-  ssh_key_path: /path/to/ssh_key
   database_path: /path/to/database
 github:
+  ssh_key_path: /path/to/ssh_key
   api_token: github_api_token
 job:
   timeout: 300
