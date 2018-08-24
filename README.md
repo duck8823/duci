@@ -51,13 +51,6 @@ volumes:
   - '/path/to/host/dir:/path/to/container/dir'
 ```
 
-### Run Server
-#### Add Environment Variable
-This server needs environment variable `GITHUB_API_TOKEN` to create status.
-```bash
-export GITHUB_API_TOKEN=<your token>
-```
-
 ## Server Settings
 ### Run Server
 If you have already set $GOPATH, you can install it with the following command.
@@ -83,7 +76,8 @@ server:
   database_path: '$HOME/.duci/db'
 github:
   ssh_key_path: '$HOME/.ssh/id_rsa'
-  api_token: ${GITHUB_API_TOKEN} # you can also use environment variable
+  # For create commit status. You can also use environment variable
+  api_token: ${GITHUB_API_TOKEN}
 job:
   timeout: 600
   concurrency: `number of cpu`
