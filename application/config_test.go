@@ -3,6 +3,7 @@ package application_test
 import (
 	"fmt"
 	"github.com/duck8823/duci/application"
+	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"testing"
 	"time"
@@ -39,7 +40,7 @@ func TestConfiguration_String(t *testing.T) {
 
 	// then
 	if actual != expected {
-		t.Errorf("wont %s, but got %s", expected, actual)
+		t.Errorf("find differences:\n %+v", cmp.Diff(actual, expected))
 	}
 }
 
@@ -68,7 +69,7 @@ func TestConfiguration_Set(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(application.Config, expected) {
-			t.Errorf("wont %+v, but got %+v", expected, application.Config)
+			t.Errorf("find differences:\n %+v", cmp.Diff(application.Config, expected))
 		}
 	})
 
