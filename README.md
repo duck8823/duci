@@ -80,8 +80,10 @@ Possible values ​​are as follows.
 server:
   workdir: '/path/to/tmp/duci'
   port: 8080
-  sshKeyPath: '$HOME/.ssh/id_rsa'
-  databasePath: '$HOME/.duci/db'
+  database_path: '$HOME/.duci/db'
+github:
+  ssh_key_path: '$HOME/.ssh/id_rsa'
+  api_token: ${GITHUB_API_TOKEN} # you can also use environment variable
 job:
   timeout: 600
   concurrency: `number of cpu`

@@ -1,0 +1,3 @@
+---
+server:
+  workdir: ${TEST_CONF_ENV}

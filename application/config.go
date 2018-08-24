@@ -1,10 +1,12 @@
 package application
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -19,16 +21,27 @@ var (
 	Config *Configuration
 )
 
+type maskString string
+
+func (s maskString) MarshalJSON() ([]byte, error) {
+	return []byte(`"***"`), nil
+}
+
 type Configuration struct {
 	Server *Server `yaml:"server" json:"server"`
+	GitHub *GitHub `yaml:"github" json:"github"`
 	Job    *Job    `yaml:"job" json:"job"`
 }
 
 type Server struct {
 	WorkDir      string `yaml:"workdir" json:"workdir"`
 	Port         int    `yaml:"port" json:"port"`
-	SSHKeyPath   string `yaml:"ssh_key_path" json:"sshKeyPath"`
 	DatabasePath string `yaml:"database_path" json:"databasePath"`
+}
+
+type GitHub struct {
+	SSHKeyPath string     `yaml:"ssh_key_path" json:"sshKeyPath"`
+	APIToken   maskString `yaml:"api_token" json:"apiToken"`
 }
 
 type Job struct {
@@ -41,8 +54,11 @@ func init() {
 		Server: &Server{
 			WorkDir:      path.Join(os.TempDir(), Name),
 			Port:         8080,
-			SSHKeyPath:   path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 			DatabasePath: path.Join(os.Getenv("HOME"), ".duci/db"),
+		},
+		GitHub: &GitHub{
+			SSHKeyPath: path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+			APIToken:   maskString(os.Getenv("GITHUB_API_TOKEN")),
 		},
 		Job: &Job{
 			Timeout:     600,
@@ -52,8 +68,8 @@ func init() {
 }
 
 func (c *Configuration) String() string {
-	bytes, _ := json.Marshal(c)
-	return string(bytes)
+	data, _ := json.Marshal(c)
+	return string(data)
 }
 
 func (c *Configuration) Set(path string) error {
@@ -61,7 +77,9 @@ func (c *Configuration) Set(path string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	return yaml.NewDecoder(file).Decode(c)
+	data, _ := ioutil.ReadAll(file)
+	data = []byte(os.ExpandEnv(string(data)))
+	return yaml.NewDecoder(bytes.NewReader(data)).Decode(c)
 }
 
 func (c *Configuration) Addr() string {
