@@ -3,10 +3,12 @@ package log
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type Level = string
@@ -23,7 +25,7 @@ type storeServiceImpl struct {
 }
 
 func NewStoreService() (StoreService, error) {
-	database, err := logger.OpenMemDb()
+	database, err := leveldb.OpenFile(application.Config.Server.DatabasePath, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
