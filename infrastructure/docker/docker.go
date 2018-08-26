@@ -62,6 +62,7 @@ func (c *clientImpl) Build(ctx context.Context, file io.Reader, tag string, dock
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag},
 		Dockerfile: dockerfile,
+		Remove:     true,
 	}
 	resp, err := c.moby.ImageBuild(ctx, file, opts)
 	if err != nil {
