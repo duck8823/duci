@@ -85,7 +85,7 @@ func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, c
 	}
 
 	if err := c.moby.ContainerStart(ctx, con.ID, types.ContainerStartOptions{}); err != nil {
-		return "", nil, errors.WithStack(err)
+		return con.ID, nil, errors.WithStack(err)
 	}
 
 	log, err := c.moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
@@ -94,7 +94,7 @@ func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, c
 		Follow:     true,
 	})
 	if err != nil {
-		return "", nil, errors.WithStack(err)
+		return con.ID, nil, errors.WithStack(err)
 	}
 
 	return con.ID, &runLogger{bufio.NewReader(log)}, nil

@@ -186,9 +186,13 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "centos:latest")
 
 			// expect
-			if _, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "missing_command"); err == nil {
+			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "missing_command")
+			if err == nil {
 				t.Error("error must occur")
 			}
+
+			// cleanup
+			removeContainer(t, containerId)
 		})
 	})
 
