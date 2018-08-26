@@ -1,25 +1,19 @@
 # duci
-![Language](https://img.shields.io/badge/language-go-74CCDC.svg)
-![GitHub release](https://img.shields.io/github/release/duck8823/duci.svg?colorB=7E7E7E)
-[![Build Status](https://travis-ci.org/duck8823/duci.svg?branch=master)](https://travis-ci.org/duck8823/duci)
-[![Coverage Status](https://coveralls.io/repos/github/duck8823/duci/badge.svg?branch=master)](https://coveralls.io/github/duck8823/duci?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/duci)](https://goreportcard.com/report/github.com/duck8823/duci)
-[![codebeat badge](https://codebeat.co/badges/dfae99c0-e051-4baa-b693-7869cc25069b)](https://codebeat.co/projects/github-com-duck8823-duci-master)
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+![Language](https://img.shields.io/badge/language-go-74CCDC.svg) ![GitHub release](https://img.shields.io/github/release/duck8823/duci.svg?colorB=7E7E7E) [![Build Status](https://travis-ci.org/duck8823/duci.svg?branch=master)](https://travis-ci.org/duck8823/duci) [![Coverage Status](https://coveralls.io/repos/github/duck8823/duci/badge.svg?branch=master)](https://coveralls.io/github/duck8823/duci?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/duck8823/duci)](https://goreportcard.com/report/github.com/duck8823/duci) [![codebeat badge](https://codebeat.co/badges/dfae99c0-e051-4baa-b693-7869cc25069b)](https://codebeat.co/projects/github-com-duck8823-duci-master) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-duci \[zushi\] (<u>D</u>ocker <u>U</u>nder <u>C</u>ontinuous <u>I</u>ntegration) is a small ci server.  
+duci \[zushi\] (Docker Under Continuous Integration) is a small ci server.  
  
 
 ## DSL is Unnecessary For CI
 Let's define the task in the task runner.  
-In the Dockerfile, let's define the necessary infrastructure for the task.  
-duci just execute the task in docker container. 
+Let's define the necessary infrastructure for the task in the Dockerfile.  
+duci just only execute the task in docker container.  
 
 ## Features
-- Run task in Docker container
-- The task is triggered by pull request comment and push 
-- Create GitHub commit status
+- Execute the task in Docker container
+- Execute the task triggered by GitHub pull request comment or push 
 - Execute tasks asynchronously
+- Create GitHub commit status
 
 ## How to use
 ### Target Repository
