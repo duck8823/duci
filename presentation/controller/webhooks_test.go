@@ -38,8 +38,13 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(&github.PullRequest{
-						Head: &github.PullRequestBranch{},
+						Head: &github.PullRequestBranch{
+							SHA: new(string),
+						},
 					}, nil)
+				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					AnyTimes().
+					Return(nil)
 
 				// and
 				handler := &controller.JobController{Runner: runner, GitHub: githubService}
@@ -104,7 +109,11 @@ func TestJobController_ServeHTTP(t *testing.T) {
 
 				githubService := mock_github.NewMockService(ctrl)
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
+					AnyTimes().
 					Return(nil, errors.New("error occur"))
+				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					AnyTimes().
+					Return(nil)
 
 				// and
 				handler := &controller.JobController{Runner: runner, GitHub: githubService}
@@ -136,13 +145,26 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 			// and
-			handler := &controller.JobController{Runner: runner}
+			githubService := mock_github.NewMockService(ctrl)
+			githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(&github.PullRequest{
+					Head: &github.PullRequestBranch{
+						SHA: new(string),
+					},
+				}, nil)
+			githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(nil)
+
+			// and
+			handler := &controller.JobController{Runner: runner, GitHub: githubService}
 
 			s := httptest.NewServer(handler)
 			defer s.Close()
 
 			// and
-			payload := createPushPayload(t, "test/repo", "master")
+			payload := createPushPayload(t, "test/repo", "master", "")
 
 			req := httptest.NewRequest("POST", "/", payload)
 			req.Header.Set("X-GitHub-Delivery", requestId.String())
@@ -164,7 +186,21 @@ func TestJobController_ServeHTTP(t *testing.T) {
 		runner := mock_runner.NewMockRunner(ctrl)
 		runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-		handler := &controller.JobController{Runner: runner}
+		// and
+		githubService := mock_github.NewMockService(ctrl)
+		githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(&github.PullRequest{
+				Head: &github.PullRequestBranch{
+					SHA: new(string),
+				},
+			}, nil)
+		githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(nil)
+
+		// and
+		handler := &controller.JobController{Runner: runner, GitHub: githubService}
 
 		s := httptest.NewServer(handler)
 		defer s.Close()
@@ -287,12 +323,11 @@ func TestJobController_ServeHTTP(t *testing.T) {
 func createIssueCommentPayload(t *testing.T, action, comment string) io.Reader {
 	t.Helper()
 
-	number := 1
 	event := &github.IssueCommentEvent{
 		Repo:   &github.Repository{},
 		Action: &action,
 		Issue: &github.Issue{
-			Number: &number,
+			Number: new(int),
 		},
 		Comment: &github.IssueComment{
 			Body: &comment,
@@ -305,7 +340,7 @@ func createIssueCommentPayload(t *testing.T, action, comment string) io.Reader {
 	return bytes.NewReader(payload)
 }
 
-func createPushPayload(t *testing.T, repoName, ref string) io.Reader {
+func createPushPayload(t *testing.T, repoName, ref string, sha string) io.Reader {
 	t.Helper()
 
 	event := github.PushEvent{
@@ -313,6 +348,9 @@ func createPushPayload(t *testing.T, repoName, ref string) io.Reader {
 			FullName: &repoName,
 		},
 		Ref: &ref,
+		HeadCommit: &github.PushEventCommit{
+			SHA: &sha,
+		},
 	}
 	payload, err := json.Marshal(event)
 	if err != nil {
