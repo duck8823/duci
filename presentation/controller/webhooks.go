@@ -11,6 +11,7 @@ import (
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -53,7 +54,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
+		ctx, repo, _, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
 		if err == SkipBuild {
 			logger.Info(requestId, "skip build")
 			w.WriteHeader(http.StatusOK)
@@ -64,7 +65,16 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go c.Runner.Run(ctx, repo, ref, command...)
+		pr, err := c.GitHub.GetPullRequest(ctx, repo, event.GetIssue().GetNumber())
+		if err != nil {
+			logger.Errorf(requestId, "%+v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		sha := pr.GetHead().GetSHA()
+		c.GitHub.CreateCommitStatus(ctx, repo, plumbing.NewHash(sha), github.PENDING, "waiting...")
+		go c.Runner.Run(ctx, repo, sha, command...)
 	case "push":
 		event := &go_github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
@@ -72,8 +82,13 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		taskName := fmt.Sprintf("%s/push", application.Name)
-		go c.Runner.Run(context.New(taskName, requestId, runtimeUrl), event.GetRepo(), event.GetRef())
+		ctx := context.New(taskName, requestId, runtimeUrl)
+
+		sha := event.GetHeadCommit().GetSHA()
+		c.GitHub.CreateCommitStatus(ctx, event.GetRepo(), plumbing.NewHash(sha), github.PENDING, "waiting...")
+		go c.Runner.Run(ctx, event.GetRepo(), sha)
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
