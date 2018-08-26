@@ -67,6 +67,9 @@ func TestClientImpl_Build(t *testing.T) {
 			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
 				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
 			}
+
+			// cleanup
+			removeImage(t, tag)
 		})
 
 		t.Run("with sub directory", func(t *testing.T) {
@@ -93,6 +96,9 @@ func TestClientImpl_Build(t *testing.T) {
 			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
 				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
 			}
+
+			// cleanup
+			removeImage(t, tag)
 		})
 	})
 
@@ -153,10 +159,10 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Parallel()
 
 			// given
-			imagePull(t, "centos:latest")
+			imagePull(t, "alpine:latest")
 
 			// when
-			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "echo", "Hello-world")
+			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -177,12 +183,16 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Parallel()
 
 			// given
-			imagePull(t, "centos:latest")
+			imagePull(t, "alpine:latest")
 
 			// expect
-			if _, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "missing_command"); err == nil {
+			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "missing_command")
+			if err == nil {
 				t.Error("error must occur")
 			}
+
+			// cleanup
+			removeContainer(t, containerId)
 		})
 	})
 
@@ -190,7 +200,7 @@ func TestClientImpl_Run(t *testing.T) {
 		t.Parallel()
 
 		// given
-		imagePull(t, "centos:latest")
+		imagePull(t, "alpine:latest")
 
 		// and
 		opts := docker.RuntimeOptions{
@@ -198,7 +208,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "sh", "-c", "echo hello $ENV")
+		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "sh", "-c", "echo hello $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -223,7 +233,7 @@ func TestClientImpl_Run(t *testing.T) {
 		t.Parallel()
 
 		// given
-		imagePull(t, "centos:latest")
+		imagePull(t, "alpine:latest")
 
 		// and
 		path, err := filepath.Abs("testdata")
@@ -235,7 +245,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "cat", "/tmp/testdata/data")
+		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -261,7 +271,7 @@ func TestClientImpl_Rm(t *testing.T) {
 	}
 
 	// given
-	tag := "alpine:3.5"
+	tag := "alpine:latest"
 	imagePull(t, tag)
 	containerId := containerCreate(t, tag)
 
@@ -560,6 +570,19 @@ func containerWait(t *testing.T, containerId string) {
 	case <-body:
 		return
 	case <-err2:
+		t.Fatalf("error occured. %+v", err)
+	}
+}
+
+func removeImage(t *testing.T, name string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	if _, err := cli.ImageRemove(context.New("test/task", uuid.New(), &url.URL{}), name, types.ImageRemoveOptions{}); err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
 }
