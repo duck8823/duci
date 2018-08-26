@@ -1,10 +1,10 @@
 # Makefile
 build:
-	vgo build
+	go build
 
 test:
-	vgo test -coverprofile cover.out $$(vgo list ./... | grep -v mock_)
-	vgo tool cover -html cover.out -o cover.html
+	go test -coverprofile cover.out $$(go list ./... | grep -v mock_)
+	go tool cover -html cover.out -o cover.html
 	open cover.html
 
 docker-test:
