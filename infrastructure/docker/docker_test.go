@@ -159,10 +159,10 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Parallel()
 
 			// given
-			imagePull(t, "centos:latest")
+			imagePull(t, "alpine:latest")
 
 			// when
-			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "echo", "Hello-world")
+			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occured: %+v", err)
 			}
@@ -183,10 +183,10 @@ func TestClientImpl_Run(t *testing.T) {
 			t.Parallel()
 
 			// given
-			imagePull(t, "centos:latest")
+			imagePull(t, "alpine:latest")
 
 			// expect
-			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "missing_command")
+			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "missing_command")
 			if err == nil {
 				t.Error("error must occur")
 			}
@@ -200,7 +200,7 @@ func TestClientImpl_Run(t *testing.T) {
 		t.Parallel()
 
 		// given
-		imagePull(t, "centos:latest")
+		imagePull(t, "alpine:latest")
 
 		// and
 		opts := docker.RuntimeOptions{
@@ -208,7 +208,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "sh", "-c", "echo hello $ENV")
+		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "sh", "-c", "echo hello $ENV")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -233,7 +233,7 @@ func TestClientImpl_Run(t *testing.T) {
 		t.Parallel()
 
 		// given
-		imagePull(t, "centos:latest")
+		imagePull(t, "alpine:latest")
 
 		// and
 		path, err := filepath.Abs("testdata")
@@ -245,7 +245,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "centos", "cat", "/tmp/testdata/data")
+		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occured: %+v", err)
 		}
@@ -271,7 +271,7 @@ func TestClientImpl_Rm(t *testing.T) {
 	}
 
 	// given
-	tag := "alpine:3.5"
+	tag := "alpine:latest"
 	imagePull(t, tag)
 	containerId := containerCreate(t, tag)
 
