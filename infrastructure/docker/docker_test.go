@@ -67,6 +67,9 @@ func TestClientImpl_Build(t *testing.T) {
 			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
 				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
 			}
+
+			// cleanup
+			removeImage(t, tag)
 		})
 
 		t.Run("with sub directory", func(t *testing.T) {
@@ -93,6 +96,9 @@ func TestClientImpl_Build(t *testing.T) {
 			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
 				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
 			}
+
+			// cleanup
+			removeImage(t, tag)
 		})
 	})
 
@@ -560,6 +566,19 @@ func containerWait(t *testing.T, containerId string) {
 	case <-body:
 		return
 	case <-err2:
+		t.Fatalf("error occured. %+v", err)
+	}
+}
+
+func removeImage(t *testing.T, name string) {
+	t.Helper()
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		t.Fatalf("error occured. %+v", err)
+	}
+
+	if _, err := cli.ImageRemove(context.New("test/task", uuid.New(), &url.URL{}), name, types.ImageRemoveOptions{}); err != nil {
 		t.Fatalf("error occured. %+v", err)
 	}
 }
