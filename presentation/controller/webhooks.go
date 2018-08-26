@@ -11,6 +11,7 @@ import (
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -53,7 +54,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx, repo, ref, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
+		ctx, repo, head, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
 		if err == SkipBuild {
 			logger.Info(requestId, "skip build")
 			w.WriteHeader(http.StatusOK)
@@ -64,7 +65,9 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go c.Runner.Run(ctx, repo, ref, command...)
+
+		c.GitHub.CreateCommitStatus(ctx, repo, plumbing.NewHash(head.GetSHA()), github.PENDING, "waiting...")
+		go c.Runner.Run(ctx, repo, head.GetRef(), command...)
 	case "push":
 		event := &go_github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
@@ -72,8 +75,13 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		taskName := fmt.Sprintf("%s/push", application.Name)
-		go c.Runner.Run(context.New(taskName, requestId, runtimeUrl), event.GetRepo(), event.GetRef())
+		ctx := context.New(taskName, requestId, runtimeUrl)
+
+		sha := event.GetHeadCommit().GetSHA()
+		c.GitHub.CreateCommitStatus(ctx, event.GetRepo(), plumbing.NewHash(sha), github.PENDING, "waiting...")
+		go c.Runner.Run(ctx, event.GetRepo(), event.GetRef())
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
@@ -89,13 +97,14 @@ func (c *JobController) parseIssueComment(
 	event *go_github.IssueCommentEvent,
 	requestId uuid.UUID,
 	url *url.URL,
-) (ctx context.Context, repo *go_github.Repository, ref string, command []string, err error) {
+) (ctx context.Context, repo *go_github.Repository, head *go_github.PullRequestBranch, command []string, err error) {
+
 	if !isValidAction(event.Action) {
-		return nil, nil, "", nil, SkipBuild
+		return nil, nil, nil, nil, SkipBuild
 	}
 
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
-		return nil, nil, "", nil, SkipBuild
+		return nil, nil, nil, nil, SkipBuild
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 	command = strings.Split(phrase, " ")
@@ -103,12 +112,12 @@ func (c *JobController) parseIssueComment(
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
-		return nil, nil, "", nil, errors.WithStack(err)
+		return nil, nil, nil, nil, errors.WithStack(err)
 	}
 
 	repo = event.GetRepo()
-	ref = fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef())
-	return ctx, repo, ref, command, err
+	head = pr.GetHead()
+	return ctx, repo, head, command, err
 }
 
 func isValidAction(action *string) bool {
