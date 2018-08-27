@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine
+FROM golang:1.11-alpine AS build
 MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache alpine-sdk
@@ -7,12 +7,15 @@ WORKDIR /go/src/github.com/duck8823/duci
 
 ADD . .
 
-RUN go get golang.org/x/vgo
+ENV GO111MODULE=on
 
-ENV CC=gcc
+RUN go build
 
-RUN vgo install
+FROM alpine
+
+WORKDIR /root/
+COPY --from=build /go/src/github.com/duck8823/duci/duci .
 
 EXPOSE 8080
 
-CMD ["duci"]
+CMD ["./duci"]
