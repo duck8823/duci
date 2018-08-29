@@ -367,6 +367,64 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 	})
 }
 
+func TestStoreServiceImpl_Start(t *testing.T) {
+	// setup
+	ctrl := gomock.NewController(t)
+	mockStore := mock_logger.NewMockStore(ctrl)
+
+	service := &storeServiceImpl{mockStore}
+	t.Run("when put success", func(t *testing.T) {
+		// given
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+		storedId := []byte(id.String())
+
+		// and
+		expected, err := json.Marshal(&model.Job{Finished: false})
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		mockStore.EXPECT().
+			Put(gomock.Eq(storedId), gomock.Eq(expected), gomock.Nil()).
+			Times(1).
+			Return(nil)
+
+		// when
+		err = service.Start(id)
+
+		// then
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+	})
+
+	t.Run("when put fail", func(t *testing.T) {
+		// given
+		id, err := uuid.NewRandom()
+		if err != nil {
+			t.Fatalf("error occured: %+v", err)
+		}
+
+		// and
+		mockStore.EXPECT().
+			Put(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(errors.New("test error"))
+
+		// when
+		err = service.Start(id)
+
+		// then
+		if err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+}
+
 func TestStoreServiceImpl_Finish(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
