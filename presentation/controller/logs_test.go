@@ -2,7 +2,7 @@ package controller_test
 
 import (
 	ctx "context"
-	"github.com/duck8823/duci/application/service/logstore/mock_log"
+	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
 	"github.com/duck8823/duci/domain/model"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/presentation/controller"
@@ -20,7 +20,7 @@ func TestLogsController_ServeHTTP(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockService := mock_log.NewMockStoreService(ctrl)
+		mockService := mock_logstore.NewMockService(ctrl)
 		handler := &controller.LogController{LogStore: mockService}
 
 		// given
