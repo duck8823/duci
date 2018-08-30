@@ -16,6 +16,7 @@ type Level = string
 type Service interface {
 	Get(uuid uuid.UUID) (*model.Job, error)
 	Append(uuid uuid.UUID, message model.Message) error
+	Start(uuid uuid.UUID) error
 	Finish(uuid uuid.UUID) error
 	Close() error
 }
@@ -77,6 +78,14 @@ func (s *storeServiceImpl) Get(uuid uuid.UUID) (*model.Job, error) {
 		return nil, errors.WithStack(err)
 	}
 	return job, nil
+}
+
+func (s *storeServiceImpl) Start(uuid uuid.UUID) error {
+	started, _ := json.Marshal(&model.Job{Finished: false})
+	if err := s.db.Put([]byte(uuid.String()), started, nil); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (s *storeServiceImpl) Finish(uuid uuid.UUID) error {

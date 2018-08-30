@@ -39,6 +39,10 @@ type DockerRunner struct {
 }
 
 func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref string, command ...string) (plumbing.Hash, error) {
+	if err := r.LogStore.Start(ctx.UUID()); err != nil {
+		return plumbing.ZeroHash, errors.WithStack(err)
+	}
+
 	commitHash := make(chan plumbing.Hash, 1)
 	errs := make(chan error, 1)
 
