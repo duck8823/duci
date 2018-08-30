@@ -67,7 +67,8 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		c.GitHub.CreateCommitStatus(ctx, repo, plumbing.NewHash(head.GetSHA()), github.PENDING, "waiting...")
-		go c.Runner.Run(ctx, repo, head.GetRef(), command...)
+		ref := fmt.Sprintf("refs/heads/%s", head.GetRef())
+		go c.Runner.Run(ctx, repo, ref, command...)
 	case "push":
 		event := &go_github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
