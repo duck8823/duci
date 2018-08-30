@@ -52,9 +52,9 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 	go func() {
 		semaphore.Acquire()
 		hash, err := r.run(ctx, repo, ref, command...)
+		semaphore.Release()
 		commitHash <- hash
 		errs <- err
-		semaphore.Release()
 	}()
 
 	select {
