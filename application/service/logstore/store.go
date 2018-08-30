@@ -81,10 +81,7 @@ func (s *storeServiceImpl) Get(uuid uuid.UUID) (*model.Job, error) {
 }
 
 func (s *storeServiceImpl) Start(uuid uuid.UUID) error {
-	started, err := json.Marshal(&model.Job{Finished: false})
-	if err != nil {
-		return errors.WithStack(err)
-	}
+	started, _ := json.Marshal(&model.Job{Finished: false})
 	if err := s.db.Put([]byte(uuid.String()), started, nil); err != nil {
 		return errors.WithStack(err)
 	}
