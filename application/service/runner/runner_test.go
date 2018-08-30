@@ -375,6 +375,46 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 	})
 
+	t.Run("when failed store#$tart", func(t *testing.T) {
+		// given
+		mockGitHub := mock_github.NewMockService(ctrl)
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(2).
+			Return(nil)
+
+		// and
+		mockLogStore := mock_logstore.NewMockService(ctrl)
+		mockLogStore.EXPECT().
+			Start(gomock.Any()).
+			AnyTimes().
+			Return(errors.New("test error"))
+
+		r := &runner.DockerRunner{
+			Name:        "test-runner",
+			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			GitHub:      mockGitHub,
+			LogStore:    mockLogStore,
+		}
+
+		// and
+		var empty plumbing.Hash
+
+		// and
+		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+
+		// when
+		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+
+		// then
+		if err == nil {
+			t.Error("must occur error")
+		}
+
+		if hash != empty {
+			t.Errorf("commit hash must be equal empty, but got %+v", hash)
+		}
+	})
+
 	t.Run("when workdir not exists", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
