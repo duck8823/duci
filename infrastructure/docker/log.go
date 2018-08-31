@@ -25,12 +25,22 @@ type buildLogger struct {
 }
 
 func (l *buildLogger) ReadLine() (*LogLine, error) {
-	line, _, err := l.reader.ReadLine()
-	s := &struct {
-		Stream string `json:"stream"`
-	}{}
-	json.NewDecoder(bytes.NewReader(line)).Decode(s)
-	return &LogLine{Timestamp: clock.Now(), Message: []byte(s.Stream)}, err
+	for {
+		line, _, readErr := l.reader.ReadLine()
+		msg := extractMessage(line)
+		if readErr == io.EOF {
+			return &LogLine{Timestamp: clock.Now(), Message: msg}, readErr
+		}
+		if readErr != nil {
+			return nil, errors.WithStack(readErr)
+		}
+
+		if len(msg) == 0 {
+			continue
+		}
+
+		return &LogLine{Timestamp: clock.Now(), Message: msg}, readErr
+	}
 }
 
 type runLogger struct {
@@ -53,6 +63,14 @@ func (l *runLogger) ReadLine() (*LogLine, error) {
 		progress := bytes.Split(messages, []byte{'\r'})
 		return &LogLine{Timestamp: clock.Now(), Message: progress[0]}, readErr
 	}
+}
+
+func extractMessage(line []byte) []byte {
+	s := &struct {
+		Stream string `json:"stream"`
+	}{}
+	json.NewDecoder(bytes.NewReader(line)).Decode(s)
+	return []byte(s.Stream)
 }
 
 func trimPrefix(line []byte) ([]byte, error) {
