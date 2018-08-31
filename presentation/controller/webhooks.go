@@ -79,7 +79,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		taskName := fmt.Sprintf("%s/push", application.Name)
 		ctx := context.New(taskName, requestId, runtimeUrl)
 
-		sha := event.GetHeadCommit().GetSHA()
+		sha := event.GetHeadCommit().GetID()
 		go c.Runner.Run(ctx, event.GetRepo(), event.GetRef(), plumbing.NewHash(sha))
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
