@@ -2,7 +2,7 @@ package context_test
 
 import (
 	ct "context"
-	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/application/context"
 	"github.com/google/uuid"
 	"net/url"
 	"testing"

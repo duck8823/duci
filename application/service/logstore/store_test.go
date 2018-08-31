@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/infrastructure/logger/mock_logger"

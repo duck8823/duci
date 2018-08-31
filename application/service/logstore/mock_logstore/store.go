@@ -5,7 +5,7 @@
 package mock_logstore
 
 import (
-	model "github.com/duck8823/duci/domain/model"
+	model "github.com/duck8823/duci/data/model"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 	reflect "reflect"

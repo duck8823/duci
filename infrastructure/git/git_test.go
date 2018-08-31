@@ -2,7 +2,7 @@ package git_test
 
 import (
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/google/uuid"
 	"gopkg.in/src-d/go-git.v4/plumbing"

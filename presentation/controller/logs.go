@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/duck8823/duci/application/service/logstore"
-	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/data/model"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"

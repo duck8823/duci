@@ -2,8 +2,8 @@ package github_test
 
 import (
 	"fmt"
+	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/service/github"
-	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/google/uuid"
 	"gopkg.in/h2non/gock.v1"
 	"gopkg.in/src-d/go-git.v4/plumbing"

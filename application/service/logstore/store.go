@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/duck8823/duci/application"
-	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"

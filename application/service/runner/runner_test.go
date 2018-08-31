@@ -2,11 +2,11 @@ package runner_test
 
 import (
 	"github.com/duck8823/duci/application"
+	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/service/github/mock_github"
 	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/clock"
-	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/duck8823/duci/infrastructure/git/mock_git"

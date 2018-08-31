@@ -3,7 +3,7 @@ package github
 import (
 	ctx "context"
 	"github.com/duck8823/duci/application"
-	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
