@@ -1,4 +1,4 @@
-package logger
+package store
 
 import (
 	leveldb_errors "github.com/syndtr/goleveldb/leveldb/errors"

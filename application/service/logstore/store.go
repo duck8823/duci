@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/data/model"
-	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/duck8823/duci/infrastructure/store"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -22,7 +22,7 @@ type Service interface {
 }
 
 type storeServiceImpl struct {
-	db logger.Store
+	db store.Store
 }
 
 func New() (Service, error) {
@@ -55,7 +55,7 @@ func (s *storeServiceImpl) findOrInitialize(uuid uuid.UUID) (*model.Job, error) 
 	job := &model.Job{}
 
 	data, err := s.db.Get([]byte(uuid.String()), nil)
-	if err == logger.NotFoundError {
+	if err == store.NotFoundError {
 		return job, nil
 	}
 	if err != nil {
