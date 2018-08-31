@@ -22,7 +22,7 @@ func TestNew(t *testing.T) {
 	})
 }
 
-func TestSshGitClient_Clone(t *testing.T) {
+func TestSshGitService_Clone(t *testing.T) {
 	t.Run("with correct key", func(t *testing.T) {
 		// setup
 		client, err := git.New(path.Join(os.Getenv("HOME"), ".ssh/id_rsa"))
