@@ -10,7 +10,7 @@ import (
 )
 
 type Service interface {
-	Clone(ctx context.Context, dir string, sshUrl string, ref string) (plumbing.Hash, error)
+	Clone(ctx context.Context, dir string, sshUrl string, ref string, sha plumbing.Hash) error
 }
 
 type sshGitService struct {
@@ -25,7 +25,7 @@ func New(sshKeyPath string) (Service, error) {
 	return &sshGitService{auth: auth}, nil
 }
 
-func (s *sshGitService) Clone(ctx context.Context, dir string, sshUrl string, ref string) (plumbing.Hash, error) {
+func (s *sshGitService) Clone(ctx context.Context, dir string, sshUrl string, ref string, sha plumbing.Hash) error {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           sshUrl,
 		Auth:          s.auth,
@@ -34,12 +34,20 @@ func (s *sshGitService) Clone(ctx context.Context, dir string, sshUrl string, re
 		Depth:         1,
 	})
 	if err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
-	reference, err := gitRepository.Head()
+	wt, err := gitRepository.Worktree()
 	if err != nil {
-		return plumbing.Hash{}, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
-	return reference.Hash(), nil
+
+	if err := wt.Checkout(&git.CheckoutOptions{
+		Hash:   sha,
+		Branch: plumbing.ReferenceName(sha.String()),
+		Create: true,
+	}); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }

@@ -66,9 +66,8 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		c.GitHub.CreateCommitStatus(ctx, repo, plumbing.NewHash(head.GetSHA()), github.PENDING, "waiting...")
 		ref := fmt.Sprintf("refs/heads/%s", head.GetRef())
-		go c.Runner.Run(ctx, repo, ref, command...)
+		go c.Runner.Run(ctx, repo, ref, plumbing.NewHash(head.GetSHA()), command...)
 	case "push":
 		event := &go_github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
@@ -81,8 +80,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx := context.New(taskName, requestId, runtimeUrl)
 
 		sha := event.GetHeadCommit().GetSHA()
-		c.GitHub.CreateCommitStatus(ctx, event.GetRepo(), plumbing.NewHash(sha), github.PENDING, "waiting...")
-		go c.Runner.Run(ctx, event.GetRepo(), event.GetRef())
+		go c.Runner.Run(ctx, event.GetRepo(), event.GetRef(), plumbing.NewHash(sha))
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
 		logger.Error(requestId, message)
