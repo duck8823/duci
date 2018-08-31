@@ -83,8 +83,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(clock.Now().Unix(), 10))
 	tagName := repo.GetFullName()
 
-	_, err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref)
-	if err != nil {
+	if err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref, sha); err != nil {
 		return errors.WithStack(err)
 	}
 

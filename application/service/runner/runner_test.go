@@ -35,23 +35,23 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Return(nil)
 
 			// and
-			mockGit := mock_git.NewMockClient(ctrl)
-			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGit := mock_git.NewMockService(ctrl)
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
+				DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
 					if err := os.MkdirAll(dir, 0700); err != nil {
-						return plumbing.Hash{}, err
+						return err
 					}
 
 					dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
 					if err != nil {
-						return plumbing.Hash{}, err
+						return err
 					}
 					defer dockerfile.Close()
 
 					dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
 
-					return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
+					return nil
 				})
 
 			// and
@@ -120,23 +120,23 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Return(nil)
 
 			// and
-			mockGit := mock_git.NewMockClient(ctrl)
-			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGit := mock_git.NewMockService(ctrl)
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
+				DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
 					if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
-						return plumbing.Hash{}, err
+						return err
 					}
 
 					dockerfile, err := os.OpenFile(path.Join(dir, ".duci/Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
 					if err != nil {
-						return plumbing.Hash{}, err
+						return err
 					}
 					defer dockerfile.Close()
 
 					dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
 
-					return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
+					return nil
 				})
 
 			// and
@@ -205,23 +205,23 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			DoAndReturn(func(_ context.Context, dir string, _ string, _ string) (plumbing.Hash, error) {
+			DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
 				if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
-					return plumbing.Hash{}, err
+					return err
 				}
 
 				dockerfile, err := os.OpenFile(path.Join(dir, ".duci/config.yml"), os.O_RDWR|os.O_CREATE, 0600)
 				if err != nil {
-					return plumbing.Hash{}, err
+					return err
 				}
 				defer dockerfile.Close()
 
 				dockerfile.WriteString("---\nvolumes:\n  - /hello:/hello")
 
-				return plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil
+				return nil
 			})
 
 		// and
@@ -289,10 +289,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, errors.New("error"))
+			Return(errors.New("error"))
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -388,10 +388,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+			Return(nil)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -454,10 +454,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+			Return(nil)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -521,10 +521,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+			Return(nil)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -592,10 +592,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+			Return(nil)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -662,10 +662,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+			Return(nil)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -730,10 +730,10 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockGit := mock_git.NewMockClient(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit := mock_git.NewMockService(ctrl)
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(plumbing.Hash{1, 2, 3, 4, 5, 6, 7, 8, 9}, nil)
+			Return(nil)
 
 		// and
 		application.Config.Job.Timeout = 1

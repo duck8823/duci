@@ -37,15 +37,13 @@ func TestSshGitService_Clone(t *testing.T) {
 				t.Fatalf("%+v", err)
 			}
 
-			// given
-			var empty plumbing.Hash
-
 			// when
-			hash, err := client.Clone(
+			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
 				"git@github.com:duck8823/duci.git",
 				"refs/heads/master",
+				plumbing.ZeroHash,
 			)
 
 			// then
@@ -55,10 +53,6 @@ func TestSshGitService_Clone(t *testing.T) {
 
 			if _, err := os.Stat(path.Join(tempDir, ".git")); err != nil {
 				t.Errorf("must create dir: %s", path.Join(tempDir, ".git"))
-			}
-
-			if hash == empty {
-				t.Errorf("commit hash must not be empty")
 			}
 		})
 
@@ -71,11 +65,12 @@ func TestSshGitService_Clone(t *testing.T) {
 			wrongPath := "/path/to/not/exists"
 
 			// when
-			_, err := client.Clone(
+			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				wrongPath,
 				"git@github.com:duck8823/duci.git",
 				"refs/heads/master",
+				plumbing.ZeroHash,
 			)
 
 			// then
