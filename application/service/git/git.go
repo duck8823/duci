@@ -43,7 +43,8 @@ func (s *sshGitService) Clone(ctx context.Context, dir string, sshUrl string, re
 	}
 
 	if err := wt.Checkout(&git.CheckoutOptions{
-		Hash: sha,
+		Hash:   sha,
+		Branch: plumbing.ReferenceName(ref),
 	}); err != nil {
 		return errors.WithStack(err)
 	}
