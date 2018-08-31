@@ -51,8 +51,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 
 	go func() {
 		semaphore.Acquire()
-		err := r.run(ctx, repo, ref, sha, command...)
-		errs <- err
+		errs <- r.run(timeout, repo, ref, sha, command...)
 		semaphore.Release()
 	}()
 
