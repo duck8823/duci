@@ -103,19 +103,12 @@ func TestRunnerImpl_Run(t *testing.T) {
 			// and
 			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
-			// and
-			var empty plumbing.Hash
-
 			// when
-			hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+			err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 			// then
 			if err != nil {
 				t.Errorf("must not error. but: %+v", err)
-			}
-
-			if hash == empty {
-				t.Error("hash must not empty")
 			}
 		})
 
@@ -194,19 +187,12 @@ func TestRunnerImpl_Run(t *testing.T) {
 			// and
 			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
-			// and
-			var empty plumbing.Hash
-
 			// when
-			hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+			err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 			// then
 			if err != nil {
 				t.Errorf("must not error. but: %+v", err)
-			}
-
-			if hash == empty {
-				t.Error("hash must not empty")
 			}
 		})
 	})
@@ -286,19 +272,12 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
-		// and
-		var empty plumbing.Hash
-
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err != nil {
 			t.Errorf("must not error. but: %+v", err)
-		}
-
-		if hash == empty {
-			t.Error("hash must not empty")
 		}
 	})
 
@@ -357,21 +336,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err == nil {
 			t.Error("must occur error")
-		}
-
-		if hash != empty {
-			t.Errorf("commit hash must be equal empty, but got %+v", hash)
 		}
 	})
 
@@ -397,21 +369,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err == nil {
 			t.Error("must occur error")
-		}
-
-		if hash != empty {
-			t.Errorf("commit hash must be equal empty, but got %+v", hash)
 		}
 	})
 
@@ -470,21 +435,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err == nil {
 			t.Error("must occur error")
-		}
-
-		if hash == empty {
-			t.Error("hash must not empty")
 		}
 	})
 
@@ -544,21 +502,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err == nil {
 			t.Error("must occur error")
-		}
-
-		if hash == empty {
-			t.Error("hash must not empty")
 		}
 	})
 
@@ -619,21 +570,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err == nil {
 			t.Error("must occur error")
-		}
-
-		if hash == empty {
-			t.Error("hash must not empty")
 		}
 	})
 
@@ -702,7 +646,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		_, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err.Error() != expected.Error() {
@@ -767,21 +711,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err != runner.Failure {
 			t.Errorf("error must be %s, but got %s", runner.Failure, err)
-		}
-
-		if hash == empty {
-			t.Error("hash must not empty")
 		}
 	})
 
@@ -847,21 +784,14 @@ func TestRunnerImpl_Run(t *testing.T) {
 		}
 
 		// and
-		var empty plumbing.Hash
-
-		// and
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		hash, err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", "Hello World.")
+		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
 
 		// then
 		if err.Error() != "context deadline exceeded" {
 			t.Errorf("error must be runner.Failure, but got %+v", err)
-		}
-
-		if hash == empty {
-			t.Error("hash must not empty")
 		}
 	})
 }

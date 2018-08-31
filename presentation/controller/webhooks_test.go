@@ -32,7 +32,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			t.Run("when github service returns no error", func(t *testing.T) {
 				// given
 				runner := mock_runner.NewMockRunner(ctrl)
-				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 				githubService := mock_github.NewMockService(ctrl)
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
