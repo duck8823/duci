@@ -33,9 +33,9 @@ func Create(dir string, output io.Writer) error {
 		}
 
 		header := &tar.Header{
-			Name:       strings.Replace(file.Name(), dir+"/", "", -1),
-			Mode:       0600,
-			Size:       info.Size(),
+			Name: strings.Replace(file.Name(), dir+"/", "", -1),
+			Mode: 0600,
+			Size: info.Size(),
 		}
 		if err := writer.WriteHeader(header); err != nil {
 			return errors.WithStack(err)

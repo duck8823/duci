@@ -9,23 +9,23 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
-type Client interface {
+type Service interface {
 	Clone(ctx context.Context, dir string, sshUrl string, ref string) (plumbing.Hash, error)
 }
 
-type sshGitClient struct {
+type sshGitService struct {
 	auth transport.AuthMethod
 }
 
-func New(sshKeyPath string) (Client, error) {
+func New(sshKeyPath string) (Service, error) {
 	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
 	if err != nil {
 		return nil, err
 	}
-	return &sshGitClient{auth: auth}, nil
+	return &sshGitService{auth: auth}, nil
 }
 
-func (s *sshGitClient) Clone(ctx context.Context, dir string, sshUrl string, ref string) (plumbing.Hash, error) {
+func (s *sshGitService) Clone(ctx context.Context, dir string, sshUrl string, ref string) (plumbing.Hash, error) {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           sshUrl,
 		Auth:          s.auth,

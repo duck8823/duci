@@ -5,13 +5,13 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/semaphore"
+	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/docker"
-	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -30,7 +30,7 @@ type Runner interface {
 }
 
 type DockerRunner struct {
-	Git         git.Client
+	Git         git.Service
 	GitHub      github.Service
 	Docker      docker.Client
 	LogStore    logstore.Service

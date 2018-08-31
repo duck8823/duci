@@ -2,11 +2,11 @@ package router
 
 import (
 	"github.com/duck8823/duci/application"
+	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/application/service/runner"
 	"github.com/duck8823/duci/infrastructure/docker"
-	"github.com/duck8823/duci/infrastructure/git"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"

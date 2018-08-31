@@ -1,7 +1,7 @@
 package git_test
 
 import (
-	"github.com/duck8823/duci/infrastructure/git"
+	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"io"
 	"io/ioutil"
