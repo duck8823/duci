@@ -3,7 +3,7 @@ package controller_test
 import (
 	ctx "context"
 	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
-	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/go-chi/chi"

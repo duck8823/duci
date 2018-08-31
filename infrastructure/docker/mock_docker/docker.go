@@ -5,7 +5,7 @@
 package mock_docker
 
 import (
-	context "github.com/duck8823/duci/infrastructure/context"
+	context "context"
 	docker "github.com/duck8823/duci/infrastructure/docker"
 	gomock "github.com/golang/mock/gomock"
 	io "io"

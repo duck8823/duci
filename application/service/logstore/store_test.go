@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/duck8823/duci/domain/model"
+	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/clock"
-	"github.com/duck8823/duci/infrastructure/logger"
-	"github.com/duck8823/duci/infrastructure/logger/mock_logger"
+	"github.com/duck8823/duci/infrastructure/store"
+	"github.com/duck8823/duci/infrastructure/store/mock_store"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
@@ -32,7 +32,7 @@ func TestNewStoreService(t *testing.T) {
 func TestStoreServiceImpl_Append(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
-	mockStore := mock_logger.NewMockStore(ctrl)
+	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &storeServiceImpl{mockStore}
 	t.Run("when store returns correct data", func(t *testing.T) {
@@ -141,7 +141,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		mockStore.EXPECT().
 			Get(gomock.Eq(storedId), gomock.Nil()).
 			Times(1).
-			Return(nil, logger.NotFoundError)
+			Return(nil, store.NotFoundError)
 		mockStore.EXPECT().
 			Put(gomock.Eq(storedId), gomock.Eq(expectedData), gomock.Nil()).
 			Times(1).
@@ -262,7 +262,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 func TestStoreServiceImpl_Get(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
-	mockStore := mock_logger.NewMockStore(ctrl)
+	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &storeServiceImpl{mockStore}
 	t.Run("with error", func(t *testing.T) {
@@ -370,7 +370,7 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 func TestStoreServiceImpl_Start(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
-	mockStore := mock_logger.NewMockStore(ctrl)
+	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &storeServiceImpl{mockStore}
 	t.Run("when put success", func(t *testing.T) {
@@ -428,7 +428,7 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 func TestStoreServiceImpl_Finish(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
-	mockStore := mock_logger.NewMockStore(ctrl)
+	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &storeServiceImpl{mockStore}
 	t.Run("with error", func(t *testing.T) {
@@ -565,7 +565,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 func TestStoreServiceImpl_Close(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
-	mockStore := mock_logger.NewMockStore(ctrl)
+	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &storeServiceImpl{mockStore}
 	t.Run("with error", func(t *testing.T) {

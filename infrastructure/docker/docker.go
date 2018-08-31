@@ -2,11 +2,11 @@ package docker
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	moby "github.com/docker/docker/client"
-	"github.com/duck8823/duci/infrastructure/context"
 	"github.com/pkg/errors"
 	"io"
 	"strings"

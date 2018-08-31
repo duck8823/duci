@@ -5,7 +5,7 @@
 package mock_git
 
 import (
-	context "github.com/duck8823/duci/infrastructure/context"
+	context "github.com/duck8823/duci/application/context"
 	gomock "github.com/golang/mock/gomock"
 	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"

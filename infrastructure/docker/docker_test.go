@@ -5,7 +5,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/duck8823/duci/infrastructure/context"
+	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/random"

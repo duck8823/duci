@@ -2,8 +2,8 @@ package git_test
 
 import (
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/context"
-	"github.com/duck8823/duci/infrastructure/git"
+	"github.com/duck8823/duci/application/context"
+	"github.com/duck8823/duci/application/service/git"
 	"github.com/google/uuid"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/url"
@@ -22,7 +22,7 @@ func TestNew(t *testing.T) {
 	})
 }
 
-func TestSshGitClient_Clone(t *testing.T) {
+func TestSshGitService_Clone(t *testing.T) {
 	t.Run("with correct key", func(t *testing.T) {
 		// setup
 		client, err := git.New(path.Join(os.Getenv("HOME"), ".ssh/id_rsa"))
