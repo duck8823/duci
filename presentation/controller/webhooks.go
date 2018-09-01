@@ -78,7 +78,7 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		sha := event.GetHeadCommit().GetID()
 		if len(sha) == 0 {
-			logger.Info(requestId, "skip build")
+			logger.Info(requestId, "skip build: could not get head commit")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("skip build"))
 			return
