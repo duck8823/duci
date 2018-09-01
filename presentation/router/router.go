@@ -24,7 +24,7 @@ func New() (http.Handler, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	webhooksCtrl := &controller.JobController{Runner: dockerRunner, GitHub: githubService}
+	webhooksCtrl := &controller.WebhooksController{Runner: dockerRunner, GitHub: githubService}
 	logCtrl := &controller.LogController{LogStore: logstoreService}
 
 	rtr := chi.NewRouter()

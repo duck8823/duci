@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestJobController_ServeHTTP(t *testing.T) {
+func TestWebhooksController_ServeHTTP(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -47,7 +47,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 					Return(nil)
 
 				// and
-				handler := &controller.JobController{Runner: runner, GitHub: githubService}
+				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 				s := httptest.NewServer(handler)
 				defer s.Close()
@@ -116,7 +116,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 					Return(nil)
 
 				// and
-				handler := &controller.JobController{Runner: runner, GitHub: githubService}
+				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 				s := httptest.NewServer(handler)
 				defer s.Close()
@@ -140,11 +140,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 		})
 
 		t.Run("when push", func(t *testing.T) {
-			// given
-			runner := mock_runner.NewMockRunner(ctrl)
-			runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
-
-			// and
+			// setup
 			githubService := mock_github.NewMockService(ctrl)
 			githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -157,27 +153,61 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				AnyTimes().
 				Return(nil)
 
-			// and
-			handler := &controller.JobController{Runner: runner, GitHub: githubService}
+			t.Run("with head_commit.id", func(t *testing.T) {
+				// given
+				runner := mock_runner.NewMockRunner(ctrl)
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-			s := httptest.NewServer(handler)
-			defer s.Close()
+				// and
+				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
-			// and
-			payload := createPushPayload(t, "test/repo", "master", "")
+				s := httptest.NewServer(handler)
+				defer s.Close()
 
-			req := httptest.NewRequest("POST", "/", payload)
-			req.Header.Set("X-GitHub-Delivery", requestId.String())
-			req.Header.Set("X-GitHub-Event", "push")
-			rec := httptest.NewRecorder()
+				// and
+				payload := createPushPayload(t, "test/repo", "master", "sha")
 
-			// when
-			handler.ServeHTTP(rec, req)
+				req := httptest.NewRequest("POST", "/", payload)
+				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Event", "push")
+				rec := httptest.NewRecorder()
 
-			// then
-			if rec.Code != 200 {
-				t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
-			}
+				// when
+				handler.ServeHTTP(rec, req)
+
+				// then
+				if rec.Code != 200 {
+					t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
+				}
+			})
+
+			t.Run("without head_commit.id", func(t *testing.T) {
+				// given
+				runner := mock_runner.NewMockRunner(ctrl)
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+
+				// and
+				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
+
+				s := httptest.NewServer(handler)
+				defer s.Close()
+
+				// and
+				payload := createPushPayload(t, "test/repo", "master", "")
+
+				req := httptest.NewRequest("POST", "/", payload)
+				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Event", "push")
+				rec := httptest.NewRecorder()
+
+				// when
+				handler.ServeHTTP(rec, req)
+
+				// then
+				if rec.Code != 200 {
+					t.Errorf("status must equal %+v, but got %+v", 200, rec.Code)
+				}
+			})
 		})
 	})
 
@@ -200,7 +230,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			Return(nil)
 
 		// and
-		handler := &controller.JobController{Runner: runner, GitHub: githubService}
+		handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 		s := httptest.NewServer(handler)
 		defer s.Close()
@@ -349,7 +379,7 @@ func createPushPayload(t *testing.T, repoName, ref string, sha string) io.Reader
 		},
 		Ref: &ref,
 		HeadCommit: &github.PushEventCommit{
-			SHA: &sha,
+			ID: &sha,
 		},
 	}
 	payload, err := json.Marshal(event)
