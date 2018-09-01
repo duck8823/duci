@@ -20,12 +20,12 @@ import (
 
 var SkipBuild = errors.New("build skip")
 
-type JobController struct {
+type WebhooksController struct {
 	Runner runner.Runner
 	GitHub github.Service
 }
 
-func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	deliveryId := go_github.DeliveryID(r)
 	requestId, err := uuid.Parse(deliveryId)
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *JobController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (c *JobController) parseIssueComment(
+func (c *WebhooksController) parseIssueComment(
 	event *go_github.IssueCommentEvent,
 	requestId uuid.UUID,
 	url *url.URL,

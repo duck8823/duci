@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestJobController_ServeHTTP(t *testing.T) {
+func TestWebhooksController_ServeHTTP(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -47,7 +47,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 					Return(nil)
 
 				// and
-				handler := &controller.JobController{Runner: runner, GitHub: githubService}
+				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 				s := httptest.NewServer(handler)
 				defer s.Close()
@@ -116,7 +116,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 					Return(nil)
 
 				// and
-				handler := &controller.JobController{Runner: runner, GitHub: githubService}
+				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 				s := httptest.NewServer(handler)
 				defer s.Close()
@@ -158,7 +158,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 				Return(nil)
 
 			// and
-			handler := &controller.JobController{Runner: runner, GitHub: githubService}
+			handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 			s := httptest.NewServer(handler)
 			defer s.Close()
@@ -200,7 +200,7 @@ func TestJobController_ServeHTTP(t *testing.T) {
 			Return(nil)
 
 		// and
-		handler := &controller.JobController{Runner: runner, GitHub: githubService}
+		handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
 
 		s := httptest.NewServer(handler)
 		defer s.Close()
