@@ -14,7 +14,7 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	// given
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	clock.Now = func() time.Time {
@@ -49,7 +49,7 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	// setup
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	clock.Now = func() time.Time {
