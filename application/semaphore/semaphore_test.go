@@ -36,7 +36,7 @@ func TestSemaphore(t *testing.T) {
 	// then
 	select {
 	case <-timeout.Done():
-		t.Errorf("error occured: %+v", timeout.Err())
+		t.Errorf("error occurred: %+v", timeout.Err())
 	case <-end:
 		// nothing to do
 	}

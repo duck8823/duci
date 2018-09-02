@@ -24,7 +24,7 @@ func TestDebug(t *testing.T) {
 	// and
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	clock.Now = func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -52,7 +52,7 @@ func TestDebugf(t *testing.T) {
 	// and
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	clock.Now = func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -80,7 +80,7 @@ func TestInfo(t *testing.T) {
 	// and
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	clock.Now = func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -108,7 +108,7 @@ func TestInfof(t *testing.T) {
 	// and
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	clock.Now = func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -136,7 +136,7 @@ func TestError(t *testing.T) {
 	// and
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	clock.Now = func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -164,7 +164,7 @@ func TestErrorf(t *testing.T) {
 	// and
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	clock.Now = func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)

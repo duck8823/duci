@@ -17,7 +17,7 @@ func TestProgressLogger_Write(t *testing.T) {
 	// setup
 	reader, writer, err := os.Pipe()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 	defer reader.Close()
 
@@ -44,7 +44,7 @@ func readLogTrimmedTime(t *testing.T, reader io.Reader) string {
 
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	log := string(bytes)

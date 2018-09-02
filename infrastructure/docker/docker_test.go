@@ -39,7 +39,7 @@ func TestClientImpl_Build(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	t.Run("with correct archive", func(t *testing.T) {
@@ -51,13 +51,13 @@ func TestClientImpl_Build(t *testing.T) {
 
 			tar, err := os.Open("testdata/correct_archive.tar")
 			if err != nil {
-				t.Fatalf("error occured: %+v", err)
+				t.Fatalf("error occurred: %+v", err)
 			}
 
 			// when
 			logger, err := cli.Build(context.New("test/task", uuid.New(), &url.URL{}), tar, tag, "./Dockerfile")
 			if err != nil {
-				t.Fatalf("error occured: %+v", err)
+				t.Fatalf("error occurred: %+v", err)
 			}
 			wait(t, logger)
 
@@ -80,13 +80,13 @@ func TestClientImpl_Build(t *testing.T) {
 
 			tar, err := os.Open("testdata/correct_archive_subdir.tar")
 			if err != nil {
-				t.Fatalf("error occured: %+v", err)
+				t.Fatalf("error occurred: %+v", err)
 			}
 
 			// when
 			logger, err := cli.Build(context.New("test/task", uuid.New(), &url.URL{}), tar, tag, ".duci/Dockerfile")
 			if err != nil {
-				t.Fatalf("error occured: %+v", err)
+				t.Fatalf("error occurred: %+v", err)
 			}
 			wait(t, logger)
 
@@ -110,7 +110,7 @@ func TestClientImpl_Build(t *testing.T) {
 
 		tar, err := os.Open("testdata/invalid_archive.tar")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// expect
@@ -124,7 +124,7 @@ func TestClientImpl_Run(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	t.Run("without environments", func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestClientImpl_Run(t *testing.T) {
 			// when
 			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "hello-world")
 			if err != nil {
-				t.Fatalf("error occured: %+v", err)
+				t.Fatalf("error occurred: %+v", err)
 			}
 			containerWait(t, containerId)
 
@@ -164,7 +164,7 @@ func TestClientImpl_Run(t *testing.T) {
 			// when
 			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "echo", "Hello-world")
 			if err != nil {
-				t.Fatalf("error occured: %+v", err)
+				t.Fatalf("error occurred: %+v", err)
 			}
 			containerWait(t, containerId)
 
@@ -210,7 +210,7 @@ func TestClientImpl_Run(t *testing.T) {
 		// when
 		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "sh", "-c", "echo hello $ENV")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		containerWait(t, containerId)
 
@@ -238,7 +238,7 @@ func TestClientImpl_Run(t *testing.T) {
 		// and
 		path, err := filepath.Abs("testdata")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		opts := docker.RuntimeOptions{
 			Volumes: docker.Volumes{fmt.Sprintf("%s:/tmp/testdata", path)},
@@ -247,7 +247,7 @@ func TestClientImpl_Run(t *testing.T) {
 		// when
 		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "cat", "/tmp/testdata/data")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		containerWait(t, containerId)
 
@@ -267,7 +267,7 @@ func TestClientImpl_Rm(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	// given
@@ -277,7 +277,7 @@ func TestClientImpl_Rm(t *testing.T) {
 
 	// when
 	if err := cli.Rm(context.New("test/task", uuid.New(), &url.URL{}), containerId); err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	containers := dockerContainers(t)
@@ -292,7 +292,7 @@ func TestClientImpl_Rmi(t *testing.T) {
 	// setup
 	cli, err := docker.New()
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	// given
@@ -301,7 +301,7 @@ func TestClientImpl_Rmi(t *testing.T) {
 
 	// when
 	if err := cli.Rmi(context.New("test/task", uuid.New(), &url.URL{}), tag); err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 
 	images := dockerImages(t)
@@ -317,7 +317,7 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		// given
 		cli, err := docker.New()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -326,7 +326,7 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		// and
 		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 0")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// when
@@ -349,7 +349,7 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		// given
 		cli, err := docker.New()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -358,7 +358,7 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		// and
 		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 1")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// when
@@ -455,12 +455,12 @@ func dockerImages(t *testing.T) []string {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	images, err := cli.ImageList(context.New("test/task", uuid.New(), &url.URL{}), types.ImageListOptions{})
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	var names []string
@@ -476,12 +476,12 @@ func dockerContainers(t *testing.T) []string {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	containers, err := cli.ContainerList(context.New("test/task", uuid.New(), &url.URL{}), types.ContainerListOptions{})
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	var ids []string
@@ -496,7 +496,7 @@ func containerLogsString(t *testing.T, containerId string) string {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	reader, err := cli.ContainerLogs(context.New("test/task", uuid.New(), &url.URL{}), containerId, types.ContainerLogsOptions{
@@ -504,12 +504,12 @@ func containerLogsString(t *testing.T, containerId string) string {
 		ShowStderr: true,
 	})
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	log, err := ioutil.ReadAll(reader)
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	return string(log)
@@ -520,16 +520,16 @@ func imagePull(t *testing.T, ref string) {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	stream, err := cli.ImagePull(context.New("test/task", uuid.New(), &url.URL{}), ref, types.ImagePullOptions{})
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 	// wait until pull
 	if _, err := ioutil.ReadAll(stream); err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	images := dockerImages(t)
@@ -543,7 +543,7 @@ func containerCreate(t *testing.T, ref string) string {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	config := &container.Config{
@@ -552,7 +552,7 @@ func containerCreate(t *testing.T, ref string) string {
 	}
 	con, err := cli.ContainerCreate(context.New("test/task", uuid.New(), &url.URL{}), config, nil, nil, "")
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 		return ""
 	}
 	return con.ID
@@ -563,14 +563,14 @@ func containerWait(t *testing.T, containerId string) {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 	body, err2 := cli.ContainerWait(context.New("test/task", uuid.New(), &url.URL{}), containerId, container.WaitConditionNotRunning)
 	select {
 	case <-body:
 		return
 	case <-err2:
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 }
 
@@ -579,11 +579,11 @@ func removeImage(t *testing.T, name string) {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	if _, err := cli.ImageRemove(context.New("test/task", uuid.New(), &url.URL{}), name, types.ImageRemoveOptions{}); err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 }
 
@@ -592,10 +592,10 @@ func removeContainer(t *testing.T, containerId string) {
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 	if err := cli.ContainerRemove(context.New("test/task", uuid.New(), &url.URL{}), containerId, types.ContainerRemoveOptions{}); err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 }
 

@@ -29,7 +29,7 @@ func TestService_GetPullRequest(t *testing.T) {
 	// setup
 	s, err := github.New()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	t.Run("when github server returns status ok", func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestService_GetPullRequest(t *testing.T) {
 
 		// then
 		if err != nil {
-			t.Fatalf("error occured. %+v", err)
+			t.Fatalf("error occurred. %+v", err)
 		}
 
 		if pr.GetID() != id {
@@ -112,7 +112,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 	// setup
 	s, err := github.New()
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 
 	t.Run("when github server returns status ok", func(t *testing.T) {
@@ -128,7 +128,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 
 		// expect
 		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
-			t.Errorf("error must not occured: but got %+v", err)
+			t.Errorf("error must not occurred: but got %+v", err)
 		}
 
 		// cleanup

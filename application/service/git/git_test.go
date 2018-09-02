@@ -27,7 +27,7 @@ func TestSshGitService_Clone(t *testing.T) {
 		// setup
 		client, err := git.New(path.Join(os.Getenv("HOME"), ".ssh/id_rsa"))
 		if err != nil {
-			t.Fatalf("error occured. %+v", err)
+			t.Fatalf("error occurred. %+v", err)
 		}
 
 		t.Run("when target directory exists", func(t *testing.T) {

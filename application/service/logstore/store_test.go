@@ -39,7 +39,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		// given
 		jst, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		date1 := time.Date(2020, time.April, 1, 12, 3, 00, 00, jst)
@@ -50,13 +50,13 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		}
 		storedData, err := json.Marshal(job)
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -108,14 +108,14 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		// given
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
 		// and
 		jst, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		clock.Now = func() time.Time {
 			return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -167,7 +167,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		// given
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -190,7 +190,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -220,20 +220,20 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		}
 		storedData, err := json.Marshal(job)
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
 		// and
 		jst, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		clock.Now = func() time.Time {
 			return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
@@ -269,7 +269,7 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		// setup
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -299,7 +299,7 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -334,13 +334,13 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		}
 		storedData, err := json.Marshal(expected)
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -377,14 +377,14 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 		// given
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
 		// and
 		expected, err := json.Marshal(&model.Job{Finished: false})
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -406,7 +406,7 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 		// given
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -435,7 +435,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		// setup
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -458,7 +458,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -482,7 +482,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		}
 		storedData, err := json.Marshal(given)
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
@@ -492,13 +492,13 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		}
 		expectedData, err := json.Marshal(expected)
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 
@@ -535,13 +535,13 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		}
 		storedData, err := json.Marshal(given)
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// and
 		id, err := uuid.NewRandom()
 		if err != nil {
-			t.Fatalf("error occured: %+v", err)
+			t.Fatalf("error occurred: %+v", err)
 		}
 		storedId := []byte(id.String())
 

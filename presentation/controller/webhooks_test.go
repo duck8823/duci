@@ -365,7 +365,7 @@ func createIssueCommentPayload(t *testing.T, action, comment string) io.Reader {
 	}
 	payload, err := json.Marshal(event)
 	if err != nil {
-		t.Fatalf("error occured. %+v", err)
+		t.Fatalf("error occurred. %+v", err)
 	}
 	return bytes.NewReader(payload)
 }
@@ -384,7 +384,7 @@ func createPushPayload(t *testing.T, repoName, ref string, sha string) io.Reader
 	}
 	payload, err := json.Marshal(event)
 	if err != nil {
-		t.Fatalf("error occured: %+v", err)
+		t.Fatalf("error occurred: %+v", err)
 	}
 	return bytes.NewReader(payload)
 }
