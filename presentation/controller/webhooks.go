@@ -33,13 +33,13 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	runtimeUrl := &url.URL{
+	runtimeURL := &url.URL{
 		Scheme: "http",
 		Host:   r.Host,
 		Path:   r.URL.Path,
 	}
 	if r.URL.Scheme != "" {
-		runtimeUrl.Scheme = r.URL.Scheme
+		runtimeURL.Scheme = r.URL.Scheme
 	}
 
 	// Trigger build
@@ -54,7 +54,7 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx, repo, head, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
+		ctx, repo, head, command, err := c.parseIssueComment(event, requestId, runtimeURL)
 		if err == SkipBuild {
 			logger.Info(requestId, "skip build")
 			w.WriteHeader(http.StatusOK)
@@ -85,7 +85,7 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		taskName := fmt.Sprintf("%s/push", application.Name)
-		ctx := context.New(taskName, requestId, runtimeUrl)
+		ctx := context.New(taskName, requestId, runtimeURL)
 		go c.Runner.Run(ctx, event.GetRepo(), event.GetRef(), plumbing.NewHash(sha))
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)

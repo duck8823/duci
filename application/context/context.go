@@ -11,7 +11,7 @@ type Context interface {
 	context.Context
 	UUID() uuid.UUID
 	TaskName() string
-	Url() *url.URL
+	URL() *url.URL
 }
 
 type jobContext struct {
@@ -38,7 +38,7 @@ func (c *jobContext) TaskName() string {
 	return c.taskName
 }
 
-func (c *jobContext) Url() *url.URL {
+func (c *jobContext) URL() *url.URL {
 	return c.url
 }
 
@@ -48,6 +48,6 @@ func WithTimeout(parent Context, timeout time.Duration) (Context, context.Cancel
 		Context:  ctx,
 		uuid:     parent.UUID(),
 		taskName: parent.TaskName(),
-		url:      parent.Url(),
+		url:      parent.URL(),
 	}, cancel
 }

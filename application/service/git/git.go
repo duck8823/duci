@@ -10,7 +10,7 @@ import (
 )
 
 type Service interface {
-	Clone(ctx context.Context, dir string, sshUrl string, ref string, sha plumbing.Hash) error
+	Clone(ctx context.Context, dir string, sshURL string, ref string, sha plumbing.Hash) error
 }
 
 type sshGitService struct {
@@ -25,9 +25,9 @@ func New(sshKeyPath string) (Service, error) {
 	return &sshGitService{auth: auth}, nil
 }
 
-func (s *sshGitService) Clone(ctx context.Context, dir string, sshUrl string, ref string, sha plumbing.Hash) error {
+func (s *sshGitService) Clone(ctx context.Context, dir string, sshURL string, ref string, sha plumbing.Hash) error {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
-		URL:           sshUrl,
+		URL:           sshURL,
 		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx.UUID()},
 		ReferenceName: plumbing.ReferenceName(ref),
