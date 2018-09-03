@@ -126,7 +126,7 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		}
 	}
 
-	containerId, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
+	containerID, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -134,11 +134,11 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		return errors.WithStack(err)
 	}
 
-	code, err := r.Docker.ExitCode(ctx, containerId)
+	code, err := r.Docker.ExitCode(ctx, containerID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := r.Docker.Rm(ctx, containerId); err != nil {
+	if err := r.Docker.Rm(ctx, containerID); err != nil {
 		return errors.WithStack(err)
 	}
 	if code != 0 {
