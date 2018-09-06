@@ -138,13 +138,13 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "hello-world:latest")
 
 			// when
-			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "hello-world")
+			containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "hello-world")
 			if err != nil {
 				t.Fatalf("error occurred: %+v", err)
 			}
-			containerWait(t, containerId)
+			containerWait(t, containerID)
 
-			logs := containerLogsString(t, containerId)
+			logs := containerLogsString(t, containerID)
 
 			// then
 			if !strings.Contains(logs, "Hello from Docker!") {
@@ -152,7 +152,7 @@ func TestClientImpl_Run(t *testing.T) {
 			}
 
 			// cleanup
-			removeContainer(t, containerId)
+			removeContainer(t, containerID)
 		})
 
 		t.Run("with command", func(t *testing.T) {
@@ -162,13 +162,13 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "alpine:latest")
 
 			// when
-			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "echo", "Hello-world")
+			containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "echo", "Hello-world")
 			if err != nil {
 				t.Fatalf("error occurred: %+v", err)
 			}
-			containerWait(t, containerId)
+			containerWait(t, containerID)
 
-			logs := containerLogsString(t, containerId)
+			logs := containerLogsString(t, containerID)
 
 			// then
 			if strings.Contains(logs, "hello-world") {
@@ -176,7 +176,7 @@ func TestClientImpl_Run(t *testing.T) {
 			}
 
 			// cleanup
-			removeContainer(t, containerId)
+			removeContainer(t, containerID)
 		})
 
 		t.Run("with missing command", func(t *testing.T) {
@@ -186,13 +186,13 @@ func TestClientImpl_Run(t *testing.T) {
 			imagePull(t, "alpine:latest")
 
 			// expect
-			containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "missing_command")
+			containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "missing_command")
 			if err == nil {
 				t.Error("error must occur")
 			}
 
 			// cleanup
-			removeContainer(t, containerId)
+			removeContainer(t, containerID)
 		})
 	})
 
@@ -208,13 +208,13 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "sh", "-c", "echo hello $ENV")
+		containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "sh", "-c", "echo hello $ENV")
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		containerWait(t, containerId)
+		containerWait(t, containerID)
 
-		logs := containerLogsString(t, containerId)
+		logs := containerLogsString(t, containerID)
 
 		// then
 		if !strings.Contains(logs, "hello-world") {
@@ -222,7 +222,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// cleanup
-		removeContainer(t, containerId)
+		removeContainer(t, containerID)
 	})
 
 	t.Run("with volumes", func(t *testing.T) {
@@ -245,13 +245,13 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// when
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "cat", "/tmp/testdata/data")
+		containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "cat", "/tmp/testdata/data")
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		containerWait(t, containerId)
+		containerWait(t, containerID)
 
-		logs := containerLogsString(t, containerId)
+		logs := containerLogsString(t, containerID)
 
 		// then
 		if !strings.Contains(logs, "hello-world") {
@@ -259,7 +259,7 @@ func TestClientImpl_Run(t *testing.T) {
 		}
 
 		// cleanup
-		removeContainer(t, containerId)
+		removeContainer(t, containerID)
 	})
 }
 
@@ -273,10 +273,10 @@ func TestClientImpl_Rm(t *testing.T) {
 	// given
 	tag := "alpine:latest"
 	imagePull(t, tag)
-	containerId := containerCreate(t, tag)
+	containerID := containerCreate(t, tag)
 
 	// when
-	if err := cli.Rm(context.New("test/task", uuid.New(), &url.URL{}), containerId); err != nil {
+	if err := cli.Rm(context.New("test/task", uuid.New(), &url.URL{}), containerID); err != nil {
 		t.Fatalf("error occurred: %+v", err)
 	}
 
@@ -284,7 +284,7 @@ func TestClientImpl_Rm(t *testing.T) {
 
 	// then
 	if contains(containers, tag) {
-		t.Errorf("containers must not contains id. containers: %+v, tag: %+v", containers, containerId)
+		t.Errorf("containers must not contains id. containers: %+v, tag: %+v", containers, containerID)
 	}
 }
 
@@ -324,13 +324,13 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		imagePull(t, "alpine:latest")
 
 		// and
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 0")
+		containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 0")
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// when
-		code, err := cli.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), containerId)
+		code, err := cli.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), containerID)
 
 		// then
 		if err != nil {
@@ -342,7 +342,7 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		}
 
 		// cleanup
-		removeContainer(t, containerId)
+		removeContainer(t, containerID)
 	})
 
 	t.Run("with exit code 1", func(t *testing.T) {
@@ -356,13 +356,13 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		imagePull(t, "alpine:latest")
 
 		// and
-		containerId, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 1")
+		containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "alpine", "sh", "-c", "exit 1")
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
 
 		// when
-		code, err := cli.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), containerId)
+		code, err := cli.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), containerID)
 
 		// then
 		if err != nil {
@@ -374,7 +374,7 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		}
 
 		// cleanup
-		removeContainer(t, containerId)
+		removeContainer(t, containerID)
 	})
 }
 
@@ -491,7 +491,7 @@ func dockerContainers(t *testing.T) []string {
 	return ids
 }
 
-func containerLogsString(t *testing.T, containerId string) string {
+func containerLogsString(t *testing.T, containerID string) string {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
@@ -499,7 +499,7 @@ func containerLogsString(t *testing.T, containerId string) string {
 		t.Fatalf("error occurred. %+v", err)
 	}
 
-	reader, err := cli.ContainerLogs(context.New("test/task", uuid.New(), &url.URL{}), containerId, types.ContainerLogsOptions{
+	reader, err := cli.ContainerLogs(context.New("test/task", uuid.New(), &url.URL{}), containerID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 	})
@@ -558,14 +558,14 @@ func containerCreate(t *testing.T, ref string) string {
 	return con.ID
 }
 
-func containerWait(t *testing.T, containerId string) {
+func containerWait(t *testing.T, containerID string) {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		t.Fatalf("error occurred. %+v", err)
 	}
-	body, err2 := cli.ContainerWait(context.New("test/task", uuid.New(), &url.URL{}), containerId, container.WaitConditionNotRunning)
+	body, err2 := cli.ContainerWait(context.New("test/task", uuid.New(), &url.URL{}), containerID, container.WaitConditionNotRunning)
 	select {
 	case <-body:
 		return
@@ -587,14 +587,14 @@ func removeImage(t *testing.T, name string) {
 	}
 }
 
-func removeContainer(t *testing.T, containerId string) {
+func removeContainer(t *testing.T, containerID string) {
 	t.Helper()
 
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		t.Fatalf("error occurred. %+v", err)
 	}
-	if err := cli.ContainerRemove(context.New("test/task", uuid.New(), &url.URL{}), containerId, types.ContainerRemoveOptions{}); err != nil {
+	if err := cli.ContainerRemove(context.New("test/task", uuid.New(), &url.URL{}), containerID, types.ContainerRemoveOptions{}); err != nil {
 		t.Fatalf("error occurred. %+v", err)
 	}
 }

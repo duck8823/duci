@@ -12,26 +12,26 @@ import (
 )
 
 func main() {
-	mainId := uuid.New()
+	mainID := uuid.New()
 
 	flag.Var(application.Config, "c", "configuration file path")
 	flag.Parse()
 
 	if err := semaphore.Make(); err != nil {
-		logger.Errorf(mainId, "Failed to initialize a semaphore.\n%+v", err)
+		logger.Errorf(mainID, "Failed to initialize a semaphore.\n%+v", err)
 		os.Exit(1)
 		return
 	}
 
 	rtr, err := router.New()
 	if err != nil {
-		logger.Errorf(mainId, "Failed to initialize controllers.\n%+v", err)
+		logger.Errorf(mainID, "Failed to initialize controllers.\n%+v", err)
 		os.Exit(1)
 		return
 	}
 
 	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
-		logger.Errorf(mainId, "Failed to run server.\n%+v", err)
+		logger.Errorf(mainID, "Failed to run server.\n%+v", err)
 		os.Exit(1)
 		return
 	}

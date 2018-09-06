@@ -41,9 +41,9 @@ func (v Volumes) ToMap() map[string]struct{} {
 type Client interface {
 	Build(ctx context.Context, file io.Reader, tag string, dockerfile string) (Log, error)
 	Run(ctx context.Context, opts RuntimeOptions, tag string, cmd ...string) (string, Log, error)
-	Rm(ctx context.Context, containerId string) error
+	Rm(ctx context.Context, containerID string) error
 	Rmi(ctx context.Context, tag string) error
-	ExitCode(ctx context.Context, containerId string) (int64, error)
+	ExitCode(ctx context.Context, containerID string) (int64, error)
 }
 
 type clientImpl struct {
@@ -101,8 +101,8 @@ func (c *clientImpl) Run(ctx context.Context, opts RuntimeOptions, tag string, c
 	return con.ID, &runLogger{bufio.NewReader(log)}, nil
 }
 
-func (c *clientImpl) Rm(ctx context.Context, containerId string) error {
-	if err := c.moby.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{}); err != nil {
+func (c *clientImpl) Rm(ctx context.Context, containerID string) error {
+	if err := c.moby.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -115,8 +115,8 @@ func (c *clientImpl) Rmi(ctx context.Context, tag string) error {
 	return nil
 }
 
-func (c *clientImpl) ExitCode(ctx context.Context, containerId string) (int64, error) {
-	body, err := c.moby.ContainerWait(ctx, containerId, container.WaitConditionNotRunning)
+func (c *clientImpl) ExitCode(ctx context.Context, containerID string) (int64, error) {
+	body, err := c.moby.ContainerWait(ctx, containerID, container.WaitConditionNotRunning)
 	select {
 	case b := <-body:
 		return b.StatusCode, nil

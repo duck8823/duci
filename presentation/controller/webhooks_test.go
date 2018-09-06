@@ -23,7 +23,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 
 	t.Run("with correct payload", func(t *testing.T) {
 		// given
-		requestId, _ := uuid.NewRandom()
+		requestID, _ := uuid.NewRandom()
 
 		t.Run("when issue_comment", func(t *testing.T) {
 			// given
@@ -59,7 +59,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 						payload := createIssueCommentPayload(t, action, "ci test")
 
 						req := httptest.NewRequest("POST", "/", payload)
-						req.Header.Set("X-GitHub-Delivery", requestId.String())
+						req.Header.Set("X-GitHub-Delivery", requestID.String())
 						req.Header.Set("X-GitHub-Event", event)
 						rec := httptest.NewRecorder()
 
@@ -82,7 +82,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 
 							// and
 							req := httptest.NewRequest("POST", "/", body)
-							req.Header.Set("X-GitHub-Delivery", requestId.String())
+							req.Header.Set("X-GitHub-Delivery", requestID.String())
 							req.Header.Set("X-GitHub-Event", event)
 							rec := httptest.NewRecorder()
 
@@ -125,7 +125,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 				payload := createIssueCommentPayload(t, "created", "ci test")
 
 				req := httptest.NewRequest("POST", "/", payload)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Delivery", requestID.String())
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 
@@ -168,7 +168,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 				payload := createPushPayload(t, "test/repo", "master", "sha")
 
 				req := httptest.NewRequest("POST", "/", payload)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Delivery", requestID.String())
 				req.Header.Set("X-GitHub-Event", "push")
 				rec := httptest.NewRecorder()
 
@@ -196,7 +196,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 				payload := createPushPayload(t, "test/repo", "master", "")
 
 				req := httptest.NewRequest("POST", "/", payload)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Delivery", requestID.String())
 				req.Header.Set("X-GitHub-Event", "push")
 				rec := httptest.NewRecorder()
 
@@ -240,10 +240,10 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 			body := createIssueCommentPayload(t, "created", "ci test")
 
 			// and
-			requestId, _ := uuid.NewRandom()
+			requestID, _ := uuid.NewRandom()
 
 			req := httptest.NewRequest("POST", "/", body)
-			req.Header.Set("X-GitHub-Delivery", requestId.String())
+			req.Header.Set("X-GitHub-Delivery", requestID.String())
 			req.Header.Set("X-GitHub-Event", "hogefuga")
 			rec := httptest.NewRecorder()
 
@@ -278,7 +278,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 		t.Run("with issue_comment", func(t *testing.T) {
 			// given
 			event := "issue_comment"
-			requestId, _ := uuid.NewRandom()
+			requestID, _ := uuid.NewRandom()
 
 			t.Run("without comment started ci", func(t *testing.T) {
 				// given
@@ -286,7 +286,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 
 				// and
 				req := httptest.NewRequest("POST", "/", body)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Delivery", requestID.String())
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 
@@ -309,7 +309,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 
 				// and
 				req := httptest.NewRequest("POST", "/", body)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Delivery", requestID.String())
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 
@@ -326,7 +326,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 		t.Run("with push", func(t *testing.T) {
 			// given
 			event := "push"
-			requestId, _ := uuid.NewRandom()
+			requestID, _ := uuid.NewRandom()
 
 			t.Run("with invalid body", func(t *testing.T) {
 				// given
@@ -334,7 +334,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 
 				// and
 				req := httptest.NewRequest("POST", "/", body)
-				req.Header.Set("X-GitHub-Delivery", requestId.String())
+				req.Header.Set("X-GitHub-Delivery", requestID.String())
 				req.Header.Set("X-GitHub-Event", event)
 				rec := httptest.NewRecorder()
 

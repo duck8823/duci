@@ -58,7 +58,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		clock.Now = func() time.Time {
@@ -80,15 +80,15 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Eq(expectedData), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Eq(expectedData), gomock.Nil()).
 			Times(1).
 			Return(nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Not(expectedData), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Not(expectedData), gomock.Nil()).
 			Do(func(_ interface{}, data []byte, _ interface{}) {
 				t.Logf("wont: %s", string(expectedData))
 				t.Logf("got:  %s", string(data))
@@ -110,7 +110,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		jst, err := time.LoadLocation("Asia/Tokyo")
@@ -139,15 +139,15 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(nil, store.NotFoundError)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Eq(expectedData), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Eq(expectedData), gomock.Nil()).
 			Times(1).
 			Return(nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Not(expectedData), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Not(expectedData), gomock.Nil()).
 			Do(func(_ interface{}, data []byte, _ interface{}) {
 				t.Logf("wont: %s", string(expectedData))
 				t.Logf("got:  %s", string(data))
@@ -169,11 +169,11 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(nil, errors.New("hello testing"))
 
@@ -192,15 +192,15 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Any(), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Any(), gomock.Nil()).
 			Times(1).
 			Do(func(_, _, _ interface{}) {
 				t.Fatalf("must not call this.")
@@ -228,7 +228,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		jst, err := time.LoadLocation("Asia/Tokyo")
@@ -241,11 +241,11 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Any(), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Any(), gomock.Nil()).
 			Times(1).
 			Return(errors.New("hello error"))
 
@@ -271,11 +271,11 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// given
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(nil, errors.New("hello testing"))
 
@@ -301,11 +301,11 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 
@@ -342,11 +342,11 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 
@@ -379,7 +379,7 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		expected, err := json.Marshal(&model.Job{Finished: false})
@@ -389,7 +389,7 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 
 		// and
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Eq(expected), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Eq(expected), gomock.Nil()).
 			Times(1).
 			Return(nil)
 
@@ -437,11 +437,11 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// given
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(nil, errors.New("hello testing"))
 
@@ -460,11 +460,11 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 
@@ -500,18 +500,18 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Eq(expectedData), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Eq(expectedData), gomock.Nil()).
 			Times(1)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Not(expectedData), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Not(expectedData), gomock.Nil()).
 			Do(func(_, arg, _ interface{}) {
 				actual := &model.Job{}
 				json.NewDecoder(bytes.NewReader(arg.([]byte))).Decode(actual)
@@ -543,15 +543,15 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
-		storedId := []byte(id.String())
+		storedID := []byte(id.String())
 
 		// and
 		mockStore.EXPECT().
-			Get(gomock.Eq(storedId), gomock.Nil()).
+			Get(gomock.Eq(storedID), gomock.Nil()).
 			Times(1).
 			Return(storedData, nil)
 		mockStore.EXPECT().
-			Put(gomock.Eq(storedId), gomock.Any(), gomock.Nil()).
+			Put(gomock.Eq(storedID), gomock.Any(), gomock.Nil()).
 			Times(1).
 			Return(errors.New("hello testing"))
 

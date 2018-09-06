@@ -68,15 +68,15 @@ func (mr *MockClientMockRecorder) Run(ctx, opts, tag interface{}, cmd ...interfa
 }
 
 // Rm mocks base method
-func (m *MockClient) Rm(ctx context.Context, containerId string) error {
-	ret := m.ctrl.Call(m, "Rm", ctx, containerId)
+func (m *MockClient) Rm(ctx context.Context, containerID string) error {
+	ret := m.ctrl.Call(m, "Rm", ctx, containerID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Rm indicates an expected call of Rm
-func (mr *MockClientMockRecorder) Rm(ctx, containerId interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rm", reflect.TypeOf((*MockClient)(nil).Rm), ctx, containerId)
+func (mr *MockClientMockRecorder) Rm(ctx, containerID interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rm", reflect.TypeOf((*MockClient)(nil).Rm), ctx, containerID)
 }
 
 // Rmi mocks base method
@@ -92,14 +92,14 @@ func (mr *MockClientMockRecorder) Rmi(ctx, tag interface{}) *gomock.Call {
 }
 
 // ExitCode mocks base method
-func (m *MockClient) ExitCode(ctx context.Context, containerId string) (int64, error) {
-	ret := m.ctrl.Call(m, "ExitCode", ctx, containerId)
+func (m *MockClient) ExitCode(ctx context.Context, containerID string) (int64, error) {
+	ret := m.ctrl.Call(m, "ExitCode", ctx, containerID)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExitCode indicates an expected call of ExitCode
-func (mr *MockClientMockRecorder) ExitCode(ctx, containerId interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExitCode", reflect.TypeOf((*MockClient)(nil).ExitCode), ctx, containerId)
+func (mr *MockClientMockRecorder) ExitCode(ctx, containerID interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExitCode", reflect.TypeOf((*MockClient)(nil).ExitCode), ctx, containerID)
 }

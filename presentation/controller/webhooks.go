@@ -26,20 +26,20 @@ type WebhooksController struct {
 }
 
 func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	deliveryId := go_github.DeliveryID(r)
-	requestId, err := uuid.Parse(deliveryId)
+	deliveryID := go_github.DeliveryID(r)
+	requestID, err := uuid.Parse(deliveryID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error: invalid request header `X-GitHub-Delivery`: %+v", deliveryId), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Error: invalid request header `X-GitHub-Delivery`: %+v", deliveryID), http.StatusBadRequest)
 		return
 	}
 
-	runtimeUrl := &url.URL{
+	runtimeURL := &url.URL{
 		Scheme: "http",
 		Host:   r.Host,
 		Path:   r.URL.Path,
 	}
 	if r.URL.Scheme != "" {
-		runtimeUrl.Scheme = r.URL.Scheme
+		runtimeURL.Scheme = r.URL.Scheme
 	}
 
 	// Trigger build
@@ -49,19 +49,19 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// Read Payload
 		event := &go_github.IssueCommentEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
-			logger.Errorf(requestId, "%+v", err)
+			logger.Errorf(requestID, "%+v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		ctx, repo, head, command, err := c.parseIssueComment(event, requestId, runtimeUrl)
+		ctx, repo, head, command, err := c.parseIssueComment(event, requestID, runtimeURL)
 		if err == SkipBuild {
-			logger.Info(requestId, "skip build")
+			logger.Info(requestID, "skip build")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(err.Error()))
 			return
 		} else if err != nil {
-			logger.Errorf(requestId, "%+v", err)
+			logger.Errorf(requestID, "%+v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -71,25 +71,25 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "push":
 		event := &go_github.PushEvent{}
 		if err := json.NewDecoder(r.Body).Decode(event); err != nil {
-			logger.Errorf(requestId, "%+v", err)
+			logger.Errorf(requestID, "%+v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		sha := event.GetHeadCommit().GetID()
 		if len(sha) == 0 {
-			logger.Info(requestId, "skip build: could not get head commit")
+			logger.Info(requestID, "skip build: could not get head commit")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("skip build"))
 			return
 		}
 
 		taskName := fmt.Sprintf("%s/push", application.Name)
-		ctx := context.New(taskName, requestId, runtimeUrl)
+		ctx := context.New(taskName, requestID, runtimeURL)
 		go c.Runner.Run(ctx, event.GetRepo(), event.GetRef(), plumbing.NewHash(sha))
 	default:
 		message := fmt.Sprintf("payload event type must be issue_comment or push. but %s", githubEvent)
-		logger.Error(requestId, message)
+		logger.Error(requestID, message)
 		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
@@ -100,7 +100,7 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (c *WebhooksController) parseIssueComment(
 	event *go_github.IssueCommentEvent,
-	requestId uuid.UUID,
+	requestID uuid.UUID,
 	url *url.URL,
 ) (ctx context.Context, repo *go_github.Repository, head *go_github.PullRequestBranch, command []string, err error) {
 
@@ -113,7 +113,7 @@ func (c *WebhooksController) parseIssueComment(
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 	command = strings.Split(phrase, " ")
-	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestId, url)
+	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestID, url)
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
