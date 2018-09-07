@@ -5,11 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/pkg/errors"
 	"io"
 	"time"
 )
+
+var now = time.Now
 
 type Log interface {
 	ReadLine() (*LogLine, error)
@@ -29,7 +30,7 @@ func (l *buildLogger) ReadLine() (*LogLine, error) {
 		line, _, readErr := l.reader.ReadLine()
 		msg := extractMessage(line)
 		if readErr == io.EOF {
-			return &LogLine{Timestamp: clock.Now(), Message: msg}, readErr
+			return &LogLine{Timestamp: now(), Message: msg}, readErr
 		}
 		if readErr != nil {
 			return nil, errors.WithStack(readErr)
@@ -39,7 +40,7 @@ func (l *buildLogger) ReadLine() (*LogLine, error) {
 			continue
 		}
 
-		return &LogLine{Timestamp: clock.Now(), Message: msg}, readErr
+		return &LogLine{Timestamp: now(), Message: msg}, readErr
 	}
 }
 
@@ -61,7 +62,7 @@ func (l *runLogger) ReadLine() (*LogLine, error) {
 
 		// prevent to CR
 		progress := bytes.Split(messages, []byte{'\r'})
-		return &LogLine{Timestamp: clock.Now(), Message: progress[0]}, readErr
+		return &LogLine{Timestamp: now(), Message: progress[0]}, readErr
 	}
 }
 

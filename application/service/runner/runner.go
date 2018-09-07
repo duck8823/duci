@@ -10,9 +10,9 @@ import (
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
-	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/logger"
+	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
@@ -20,7 +20,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strconv"
 )
 
 var Failure = errors.New("Task Failure")
@@ -79,7 +78,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 }
 
 func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error {
-	workDir := path.Join(r.BaseWorkDir, strconv.FormatInt(clock.Now().Unix(), 10))
+	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
 	tagName := repo.GetFullName()
 
 	if err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref, sha); err != nil {

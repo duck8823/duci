@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/duck8823/duci/data/model"
-	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/store"
 	"github.com/duck8823/duci/infrastructure/store/mock_store"
 	"github.com/golang/mock/gomock"
@@ -61,11 +60,6 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		storedID := []byte(id.String())
 
 		// and
-		clock.Now = func() time.Time {
-			return date2
-		}
-
-		// and
 		expected := &model.Job{
 			Finished: false,
 			Stream: []model.Message{
@@ -99,9 +93,6 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err := service.Append(id, model.Message{Time: date2, Text: "Hello Testing."}); err != nil {
 			t.Errorf("error must not occur, but got %+v", err)
 		}
-
-		// cleanup
-		clock.Adjust()
 	})
 
 	t.Run("when value not found", func(t *testing.T) {
@@ -113,23 +104,10 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		storedID := []byte(id.String())
 
 		// and
-		jst, err := time.LoadLocation("Asia/Tokyo")
-		if err != nil {
-			t.Fatalf("error occurred: %+v", err)
-		}
-		clock.Now = func() time.Time {
-			return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
-		}
-
-		// and
-		clock.Now = func() time.Time {
-			return time.Time{}
-		}
-
 		expected := &model.Job{
 			Finished: false,
 			Stream: []model.Message{
-				{Time: clock.Now(), Text: "Hello Testing."},
+				{Time: time.Now(), Text: "Hello Testing."},
 			},
 		}
 		expectedData, err := json.Marshal(expected)
@@ -155,12 +133,9 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 			Return(errors.New("must not call this"))
 
 		// expect
-		if err := service.Append(id, model.Message{Time: time.Time{}, Text: "Hello Testing."}); err != nil {
+		if err := service.Append(id, expected.Stream[0]); err != nil {
 			t.Errorf("error must not occur, but got %+v", err)
 		}
-
-		// cleanup
-		clock.Adjust()
 	})
 
 	t.Run("when store.Get returns error", func(t *testing.T) {
@@ -216,7 +191,7 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		// given
 		job := &model.Job{
 			Finished: false,
-			Stream:   []model.Message{{Time: clock.Now(), Text: "Hello World."}},
+			Stream:   []model.Message{{Time: time.Now(), Text: "Hello World."}},
 		}
 		storedData, err := json.Marshal(job)
 		if err != nil {
@@ -229,15 +204,6 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 			t.Fatalf("error occurred: %+v", err)
 		}
 		storedID := []byte(id.String())
-
-		// and
-		jst, err := time.LoadLocation("Asia/Tokyo")
-		if err != nil {
-			t.Fatalf("error occurred: %+v", err)
-		}
-		clock.Now = func() time.Time {
-			return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
-		}
 
 		// and
 		mockStore.EXPECT().
@@ -253,9 +219,6 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 		if err := service.Append(id, model.Message{Text: "Hello Testing."}); err == nil {
 			t.Error("error must occur, but got nil")
 		}
-
-		// cleanup
-		clock.Adjust()
 	})
 }
 
@@ -324,13 +287,9 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 
 	t.Run("with stored data", func(t *testing.T) {
 		// given
-		clock.Now = func() time.Time {
-			return time.Unix(0, 0)
-		}
-
 		expected := &model.Job{
 			Finished: false,
-			Stream:   []model.Message{{Time: clock.Now(), Text: "Hello World."}},
+			Stream:   []model.Message{{Time: time.Now(), Text: "Hello World."}},
 		}
 		storedData, err := json.Marshal(expected)
 		if err != nil {
@@ -361,9 +320,6 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 		if !cmp.Equal(actual.Stream[0].Time, expected.Stream[0].Time) {
 			t.Errorf("wont %+v, but got %+v", expected, actual)
 		}
-
-		// cleanup
-		clock.Adjust()
 	})
 }
 
@@ -478,7 +434,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		// given
 		given := &model.Job{
 			Finished: false,
-			Stream:   []model.Message{{Time: time.Unix(0, 0), Text: "Hello World."}},
+			Stream:   []model.Message{{Time: time.Now(), Text: "Hello World."}},
 		}
 		storedData, err := json.Marshal(given)
 		if err != nil {
@@ -488,7 +444,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		// and
 		expected := &model.Job{
 			Finished: true,
-			Stream:   []model.Message{{Time: time.Unix(0, 0), Text: "Hello World."}},
+			Stream:   given.Stream,
 		}
 		expectedData, err := json.Marshal(expected)
 		if err != nil {
@@ -531,7 +487,7 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 		// given
 		given := &model.Job{
 			Finished: false,
-			Stream:   []model.Message{{Time: clock.Now(), Text: "Hello World."}},
+			Stream:   []model.Message{{Time: time.Now(), Text: "Hello World."}},
 		}
 		storedData, err := json.Marshal(given)
 		if err != nil {

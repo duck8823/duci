@@ -7,7 +7,6 @@ import (
 	"github.com/duck8823/duci/application/service/github/mock_github"
 	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
 	"github.com/duck8823/duci/application/service/runner"
-	"github.com/duck8823/duci/infrastructure/clock"
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/golang/mock/gomock"
@@ -595,16 +594,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockGit := mock_git.NewMockService(ctrl)
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			DoAndReturn(cloneSuccess)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(&MockBuildLog{}, nil)
-		mockDocker.EXPECT().
-			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
-			Return(nil, errors.New("must not call this"))
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -665,7 +661,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockGit := mock_git.NewMockService(ctrl)
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			DoAndReturn(cloneSuccess)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -733,7 +729,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockGit := mock_git.NewMockService(ctrl)
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			DoAndReturn(cloneSuccess)
 
 		// and
 		application.Config.Job.Timeout = 1
@@ -813,12 +809,28 @@ type MockBuildLog struct {
 }
 
 func (l *MockBuildLog) ReadLine() (*docker.LogLine, error) {
-	return &docker.LogLine{Timestamp: clock.Now(), Message: []byte("{\"stream\":\"Hello World,\"}")}, io.EOF
+	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("{\"stream\":\"Hello World,\"}")}, io.EOF
 }
 
 type MockJobLog struct {
 }
 
 func (l *MockJobLog) ReadLine() (*docker.LogLine, error) {
-	return &docker.LogLine{Timestamp: clock.Now(), Message: []byte("Hello World,")}, io.EOF
+	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("Hello World,")}, io.EOF
+}
+
+func cloneSuccess(_ interface{}, dir string, _, _, _ interface{}) error {
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+
+	dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return err
+	}
+	defer dockerfile.Close()
+
+	dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
+
+	return nil
 }
