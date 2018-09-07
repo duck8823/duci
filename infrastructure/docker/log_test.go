@@ -3,7 +3,6 @@ package docker
 import (
 	"bufio"
 	"bytes"
-	"github.com/duck8823/duci/infrastructure/clock"
 	"reflect"
 	"strings"
 	"testing"
@@ -17,7 +16,7 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 		t.Fatalf("error occurred: %+v", err)
 	}
 
-	clock.Now = func() time.Time {
+	now = func() time.Time {
 		return time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
 	}
 
@@ -26,7 +25,7 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	logger := &buildLogger{reader: reader}
 
 	// and
-	expected := &LogLine{Timestamp: clock.Now(), Message: []byte("Hello World.")}
+	expected := &LogLine{Timestamp: now(), Message: []byte("Hello World.")}
 
 	// when
 	actual, err := logger.ReadLine()
@@ -42,7 +41,7 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	}
 
 	// cleanup
-	clock.Adjust()
+	now = time.Now
 }
 
 func TestRunLogger_ReadLine(t *testing.T) {
@@ -52,7 +51,7 @@ func TestRunLogger_ReadLine(t *testing.T) {
 		t.Fatalf("error occurred: %+v", err)
 	}
 
-	clock.Now = func() time.Time {
+	now = func() time.Time {
 		return time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
 	}
 
@@ -63,7 +62,7 @@ func TestRunLogger_ReadLine(t *testing.T) {
 		logger := &runLogger{reader: reader}
 
 		// and
-		expected := &LogLine{Timestamp: clock.Now(), Message: []byte("Hello")}
+		expected := &LogLine{Timestamp: now(), Message: []byte("Hello")}
 
 		// when
 		actual, err := logger.ReadLine()
@@ -105,7 +104,7 @@ func TestRunLogger_ReadLine(t *testing.T) {
 		logger := &runLogger{reader: reader}
 
 		// and
-		expected := &LogLine{Timestamp: clock.Now(), Message: []byte{}}
+		expected := &LogLine{Timestamp: now(), Message: []byte{}}
 
 		// when
 		actual, err := logger.ReadLine()
@@ -122,5 +121,5 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	})
 
 	// cleanup
-	clock.Adjust()
+	now = time.Now
 }
