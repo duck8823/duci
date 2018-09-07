@@ -79,9 +79,6 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 
 func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
-	if err := os.MkdirAll(workDir, 0700); err != nil {
-		return errors.WithStack(err)
-	}
 	tagName := repo.GetFullName()
 
 	if err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref, sha); err != nil {

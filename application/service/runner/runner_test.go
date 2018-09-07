@@ -594,7 +594,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockGit := mock_git.NewMockService(ctrl)
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			DoAndReturn(cloneSuccess)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -661,7 +661,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockGit := mock_git.NewMockService(ctrl)
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			DoAndReturn(cloneSuccess)
 
 		// and
 		mockDocker := mock_docker.NewMockClient(ctrl)
@@ -729,7 +729,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		mockGit := mock_git.NewMockService(ctrl)
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(nil)
+			DoAndReturn(cloneSuccess)
 
 		// and
 		application.Config.Job.Timeout = 1
@@ -817,4 +817,20 @@ type MockJobLog struct {
 
 func (l *MockJobLog) ReadLine() (*docker.LogLine, error) {
 	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("Hello World,")}, io.EOF
+}
+
+func cloneSuccess(_ interface{}, dir string, _, _, _ interface{}) error {
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+
+	dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return err
+	}
+	defer dockerfile.Close()
+
+	dockerfile.WriteString("FROM alpine\nENTRYPOINT [\"echo\"]")
+
+	return nil
 }
