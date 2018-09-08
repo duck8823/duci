@@ -1,8 +1,9 @@
-package docker
+package docker_test
 
 import (
 	"bufio"
 	"bytes"
+	"github.com/duck8823/duci/infrastructure/docker"
 	"reflect"
 	"strings"
 	"testing"
@@ -15,17 +16,19 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error occurred: %+v", err)
 	}
+	date := time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
 
-	now = func() time.Time {
-		return time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
-	}
+	docker.SetNowFunc(func() time.Time {
+		return date
+	})
 
 	// and
 	reader := bufio.NewReader(strings.NewReader("{\"stream\":\"Hello World.\"}"))
-	logger := &buildLogger{reader: reader}
+	logger := &docker.BuildLogger{}
+	logger.SetReader(reader)
 
 	// and
-	expected := &LogLine{Timestamp: now(), Message: []byte("Hello World.")}
+	expected := &docker.LogLine{Timestamp: date, Message: []byte("Hello World.")}
 
 	// when
 	actual, err := logger.ReadLine()
@@ -41,7 +44,7 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	}
 
 	// cleanup
-	now = time.Now
+	docker.SetNowFunc(time.Now)
 }
 
 func TestRunLogger_ReadLine(t *testing.T) {
@@ -50,19 +53,21 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error occurred: %+v", err)
 	}
+	date := time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
 
-	now = func() time.Time {
-		return time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
-	}
+	docker.SetNowFunc(func() time.Time {
+		return date
+	})
 
 	t.Run("with correct format", func(t *testing.T) {
 		// given
 		prefix := []byte{1, 0, 0, 0, 9, 9, 9, 9}
 		reader := bufio.NewReader(bytes.NewReader(append(prefix, 'H', 'e', 'l', 'l', 'o')))
-		logger := &runLogger{reader: reader}
+		logger := &docker.RunLogger{}
+		logger.SetReader(reader)
 
 		// and
-		expected := &LogLine{Timestamp: now(), Message: []byte("Hello")}
+		expected := &docker.LogLine{Timestamp: date, Message: []byte("Hello")}
 
 		// when
 		actual, err := logger.ReadLine()
@@ -82,7 +87,8 @@ func TestRunLogger_ReadLine(t *testing.T) {
 		// given
 		prefix := []byte{0, 0, 0, 0, 9, 9, 9, 9}
 		reader := bufio.NewReader(bytes.NewReader(append(prefix, 'H', 'e', 'l', 'l', 'o')))
-		logger := &runLogger{reader: reader}
+		logger := &docker.RunLogger{}
+		logger.SetReader(reader)
 
 		// when
 		actual, err := logger.ReadLine()
@@ -101,10 +107,11 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	t.Run("when too short", func(t *testing.T) {
 		// given
 		reader := bufio.NewReader(bytes.NewReader([]byte{'H', 'e', 'l', 'l', 'o'}))
-		logger := &runLogger{reader: reader}
+		logger := &docker.RunLogger{}
+		logger.SetReader(reader)
 
 		// and
-		expected := &LogLine{Timestamp: now(), Message: []byte{}}
+		expected := &docker.LogLine{Timestamp: date, Message: []byte{}}
 
 		// when
 		actual, err := logger.ReadLine()
@@ -121,5 +128,5 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	})
 
 	// cleanup
-	now = time.Now
+	docker.SetNowFunc(time.Now)
 }

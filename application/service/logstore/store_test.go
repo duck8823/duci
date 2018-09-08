@@ -1,9 +1,10 @@
-package logstore
+package logstore_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/store"
 	"github.com/duck8823/duci/infrastructure/store/mock_store"
@@ -16,10 +17,10 @@ import (
 
 func TestNewStoreService(t *testing.T) {
 	// when
-	actual, err := New()
+	actual, err := logstore.New()
 
 	// then
-	if _, ok := actual.(*storeServiceImpl); !ok {
+	if _, ok := actual.(*logstore.StoreServiceImpl); !ok {
 		t.Error("must be a Service, but not.")
 	}
 
@@ -33,7 +34,8 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockStore := mock_store.NewMockStore(ctrl)
 
-	service := &storeServiceImpl{mockStore}
+	service := &logstore.StoreServiceImpl{}
+	service.SetDB(mockStore)
 	t.Run("when store returns correct data", func(t *testing.T) {
 		// given
 		jst, err := time.LoadLocation("Asia/Tokyo")
@@ -227,7 +229,8 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockStore := mock_store.NewMockStore(ctrl)
 
-	service := &storeServiceImpl{mockStore}
+	service := &logstore.StoreServiceImpl{}
+	service.SetDB(mockStore)
 	t.Run("with error", func(t *testing.T) {
 		// setup
 		id, err := uuid.NewRandom()
@@ -328,7 +331,8 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockStore := mock_store.NewMockStore(ctrl)
 
-	service := &storeServiceImpl{mockStore}
+	service := &logstore.StoreServiceImpl{}
+	service.SetDB(mockStore)
 	t.Run("when put success", func(t *testing.T) {
 		// given
 		id, err := uuid.NewRandom()
@@ -386,7 +390,8 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockStore := mock_store.NewMockStore(ctrl)
 
-	service := &storeServiceImpl{mockStore}
+	service := &logstore.StoreServiceImpl{}
+	service.SetDB(mockStore)
 	t.Run("with error", func(t *testing.T) {
 		// setup
 		id, err := uuid.NewRandom()
@@ -523,7 +528,8 @@ func TestStoreServiceImpl_Close(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockStore := mock_store.NewMockStore(ctrl)
 
-	service := &storeServiceImpl{mockStore}
+	service := &logstore.StoreServiceImpl{}
+	service.SetDB(mockStore)
 	t.Run("with error", func(t *testing.T) {
 		// given
 		mockStore.EXPECT().
