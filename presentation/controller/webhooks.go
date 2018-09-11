@@ -56,15 +56,7 @@ func (c *WebhooksController) runWithIssueCommentEvent(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// Read Payload
-	event := &go_github.IssueCommentEvent{}
-	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
-		logger.Errorf(requestID, "%+v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	ctx, repo, head, command, err := c.parseIssueComment(event, requestID, runtimeURL(r))
+	ctx, repo, head, command, err := c.parseIssueComment(requestID, r)
 	if err == SkipBuild {
 		logger.Info(requestID, "skip build")
 		w.WriteHeader(http.StatusOK)
@@ -81,16 +73,20 @@ func (c *WebhooksController) runWithIssueCommentEvent(
 }
 
 func (c *WebhooksController) parseIssueComment(
-	event *go_github.IssueCommentEvent,
 	requestID uuid.UUID,
-	url *url.URL,
+	r *http.Request,
 ) (ctx context.Context, repo *go_github.Repository, head *go_github.PullRequestBranch, command []string, err error) {
+	event := &go_github.IssueCommentEvent{}
+	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
+		return nil, nil, nil, nil, errors.WithStack(err)
+	}
+
 	phrase, err := phrase(event)
 	if err != nil {
 		return nil, nil, nil, nil, SkipBuild
 	}
 	command = strings.Split(phrase, " ")
-	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestID, url)
+	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestID, runtimeURL(r))
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
