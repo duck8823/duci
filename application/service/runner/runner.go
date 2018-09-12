@@ -154,15 +154,17 @@ func dockerfilePath(workDir string) string {
 
 func runtimeOpts(workDir string) (docker.RuntimeOptions, error) {
 	var opts docker.RuntimeOptions
-	if exists(path.Join(workDir, ".duci/config.yml")) {
-		content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
-		if err != nil {
-			return opts, errors.WithStack(err)
-		}
-		content = []byte(os.ExpandEnv(string(content)))
-		if err := yaml.NewDecoder(bytes.NewReader(content)).Decode(&opts); err != nil {
-			return opts, errors.WithStack(err)
-		}
+
+	if !exists(path.Join(workDir, ".duci/config.yml")) {
+		return opts, nil
+	}
+	content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
+	if err != nil {
+		return opts, errors.WithStack(err)
+	}
+	content = []byte(os.ExpandEnv(string(content)))
+	if err := yaml.NewDecoder(bytes.NewReader(content)).Decode(&opts); err != nil {
+		return opts, errors.WithStack(err)
 	}
 	return opts, nil
 }
