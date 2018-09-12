@@ -79,7 +79,6 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 
 func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
-	tagName := repo.GetFullName()
 
 	if err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref, sha); err != nil {
 		return errors.WithStack(err)
@@ -87,25 +86,14 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 
 	r.GitHub.CreateCommitStatus(ctx, repo, sha, github.PENDING, "started job")
 
-	tarFilePath := path.Join(workDir, "duci.tar")
-	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
+	tarball, err := createTarball(workDir)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer writeFile.Close()
+	defer tarball.Close()
 
-	if err := tar.Create(workDir, writeFile); err != nil {
-		return errors.WithStack(err)
-	}
-
-	readFile, _ := os.Open(tarFilePath)
-	defer readFile.Close()
-
-	dockerfile := "./Dockerfile"
-	if exists(path.Join(workDir, ".duci/Dockerfile")) {
-		dockerfile = ".duci/Dockerfile"
-	}
-	buildLog, err := r.Docker.Build(ctx, readFile, tagName, dockerfile)
+	dockerfile := dockerfilePath(workDir)
+	buildLog, err := r.Docker.Build(ctx, tarball, repo.GetFullName(), dockerfile)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -113,19 +101,12 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 		return errors.WithStack(err)
 	}
 
-	var opts docker.RuntimeOptions
-	if exists(path.Join(workDir, ".duci/config.yml")) {
-		content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		content = []byte(os.ExpandEnv(string(content)))
-		if err := yaml.NewDecoder(bytes.NewReader(content)).Decode(&opts); err != nil {
-			return errors.WithStack(err)
-		}
+	opts, err := runtimeOpts(workDir)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
-	containerID, runLog, err := r.Docker.Run(ctx, opts, tagName, command...)
+	containerID, runLog, err := r.Docker.Run(ctx, opts, repo.GetFullName(), command...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -145,6 +126,45 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	}
 
 	return err
+}
+
+func createTarball(workDir string) (*os.File, error) {
+	tarFilePath := path.Join(workDir, "duci.tar")
+	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	defer writeFile.Close()
+
+	if err := tar.Create(workDir, writeFile); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	readFile, _ := os.Open(tarFilePath)
+	return readFile, nil
+}
+
+func dockerfilePath(workDir string) string {
+	dockerfile := "./Dockerfile"
+	if exists(path.Join(workDir, ".duci/Dockerfile")) {
+		dockerfile = ".duci/Dockerfile"
+	}
+	return dockerfile
+}
+
+func runtimeOpts(workDir string) (docker.RuntimeOptions, error) {
+	var opts docker.RuntimeOptions
+	if exists(path.Join(workDir, ".duci/config.yml")) {
+		content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
+		if err != nil {
+			return opts, errors.WithStack(err)
+		}
+		content = []byte(os.ExpandEnv(string(content)))
+		if err := yaml.NewDecoder(bytes.NewReader(content)).Decode(&opts); err != nil {
+			return opts, errors.WithStack(err)
+		}
+	}
+	return opts, nil
 }
 
 func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
