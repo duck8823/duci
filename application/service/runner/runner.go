@@ -86,39 +86,20 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 
 	r.GitHub.CreateCommitStatus(ctx, repo, sha, github.PENDING, "started job")
 
-	tarball, err := createTarball(workDir)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	defer tarball.Close()
-
-	dockerfile := dockerfilePath(workDir)
-	buildLog, err := r.Docker.Build(ctx, tarball, repo.GetFullName(), dockerfile)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if err := r.logAppend(ctx, buildLog); err != nil {
+	if err := r.dockerBuild(ctx, workDir, repo); err != nil {
 		return errors.WithStack(err)
 	}
 
-	opts, err := runtimeOpts(workDir)
+	conID, err := r.dockerRun(ctx, workDir, repo, command...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	containerID, runLog, err := r.Docker.Run(ctx, opts, repo.GetFullName(), command...)
+	code, err := r.Docker.ExitCode(ctx, conID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := r.logAppend(ctx, runLog); err != nil {
-		return errors.WithStack(err)
-	}
-
-	code, err := r.Docker.ExitCode(ctx, containerID)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if err := r.Docker.Rm(ctx, containerID); err != nil {
+	if err := r.Docker.Rm(ctx, conID); err != nil {
 		return errors.WithStack(err)
 	}
 	if code != 0 {
@@ -126,6 +107,23 @@ func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref stri
 	}
 
 	return err
+}
+
+func (r *DockerRunner) dockerBuild(ctx context.Context, dir string, repo github.Repository) error {
+	tarball, err := createTarball(dir)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer tarball.Close()
+
+	buildLog, err := r.Docker.Build(ctx, tarball, repo.GetFullName(), dockerfilePath(dir))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	if err := r.logAppend(ctx, buildLog); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func createTarball(workDir string) (*os.File, error) {
@@ -150,6 +148,22 @@ func dockerfilePath(workDir string) string {
 		dockerfile = ".duci/Dockerfile"
 	}
 	return dockerfile
+}
+
+func (r *DockerRunner) dockerRun(ctx context.Context, dir string, repo github.Repository, cmd ...string) (string, error) {
+	opts, err := runtimeOpts(dir)
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	conID, runLog, err := r.Docker.Run(ctx, opts, repo.GetFullName(), cmd...)
+	if err != nil {
+		return conID, errors.WithStack(err)
+	}
+	if err := r.logAppend(ctx, runLog); err != nil {
+		return conID, errors.WithStack(err)
+	}
+	return conID, nil
 }
 
 func runtimeOpts(workDir string) (docker.RuntimeOptions, error) {
