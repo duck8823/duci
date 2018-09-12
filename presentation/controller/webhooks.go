@@ -114,8 +114,7 @@ func (c *WebhooksController) runWithPushEvent(requestID uuid.UUID, w http.Respon
 		return
 	}
 
-	taskName := fmt.Sprintf("%s/push", application.Name)
-	ctx := context.New(taskName, requestID, runtimeURL(r))
+	ctx := context.New(fmt.Sprintf("%s/push", application.Name), requestID, runtimeURL(r))
 	go c.Runner.Run(ctx, event.GetRepo(), event.GetRef(), plumbing.NewHash(sha))
 }
 
