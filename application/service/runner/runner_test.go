@@ -102,7 +102,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 			// when
-			err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+			err := r.Run(
+				context.New("test/task", uuid.New(), &url.URL{}),
+				runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				"Hello World.",
+			)
 
 			// then
 			if err != nil {
@@ -185,7 +189,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 			// when
-			err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+			err := r.Run(
+				context.New("test/task", uuid.New(), &url.URL{}),
+				runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				"Hello World.",
+			)
 
 			// then
 			if err != nil {
@@ -269,7 +277,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err != nil {
@@ -334,7 +346,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -366,7 +382,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -431,7 +451,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -497,7 +521,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -564,7 +592,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -633,7 +665,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err.Error() != expected.Error() {
@@ -700,7 +736,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err != runner.Failure {
@@ -772,7 +812,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err.Error() != "context deadline exceeded" {

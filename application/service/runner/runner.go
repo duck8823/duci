@@ -24,8 +24,14 @@ import (
 
 var Failure = errors.New("Task Failure")
 
+type TargetSource struct {
+	Repo github.Repository
+	Ref  string
+	SHA  plumbing.Hash
+}
+
 type Runner interface {
-	Run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error
+	Run(ctx context.Context, src TargetSource, command ...string) error
 }
 
 type DockerRunner struct {
@@ -36,9 +42,9 @@ type DockerRunner struct {
 	BaseWorkDir string
 }
 
-func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error {
+func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...string) error {
 	if err := r.LogStore.Start(ctx.UUID()); err != nil {
-		r.GitHub.CreateCommitStatus(ctx, repo, sha, github.ERROR, err.Error())
+		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
 		return errors.WithStack(err)
 	}
 
@@ -49,7 +55,7 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 
 	go func() {
 		semaphore.Acquire()
-		errs <- r.run(timeout, repo, ref, sha, command...)
+		errs <- r.run(timeout, src.Repo, src.Ref, src.SHA, command...)
 		semaphore.Release()
 	}()
 
@@ -57,19 +63,19 @@ func (r *DockerRunner) Run(ctx context.Context, repo github.Repository, ref stri
 	case <-timeout.Done():
 		if timeout.Err() != nil {
 			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
-			r.GitHub.CreateCommitStatus(ctx, repo, sha, github.ERROR, timeout.Err().Error())
+			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, timeout.Err().Error())
 		}
 		r.LogStore.Finish(ctx.UUID())
 		return timeout.Err()
 	case err := <-errs:
 		if err == Failure {
 			logger.Error(ctx.UUID(), err.Error())
-			r.GitHub.CreateCommitStatus(ctx, repo, sha, github.FAILURE, "failure job")
+			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.FAILURE, "failure job")
 		} else if err != nil {
 			logger.Errorf(ctx.UUID(), "%+v", err)
-			r.GitHub.CreateCommitStatus(ctx, repo, sha, github.ERROR, err.Error())
+			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
 		} else {
-			r.GitHub.CreateCommitStatus(ctx, repo, sha, github.SUCCESS, "success")
+			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.SUCCESS, "success")
 		}
 		r.LogStore.Finish(ctx.UUID())
 		return err
