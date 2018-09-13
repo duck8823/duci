@@ -91,7 +91,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Return(nil)
 
 			r := &runner.DockerRunner{
-				Name:        "test-runner",
 				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 				Git:         mockGit,
 				GitHub:      mockGitHub,
@@ -175,7 +174,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Return(nil)
 
 			r := &runner.DockerRunner{
-				Name:        "test-runner",
 				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 				Git:         mockGit,
 				GitHub:      mockGitHub,
@@ -260,7 +258,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -326,7 +323,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -361,7 +357,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(errors.New("test error"))
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			GitHub:      mockGitHub,
 			LogStore:    mockLogStore,
@@ -425,7 +420,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: "/path/to/not/exists/dir",
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -492,7 +486,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -560,7 +553,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -630,7 +622,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -698,7 +689,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -771,7 +761,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,

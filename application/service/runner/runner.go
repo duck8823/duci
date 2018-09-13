@@ -33,7 +33,6 @@ type DockerRunner struct {
 	GitHub      github.Service
 	Docker      docker.Client
 	LogStore    logstore.Service
-	Name        string
 	BaseWorkDir string
 }
 
