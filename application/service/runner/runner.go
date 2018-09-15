@@ -55,7 +55,7 @@ func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...str
 
 	go func() {
 		semaphore.Acquire()
-		errs <- r.run(timeout, src.Repo, src.Ref, src.SHA, command...)
+		errs <- r.run(timeout, src, command...)
 		semaphore.Release()
 	}()
 
@@ -82,20 +82,20 @@ func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...str
 	}
 }
 
-func (r *DockerRunner) run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error {
+func (r *DockerRunner) run(ctx context.Context, src TargetSource, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
 
-	if err := r.Git.Clone(ctx, workDir, repo.GetSSHURL(), ref, sha); err != nil {
+	if err := r.Git.Clone(ctx, workDir, src.Repo.GetSSHURL(), src.Ref, src.SHA); err != nil {
 		return errors.WithStack(err)
 	}
 
-	r.GitHub.CreateCommitStatus(ctx, repo, sha, github.PENDING, "started job")
+	r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.PENDING, "started job")
 
-	if err := r.dockerBuild(ctx, workDir, repo); err != nil {
+	if err := r.dockerBuild(ctx, workDir, src.Repo); err != nil {
 		return errors.WithStack(err)
 	}
 
-	conID, err := r.dockerRun(ctx, workDir, repo, command...)
+	conID, err := r.dockerRun(ctx, workDir, src.Repo, command...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
