@@ -61,23 +61,10 @@ func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...str
 
 	select {
 	case <-timeout.Done():
-		if timeout.Err() != nil {
-			logger.Errorf(ctx.UUID(), "%+v", timeout.Err())
-			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, timeout.Err().Error())
-		}
-		r.LogStore.Finish(ctx.UUID())
+		r.timeout(timeout, src)
 		return timeout.Err()
 	case err := <-errs:
-		if err == Failure {
-			logger.Error(ctx.UUID(), err.Error())
-			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.FAILURE, "failure job")
-		} else if err != nil {
-			logger.Errorf(ctx.UUID(), "%+v", err)
-			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
-		} else {
-			r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.SUCCESS, "success")
-		}
-		r.LogStore.Finish(ctx.UUID())
+		r.finish(ctx, src, err)
 		return err
 	}
 }
@@ -208,4 +195,25 @@ func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
 func exists(name string) bool {
 	_, err := os.Stat(name)
 	return !os.IsNotExist(err)
+}
+
+func (r *DockerRunner) timeout(ctx context.Context, src TargetSource) {
+	if ctx.Err() != nil {
+		logger.Errorf(ctx.UUID(), "%+v", ctx.Err())
+		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, ctx.Err().Error())
+	}
+	r.LogStore.Finish(ctx.UUID())
+}
+
+func (r *DockerRunner) finish(ctx context.Context, src TargetSource, err error) {
+	if err == Failure {
+		logger.Error(ctx.UUID(), err.Error())
+		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.FAILURE, "failure job")
+	} else if err != nil {
+		logger.Errorf(ctx.UUID(), "%+v", err)
+		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
+	} else {
+		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.SUCCESS, "success")
+	}
+	r.LogStore.Finish(ctx.UUID())
 }
