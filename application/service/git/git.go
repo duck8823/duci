@@ -9,8 +9,14 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
+type TargetSource struct {
+	URL string
+	Ref string
+	SHA plumbing.Hash
+}
+
 type Service interface {
-	Clone(ctx context.Context, dir string, sshURL string, ref string, sha plumbing.Hash) error
+	Clone(ctx context.Context, dir string, src TargetSource) error
 }
 
 type sshGitService struct {
@@ -25,12 +31,12 @@ func New(sshKeyPath string) (Service, error) {
 	return &sshGitService{auth: auth}, nil
 }
 
-func (s *sshGitService) Clone(ctx context.Context, dir string, sshURL string, ref string, sha plumbing.Hash) error {
+func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
-		URL:           sshURL,
+		URL:           src.URL,
 		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx.UUID()},
-		ReferenceName: plumbing.ReferenceName(ref),
+		ReferenceName: plumbing.ReferenceName(src.Ref),
 		Depth:         1,
 	})
 	if err != nil {
@@ -43,8 +49,8 @@ func (s *sshGitService) Clone(ctx context.Context, dir string, sshURL string, re
 	}
 
 	if err := wt.Checkout(&git.CheckoutOptions{
-		Hash:   sha,
-		Branch: plumbing.ReferenceName(sha.String()),
+		Hash:   src.SHA,
+		Branch: plumbing.ReferenceName(src.SHA.String()),
 		Create: true,
 	}); err != nil {
 		return errors.WithStack(err)

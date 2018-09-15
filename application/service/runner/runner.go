@@ -14,7 +14,6 @@ import (
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
-	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
@@ -23,12 +22,6 @@ import (
 )
 
 var Failure = errors.New("Task Failure")
-
-type TargetSource struct {
-	Repo github.Repository
-	Ref  string
-	SHA  plumbing.Hash
-}
 
 type Runner interface {
 	Run(ctx context.Context, src TargetSource, command ...string) error
@@ -72,7 +65,7 @@ func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...str
 func (r *DockerRunner) run(ctx context.Context, src TargetSource, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
 
-	if err := r.Git.Clone(ctx, workDir, src.Repo.GetSSHURL(), src.Ref, src.SHA); err != nil {
+	if err := r.Git.Clone(ctx, workDir, src.ToGitTargetSource()); err != nil {
 		return errors.WithStack(err)
 	}
 

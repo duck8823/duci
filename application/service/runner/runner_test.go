@@ -35,9 +35,9 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 			// and
 			mockGit := mock_git.NewMockService(ctrl)
-			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
+				DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
 					if err := os.MkdirAll(dir, 0700); err != nil {
 						return err
 					}
@@ -123,9 +123,9 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 			// and
 			mockGit := mock_git.NewMockService(ctrl)
-			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
+				DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
 					if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
 						return err
 					}
@@ -211,9 +211,9 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
+			DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
 				if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
 					return err
 				}
@@ -298,7 +298,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(errors.New("error"))
 
@@ -403,7 +403,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 
@@ -472,7 +472,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 
@@ -542,7 +542,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 
@@ -616,7 +616,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(cloneSuccess)
 
@@ -686,7 +686,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(cloneSuccess)
 
@@ -757,7 +757,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(cloneSuccess)
 
@@ -852,7 +852,7 @@ func (l *MockJobLog) ReadLine() (*docker.LogLine, error) {
 	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("Hello World,")}, io.EOF
 }
 
-func cloneSuccess(_ interface{}, dir string, _, _, _ interface{}) error {
+func cloneSuccess(_ interface{}, dir string, _ interface{}) error {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return err
 	}

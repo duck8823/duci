@@ -6,8 +6,8 @@ package mock_git
 
 import (
 	context "github.com/duck8823/duci/application/context"
+	git "github.com/duck8823/duci/application/service/git"
 	gomock "github.com/golang/mock/gomock"
-	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"
 )
 
@@ -35,13 +35,13 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Clone mocks base method
-func (m *MockService) Clone(ctx context.Context, dir, sshUrl, ref string, sha plumbing.Hash) error {
-	ret := m.ctrl.Call(m, "Clone", ctx, dir, sshUrl, ref, sha)
+func (m *MockService) Clone(ctx context.Context, dir string, src git.TargetSource) error {
+	ret := m.ctrl.Call(m, "Clone", ctx, dir, src)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Clone indicates an expected call of Clone
-func (mr *MockServiceMockRecorder) Clone(ctx, dir, sshUrl, ref, sha interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clone", reflect.TypeOf((*MockService)(nil).Clone), ctx, dir, sshUrl, ref, sha)
+func (mr *MockServiceMockRecorder) Clone(ctx, dir, src interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clone", reflect.TypeOf((*MockService)(nil).Clone), ctx, dir, src)
 }
