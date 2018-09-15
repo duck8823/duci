@@ -192,11 +192,6 @@ func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
 	}
 }
 
-func exists(name string) bool {
-	_, err := os.Stat(name)
-	return !os.IsNotExist(err)
-}
-
 func (r *DockerRunner) timeout(ctx context.Context, src TargetSource) {
 	if ctx.Err() != nil {
 		logger.Errorf(ctx.UUID(), "%+v", ctx.Err())
@@ -216,4 +211,9 @@ func (r *DockerRunner) finish(ctx context.Context, src TargetSource, err error) 
 		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.SUCCESS, "success")
 	}
 	r.LogStore.Finish(ctx.UUID())
+}
+
+func exists(name string) bool {
+	_, err := os.Stat(name)
+	return !os.IsNotExist(err)
 }
