@@ -25,6 +25,8 @@ type WebhooksController struct {
 	GitHub github.Service
 }
 
+type Command []string
+
 func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestID, err := requestID(r)
 	if err != nil {
@@ -64,33 +66,32 @@ func (c *WebhooksController) runWithIssueCommentEvent(requestID uuid.UUID, w htt
 		return
 	}
 
-	go c.Runner.Run(ctx, src, command...)
+	go c.Runner.Run(ctx, *src, command...)
 }
 
-func (c *WebhooksController) parseIssueComment(requestID uuid.UUID, r *http.Request) (ctx context.Context, src github.TargetSource, command []string, err error) {
+func (c *WebhooksController) parseIssueComment(requestID uuid.UUID, r *http.Request) (context.Context, *github.TargetSource, Command, error) {
 	event := &go_github.IssueCommentEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
-		return nil, src, nil, errors.WithStack(err)
+		return nil, nil, nil, errors.WithStack(err)
 	}
 
-	phrase, err := phrase(event)
+	cmd, err := command(event)
 	if err != nil {
-		return nil, src, nil, SkipBuild
+		return nil, nil, nil, errors.Cause(err)
 	}
-	command = strings.Split(phrase, " ")
-	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestID, runtimeURL(r))
+	ctx := context.New(fmt.Sprintf("%s/pr/%s", application.Name, cmd[0]), requestID, runtimeURL(r))
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
-		return nil, src, nil, errors.WithStack(err)
+		return nil, nil, nil, errors.WithStack(err)
 	}
 
-	src = github.TargetSource{
+	src := &github.TargetSource{
 		Repo: event.GetRepo(),
 		Ref:  fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
 		SHA:  plumbing.NewHash(pr.GetHead().GetSHA()),
 	}
-	return ctx, src, command, err
+	return ctx, src, cmd, err
 }
 
 func (c *WebhooksController) runWithPushEvent(requestID uuid.UUID, w http.ResponseWriter, r *http.Request) {
@@ -135,16 +136,17 @@ func runtimeURL(r *http.Request) *url.URL {
 	return runtimeURL
 }
 
-func phrase(event *go_github.IssueCommentEvent) (string, error) {
+func command(event *go_github.IssueCommentEvent) (Command, error) {
 	if !isValidAction(event.Action) {
-		return "", SkipBuild
+		return Command{}, SkipBuild
 	}
 
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
-		return "", SkipBuild
+		return Command{}, SkipBuild
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
-	return phrase, nil
+	command := strings.Split(phrase, " ")
+	return command, nil
 }
 
 func isValidAction(action *string) bool {
