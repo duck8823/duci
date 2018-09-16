@@ -1,8 +1,8 @@
-package runner_test
+package github_test
 
 import (
 	"github.com/duck8823/duci/application/service/git"
-	"github.com/duck8823/duci/application/service/runner"
+	"github.com/duck8823/duci/application/service/github"
 	"github.com/google/go-cmp/cmp"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"reflect"
@@ -18,7 +18,7 @@ func TestTargetSource_ToGitTargetSource(t *testing.T) {
 	}
 
 	// and
-	src := runner.TargetSource{
+	src := github.TargetSource{
 		Repo: &MockRepository{FullName: "fullName", SSHURL: expected.URL},
 		Ref:  expected.Ref,
 		SHA:  expected.SHA,

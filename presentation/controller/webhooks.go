@@ -69,7 +69,7 @@ func (c *WebhooksController) runWithIssueCommentEvent(
 	}
 
 	ref := fmt.Sprintf("refs/heads/%s", head.GetRef())
-	go c.Runner.Run(ctx, runner.TargetSource{Repo: repo, Ref: ref, SHA: plumbing.NewHash(head.GetSHA())}, command...)
+	go c.Runner.Run(ctx, github.TargetSource{Repo: repo, Ref: ref, SHA: plumbing.NewHash(head.GetSHA())}, command...)
 }
 
 func (c *WebhooksController) parseIssueComment(
@@ -115,7 +115,7 @@ func (c *WebhooksController) runWithPushEvent(requestID uuid.UUID, w http.Respon
 	}
 
 	ctx := context.New(fmt.Sprintf("%s/push", application.Name), requestID, runtimeURL(r))
-	go c.Runner.Run(ctx, runner.TargetSource{Repo: event.GetRepo(), Ref: event.GetRef(), SHA: plumbing.NewHash(sha)})
+	go c.Runner.Run(ctx, github.TargetSource{Repo: event.GetRepo(), Ref: event.GetRef(), SHA: plumbing.NewHash(sha)})
 }
 
 func requestID(r *http.Request) (uuid.UUID, error) {

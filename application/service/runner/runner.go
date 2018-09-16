@@ -24,7 +24,7 @@ import (
 var Failure = errors.New("Task Failure")
 
 type Runner interface {
-	Run(ctx context.Context, src TargetSource, command ...string) error
+	Run(ctx context.Context, src github.TargetSource, command ...string) error
 }
 
 type DockerRunner struct {
@@ -35,7 +35,7 @@ type DockerRunner struct {
 	BaseWorkDir string
 }
 
-func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...string) error {
+func (r *DockerRunner) Run(ctx context.Context, src github.TargetSource, command ...string) error {
 	if err := r.LogStore.Start(ctx.UUID()); err != nil {
 		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
 		return errors.WithStack(err)
@@ -62,7 +62,7 @@ func (r *DockerRunner) Run(ctx context.Context, src TargetSource, command ...str
 	}
 }
 
-func (r *DockerRunner) run(ctx context.Context, src TargetSource, command ...string) error {
+func (r *DockerRunner) run(ctx context.Context, src github.TargetSource, command ...string) error {
 	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
 
 	if err := r.Git.Clone(ctx, workDir, src.ToGitTargetSource()); err != nil {
@@ -185,7 +185,7 @@ func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
 	}
 }
 
-func (r *DockerRunner) timeout(ctx context.Context, src TargetSource) {
+func (r *DockerRunner) timeout(ctx context.Context, src github.TargetSource) {
 	if ctx.Err() != nil {
 		logger.Errorf(ctx.UUID(), "%+v", ctx.Err())
 		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, ctx.Err().Error())
@@ -193,7 +193,7 @@ func (r *DockerRunner) timeout(ctx context.Context, src TargetSource) {
 	r.LogStore.Finish(ctx.UUID())
 }
 
-func (r *DockerRunner) finish(ctx context.Context, src TargetSource, err error) {
+func (r *DockerRunner) finish(ctx context.Context, src github.TargetSource, err error) {
 	if err == Failure {
 		logger.Error(ctx.UUID(), err.Error())
 		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.FAILURE, "failure job")

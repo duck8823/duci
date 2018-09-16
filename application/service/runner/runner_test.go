@@ -4,6 +4,7 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/service/git/mock_git"
+	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/github/mock_github"
 	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
 	"github.com/duck8823/duci/application/service/runner"
@@ -104,7 +105,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			// when
 			err := r.Run(
 				context.New("test/task", uuid.New(), &url.URL{}),
-				runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 				"Hello World.",
 			)
 
@@ -191,7 +192,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 			// when
 			err := r.Run(
 				context.New("test/task", uuid.New(), &url.URL{}),
-				runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 				"Hello World.",
 			)
 
@@ -279,7 +280,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -348,7 +349,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -384,7 +385,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -453,7 +454,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -523,7 +524,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -594,7 +595,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -667,7 +668,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -738,7 +739,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -814,7 +815,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			runner.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 

@@ -6,7 +6,7 @@ package mock_runner
 
 import (
 	context "github.com/duck8823/duci/application/context"
-	runner "github.com/duck8823/duci/application/service/runner"
+	github "github.com/duck8823/duci/application/service/github"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -35,7 +35,7 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Run mocks base method
-func (m *MockRunner) Run(ctx context.Context, src runner.TargetSource, command ...string) error {
+func (m *MockRunner) Run(ctx context.Context, src github.TargetSource, command ...string) error {
 	varargs := []interface{}{ctx, src}
 	for _, a := range command {
 		varargs = append(varargs, a)

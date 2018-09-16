@@ -1,13 +1,12 @@
-package runner
+package github
 
 import (
 	"github.com/duck8823/duci/application/service/git"
-	"github.com/duck8823/duci/application/service/github"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
 type TargetSource struct {
-	Repo github.Repository
+	Repo Repository
 	Ref  string
 	SHA  plumbing.Hash
 }
