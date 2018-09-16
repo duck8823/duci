@@ -8,7 +8,6 @@ import (
 	context "github.com/duck8823/duci/application/context"
 	github "github.com/duck8823/duci/application/service/github"
 	gomock "github.com/golang/mock/gomock"
-	plumbing "gopkg.in/src-d/go-git.v4/plumbing"
 	reflect "reflect"
 )
 
@@ -36,8 +35,8 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Run mocks base method
-func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string, sha plumbing.Hash, command ...string) error {
-	varargs := []interface{}{ctx, repo, ref, sha}
+func (m *MockRunner) Run(ctx context.Context, src github.TargetSource, command ...string) error {
+	varargs := []interface{}{ctx, src}
 	for _, a := range command {
 		varargs = append(varargs, a)
 	}
@@ -47,7 +46,7 @@ func (m *MockRunner) Run(ctx context.Context, repo github.Repository, ref string
 }
 
 // Run indicates an expected call of Run
-func (mr *MockRunnerMockRecorder) Run(ctx, repo, ref, sha interface{}, command ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{ctx, repo, ref, sha}, command...)
+func (mr *MockRunnerMockRecorder) Run(ctx, src interface{}, command ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{ctx, src}, command...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockRunner)(nil).Run), varargs...)
 }

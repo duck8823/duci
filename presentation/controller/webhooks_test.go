@@ -32,7 +32,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 			t.Run("when github service returns no error", func(t *testing.T) {
 				// given
 				runner := mock_runner.NewMockRunner(ctrl)
-				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 				githubService := mock_github.NewMockService(ctrl)
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
@@ -42,7 +42,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 							SHA: new(string),
 						},
 					}, nil)
-				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(nil)
 
@@ -111,7 +111,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(nil, errors.New("error occur"))
-				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(nil)
 
@@ -149,14 +149,14 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 						SHA: new(string),
 					},
 				}, nil)
-			githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				AnyTimes().
 				Return(nil)
 
 			t.Run("with head_commit.id", func(t *testing.T) {
 				// given
 				runner := mock_runner.NewMockRunner(ctrl)
-				runner.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+				runner.EXPECT().Run(gomock.Any(), gomock.Any()).Times(1)
 
 				// and
 				handler := &controller.WebhooksController{Runner: runner, GitHub: githubService}
@@ -225,7 +225,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 					SHA: new(string),
 				},
 			}, nil)
-		githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 

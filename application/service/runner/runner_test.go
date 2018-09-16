@@ -4,6 +4,7 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/service/git/mock_git"
+	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/github/mock_github"
 	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
 	"github.com/duck8823/duci/application/service/runner"
@@ -29,15 +30,15 @@ func TestRunnerImpl_Run(t *testing.T) {
 		t.Run("when Dockerfile in proj root", func(t *testing.T) {
 			// given
 			mockGitHub := mock_github.NewMockService(ctrl)
-			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(2).
 				Return(nil)
 
 			// and
 			mockGit := mock_git.NewMockService(ctrl)
-			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
+				DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
 					if err := os.MkdirAll(dir, 0700); err != nil {
 						return err
 					}
@@ -91,7 +92,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Return(nil)
 
 			r := &runner.DockerRunner{
-				Name:        "test-runner",
 				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 				Git:         mockGit,
 				GitHub:      mockGitHub,
@@ -103,7 +103,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 			// when
-			err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+			err := r.Run(
+				context.New("test/task", uuid.New(), &url.URL{}),
+				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				"Hello World.",
+			)
 
 			// then
 			if err != nil {
@@ -114,15 +118,15 @@ func TestRunnerImpl_Run(t *testing.T) {
 		t.Run("when Dockerfile in sub directory", func(t *testing.T) {
 			// given
 			mockGitHub := mock_github.NewMockService(ctrl)
-			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(2).
 				Return(nil)
 
 			// and
 			mockGit := mock_git.NewMockService(ctrl)
-			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
+				DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
 					if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
 						return err
 					}
@@ -175,7 +179,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 				Return(nil)
 
 			r := &runner.DockerRunner{
-				Name:        "test-runner",
 				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 				Git:         mockGit,
 				GitHub:      mockGitHub,
@@ -187,7 +190,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 			// when
-			err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+			err := r.Run(
+				context.New("test/task", uuid.New(), &url.URL{}),
+				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				"Hello World.",
+			)
 
 			// then
 			if err != nil {
@@ -199,15 +206,15 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("with config file", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			DoAndReturn(func(_ interface{}, dir string, _, _, _ interface{}) error {
+			DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
 				if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
 					return err
 				}
@@ -260,7 +267,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -272,7 +278,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err != nil {
@@ -283,13 +293,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when failed to git clone", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(errors.New("error"))
 
@@ -326,7 +336,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -338,7 +347,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -349,7 +362,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when failed store#$tart", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -361,7 +374,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(errors.New("test error"))
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			GitHub:      mockGitHub,
 			LogStore:    mockLogStore,
@@ -371,7 +383,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -382,13 +398,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when workdir not exists", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 
@@ -425,7 +441,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: "/path/to/not/exists/dir",
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -437,7 +452,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -448,13 +467,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when docker build failure", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 
@@ -492,7 +511,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -504,7 +522,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -515,13 +537,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when docker run error", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			Return(nil)
 
@@ -560,7 +582,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -572,7 +593,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err == nil {
@@ -586,13 +611,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(cloneSuccess)
 
@@ -630,7 +655,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -642,7 +666,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err.Error() != expected.Error() {
@@ -653,13 +681,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when docker run failure ( with exit code 1 )", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(cloneSuccess)
 
@@ -698,7 +726,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -710,7 +737,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err != runner.Failure {
@@ -721,13 +752,13 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when runner timeout", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
 		// and
 		mockGit := mock_git.NewMockService(ctrl)
-		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(cloneSuccess)
 
@@ -771,7 +802,6 @@ func TestRunnerImpl_Run(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			Name:        "test-runner",
 			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
@@ -783,7 +813,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
 
 		// when
-		err := r.Run(context.New("test/task", uuid.New(), &url.URL{}), repo, "master", plumbing.ZeroHash, "Hello World.")
+		err := r.Run(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			"Hello World.",
+		)
 
 		// then
 		if err.Error() != "context deadline exceeded" {
@@ -819,7 +853,7 @@ func (l *MockJobLog) ReadLine() (*docker.LogLine, error) {
 	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("Hello World,")}, io.EOF
 }
 
-func cloneSuccess(_ interface{}, dir string, _, _, _ interface{}) error {
+func cloneSuccess(_ interface{}, dir string, _ interface{}) error {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return err
 	}

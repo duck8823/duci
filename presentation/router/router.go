@@ -58,7 +58,6 @@ func createRunner(logstoreService logstore.Service, githubService github.Service
 	}
 
 	dockerRunner := &runner.DockerRunner{
-		Name:        application.Name,
 		BaseWorkDir: application.Config.Server.WorkDir,
 		Git:         gitClient,
 		GitHub:      githubService,

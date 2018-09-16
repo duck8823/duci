@@ -41,9 +41,11 @@ func TestSshGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
-				"git@github.com:duck8823/duci.git",
-				"refs/heads/master",
-				plumbing.ZeroHash,
+				git.TargetSource{
+					URL: "git@github.com:duck8823/duci.git",
+					Ref: "refs/heads/master",
+					SHA: plumbing.ZeroHash,
+				},
 			)
 
 			// then
@@ -68,9 +70,11 @@ func TestSshGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				wrongPath,
-				"git@github.com:duck8823/duci.git",
-				"refs/heads/master",
-				plumbing.ZeroHash,
+				git.TargetSource{
+					URL: "git@github.com:duck8823/duci.git",
+					Ref: "refs/heads/master",
+					SHA: plumbing.ZeroHash,
+				},
 			)
 
 			// then
