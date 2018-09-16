@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
-	"gopkg.in/src-d/go-git.v4/plumbing"
 	"path"
 )
 
@@ -23,7 +22,7 @@ const (
 
 type Service interface {
 	GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error)
-	CreateCommitStatus(ctx context.Context, repo Repository, hash plumbing.Hash, state State, description string) error
+	CreateCommitStatus(ctx context.Context, src TargetSource, state State, description string) error
 }
 
 type serviceImpl struct {
@@ -62,8 +61,8 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	return pr, nil
 }
 
-func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Repository, hash plumbing.Hash, state State, description string) error {
-	name := &RepositoryName{repository.GetFullName()}
+func (s *serviceImpl) CreateCommitStatus(ctx context.Context, src TargetSource, state State, description string) error {
+	name := &RepositoryName{src.Repo.GetFullName()}
 	owner, err := name.Owner()
 	if err != nil {
 		return errors.WithStack(err)
@@ -91,7 +90,7 @@ func (s *serviceImpl) CreateCommitStatus(ctx context.Context, repository Reposit
 		ctx,
 		owner,
 		repo,
-		hash.String(),
+		src.SHA.String(),
 		status,
 	); err != nil {
 		logger.Errorf(ctx.UUID(), "Failed to create commit status: %+v", err)

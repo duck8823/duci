@@ -37,7 +37,7 @@ type DockerRunner struct {
 
 func (r *DockerRunner) Run(ctx context.Context, src github.TargetSource, command ...string) error {
 	if err := r.LogStore.Start(ctx.UUID()); err != nil {
-		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
+		r.GitHub.CreateCommitStatus(ctx, src, github.ERROR, err.Error())
 		return errors.WithStack(err)
 	}
 
@@ -69,7 +69,7 @@ func (r *DockerRunner) run(ctx context.Context, src github.TargetSource, command
 		return errors.WithStack(err)
 	}
 
-	r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.PENDING, "started job")
+	r.GitHub.CreateCommitStatus(ctx, src, github.PENDING, "started job")
 
 	if err := r.dockerBuild(ctx, workDir, src.Repo); err != nil {
 		return errors.WithStack(err)
@@ -188,7 +188,7 @@ func (r *DockerRunner) logAppend(ctx context.Context, log docker.Log) error {
 func (r *DockerRunner) timeout(ctx context.Context, src github.TargetSource) {
 	if ctx.Err() != nil {
 		logger.Errorf(ctx.UUID(), "%+v", ctx.Err())
-		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, ctx.Err().Error())
+		r.GitHub.CreateCommitStatus(ctx, src, github.ERROR, ctx.Err().Error())
 	}
 	r.LogStore.Finish(ctx.UUID())
 }
@@ -196,12 +196,12 @@ func (r *DockerRunner) timeout(ctx context.Context, src github.TargetSource) {
 func (r *DockerRunner) finish(ctx context.Context, src github.TargetSource, err error) {
 	if err == Failure {
 		logger.Error(ctx.UUID(), err.Error())
-		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.FAILURE, "failure job")
+		r.GitHub.CreateCommitStatus(ctx, src, github.FAILURE, "failure job")
 	} else if err != nil {
 		logger.Errorf(ctx.UUID(), "%+v", err)
-		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.ERROR, err.Error())
+		r.GitHub.CreateCommitStatus(ctx, src, github.ERROR, err.Error())
 	} else {
-		r.GitHub.CreateCommitStatus(ctx, src.Repo, src.SHA, github.SUCCESS, "success")
+		r.GitHub.CreateCommitStatus(ctx, src, github.SUCCESS, "success")
 	}
 	r.LogStore.Finish(ctx.UUID())
 }

@@ -30,7 +30,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		t.Run("when Dockerfile in proj root", func(t *testing.T) {
 			// given
 			mockGitHub := mock_github.NewMockService(ctrl)
-			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(2).
 				Return(nil)
 
@@ -118,7 +118,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 		t.Run("when Dockerfile in sub directory", func(t *testing.T) {
 			// given
 			mockGitHub := mock_github.NewMockService(ctrl)
-			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(2).
 				Return(nil)
 
@@ -206,7 +206,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("with config file", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -293,7 +293,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when failed to git clone", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -362,7 +362,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when failed store#$tart", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -398,7 +398,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when workdir not exists", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -467,7 +467,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when docker build failure", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -537,7 +537,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when docker run error", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -611,7 +611,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// and
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -681,7 +681,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when docker run failure ( with exit code 1 )", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 
@@ -752,7 +752,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 	t.Run("when runner timeout", func(t *testing.T) {
 		// given
 		mockGitHub := mock_github.NewMockService(ctrl)
-		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockGitHub.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(2).
 			Return(nil)
 

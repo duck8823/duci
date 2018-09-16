@@ -42,7 +42,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 							SHA: new(string),
 						},
 					}, nil)
-				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(nil)
 
@@ -111,7 +111,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 				githubService.EXPECT().GetPullRequest(gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(nil, errors.New("error occur"))
-				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					AnyTimes().
 					Return(nil)
 
@@ -149,7 +149,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 						SHA: new(string),
 					},
 				}, nil)
-			githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				AnyTimes().
 				Return(nil)
 
@@ -225,7 +225,7 @@ func TestWebhooksController_ServeHTTP(t *testing.T) {
 					SHA: new(string),
 				},
 			}, nil)
-		githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		githubService.EXPECT().CreateCommitStatus(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes().
 			Return(nil)
 
