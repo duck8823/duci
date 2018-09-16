@@ -127,7 +127,12 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			Reply(200)
 
 		// expect
-		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err != nil {
+		if err := s.CreateCommitStatus(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			github.SUCCESS,
+			"",
+		); err != nil {
 			t.Errorf("error must not occurred: but got %+v", err)
 		}
 
@@ -147,7 +152,12 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			Reply(404)
 
 		// expect
-		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
+		if err := s.CreateCommitStatus(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			github.SUCCESS,
+			"",
+		); err == nil {
 			t.Error("errot must occred. but got nil")
 		}
 
@@ -162,7 +172,12 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		}
 
 		// expect
-		if err := s.CreateCommitStatus(context.New("test/task", uuid.New(), &url.URL{}), repo, plumbing.Hash{}, github.SUCCESS, ""); err == nil {
+		if err := s.CreateCommitStatus(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			github.SUCCESS,
+			"",
+		); err == nil {
 			t.Error("errot must occred. but got nil")
 		}
 	})
@@ -195,8 +210,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New(taskName, requestID, &url.URL{Scheme: "http", Host: "host:8080"}),
-			repo,
-			plumbing.Hash{},
+			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			state,
 			description,
 		); err == nil {
