@@ -81,9 +81,18 @@ func (c *WebhooksController) parseIssueComment(requestID uuid.UUID, r *http.Requ
 	}
 	ctx := context.New(fmt.Sprintf("%s/pr/%s", application.Name, cmd[0]), requestID, runtimeURL(r))
 
-	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
+	src, err := c.targetSource(ctx, *event)
 	if err != nil {
 		return nil, nil, nil, errors.WithStack(err)
+	}
+
+	return ctx, src, cmd, err
+}
+
+func (c *WebhooksController) targetSource(ctx context.Context, event go_github.IssueCommentEvent) (*github.TargetSource, error) {
+	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
+	if err != nil {
+		return nil, errors.WithStack(err)
 	}
 
 	src := &github.TargetSource{
@@ -91,7 +100,7 @@ func (c *WebhooksController) parseIssueComment(requestID uuid.UUID, r *http.Requ
 		Ref:  fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
 		SHA:  plumbing.NewHash(pr.GetHead().GetSHA()),
 	}
-	return ctx, src, cmd, err
+	return src, nil
 }
 
 func (c *WebhooksController) runWithPushEvent(requestID uuid.UUID, w http.ResponseWriter, r *http.Request) {
