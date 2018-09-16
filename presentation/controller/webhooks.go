@@ -51,12 +51,8 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (c *WebhooksController) runWithIssueCommentEvent(
-	requestID uuid.UUID,
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	ctx, repo, head, command, err := c.parseIssueComment(requestID, r)
+func (c *WebhooksController) runWithIssueCommentEvent(requestID uuid.UUID, w http.ResponseWriter, r *http.Request) {
+	ctx, src, command, err := c.parseIssueComment(requestID, r)
 	if err == SkipBuild {
 		logger.Info(requestID, "skip build")
 		w.WriteHeader(http.StatusOK)
@@ -68,34 +64,33 @@ func (c *WebhooksController) runWithIssueCommentEvent(
 		return
 	}
 
-	ref := fmt.Sprintf("refs/heads/%s", head.GetRef())
-	go c.Runner.Run(ctx, github.TargetSource{Repo: repo, Ref: ref, SHA: plumbing.NewHash(head.GetSHA())}, command...)
+	go c.Runner.Run(ctx, src, command...)
 }
 
-func (c *WebhooksController) parseIssueComment(
-	requestID uuid.UUID,
-	r *http.Request,
-) (ctx context.Context, repo *go_github.Repository, head *go_github.PullRequestBranch, command []string, err error) {
+func (c *WebhooksController) parseIssueComment(requestID uuid.UUID, r *http.Request) (ctx context.Context, src github.TargetSource, command []string, err error) {
 	event := &go_github.IssueCommentEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
-		return nil, nil, nil, nil, errors.WithStack(err)
+		return nil, src, nil, errors.WithStack(err)
 	}
 
 	phrase, err := phrase(event)
 	if err != nil {
-		return nil, nil, nil, nil, SkipBuild
+		return nil, src, nil, SkipBuild
 	}
 	command = strings.Split(phrase, " ")
 	ctx = context.New(fmt.Sprintf("%s/pr/%s", application.Name, command[0]), requestID, runtimeURL(r))
 
 	pr, err := c.GitHub.GetPullRequest(ctx, event.GetRepo(), event.GetIssue().GetNumber())
 	if err != nil {
-		return nil, nil, nil, nil, errors.WithStack(err)
+		return nil, src, nil, errors.WithStack(err)
 	}
 
-	repo = event.GetRepo()
-	head = pr.GetHead()
-	return ctx, repo, head, command, err
+	src = github.TargetSource{
+		Repo: event.GetRepo(),
+		Ref:  fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
+		SHA:  plumbing.NewHash(pr.GetHead().GetSHA()),
+	}
+	return ctx, src, command, err
 }
 
 func (c *WebhooksController) runWithPushEvent(requestID uuid.UUID, w http.ResponseWriter, r *http.Request) {
