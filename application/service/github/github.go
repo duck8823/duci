@@ -20,6 +20,7 @@ const (
 	FAILURE State = "failure"
 )
 
+// Service describes a github service.
 type Service interface {
 	GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error)
 	CreateCommitStatus(ctx context.Context, src TargetSource, state State, description string) error
@@ -29,6 +30,7 @@ type serviceImpl struct {
 	cli *github.Client
 }
 
+// New returns a github service.
 func New() (Service, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: string(application.Config.GitHub.APIToken)},
@@ -38,6 +40,7 @@ func New() (Service, error) {
 	return &serviceImpl{github.NewClient(tc)}, nil
 }
 
+// GetPullRequest returns a pull request with specific repository and number.
 func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error) {
 	name := &RepositoryName{repository.GetFullName()}
 	owner, err := name.Owner()
@@ -61,6 +64,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 	return pr, nil
 }
 
+// CreateCommitStatus create commit status to github.
 func (s *serviceImpl) CreateCommitStatus(ctx context.Context, src TargetSource, state State, description string) error {
 	name := &RepositoryName{src.Repo.GetFullName()}
 	owner, err := name.Owner()

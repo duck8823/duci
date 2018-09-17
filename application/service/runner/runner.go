@@ -21,12 +21,15 @@ import (
 	"path"
 )
 
+// Failure is a error describes task failure.
 var Failure = errors.New("Task Failure")
 
+// Runner is a interface describes task runner.
 type Runner interface {
 	Run(ctx context.Context, src github.TargetSource, command ...string) error
 }
 
+// DockerRunner represents a runner implement for docker.
 type DockerRunner struct {
 	Git         git.Service
 	GitHub      github.Service
@@ -35,6 +38,7 @@ type DockerRunner struct {
 	BaseWorkDir string
 }
 
+// Run task in docker container.
 func (r *DockerRunner) Run(ctx context.Context, src github.TargetSource, command ...string) error {
 	if err := r.LogStore.Start(ctx.UUID()); err != nil {
 		r.GitHub.CreateCommitStatus(ctx, src, github.ERROR, err.Error())

@@ -11,8 +11,10 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+// Level describes a log level.
 type Level = string
 
+// Service is a interface describe store for log.
 type Service interface {
 	Get(uuid uuid.UUID) (*model.Job, error)
 	Append(uuid uuid.UUID, message model.Message) error
@@ -25,6 +27,7 @@ type storeServiceImpl struct {
 	db store.Store
 }
 
+// New returns a implementation of Service interface.
 func New() (Service, error) {
 	database, err := leveldb.OpenFile(application.Config.Server.DatabasePath, nil)
 	if err != nil {
@@ -33,6 +36,7 @@ func New() (Service, error) {
 	return &storeServiceImpl{database}, nil
 }
 
+// Append a message to store.
 func (s *storeServiceImpl) Append(uuid uuid.UUID, message model.Message) error {
 	job, err := s.findOrInitialize(uuid)
 	if err != nil {
@@ -67,6 +71,7 @@ func (s *storeServiceImpl) findOrInitialize(uuid uuid.UUID) (*model.Job, error) 
 	return job, nil
 }
 
+// Get a job from store.
 func (s *storeServiceImpl) Get(uuid uuid.UUID) (*model.Job, error) {
 	data, err := s.db.Get([]byte(uuid.String()), nil)
 	if err != nil {
@@ -80,6 +85,7 @@ func (s *storeServiceImpl) Get(uuid uuid.UUID) (*model.Job, error) {
 	return job, nil
 }
 
+// Start stores initialized job to store.
 func (s *storeServiceImpl) Start(uuid uuid.UUID) error {
 	started, _ := json.Marshal(&model.Job{Finished: false})
 	if err := s.db.Put([]byte(uuid.String()), started, nil); err != nil {
@@ -88,6 +94,7 @@ func (s *storeServiceImpl) Start(uuid uuid.UUID) error {
 	return nil
 }
 
+// Finish stores with finished flag.
 func (s *storeServiceImpl) Finish(uuid uuid.UUID) error {
 	data, err := s.db.Get([]byte(uuid.String()), nil)
 	if err != nil {
@@ -111,6 +118,7 @@ func (s *storeServiceImpl) Finish(uuid uuid.UUID) error {
 	return nil
 }
 
+// Close a data store.
 func (s *storeServiceImpl) Close() error {
 	if err := s.db.Close(); err != nil {
 		return errors.WithStack(err)

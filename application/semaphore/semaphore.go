@@ -21,10 +21,12 @@ func Make() error {
 	return nil
 }
 
+// Acquire is a function to acquire and block permit
 func Acquire() {
 	sem <- struct{}{}
 }
 
+// Release is a function to release permit
 func Release() {
 	<-sem
 }
