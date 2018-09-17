@@ -8,7 +8,8 @@ go:
   - "1.11"
 
 env:
-  - GO111MODULE=on
+  global:
+    - GO111MODULE=on
 
 cache:
   directories:
