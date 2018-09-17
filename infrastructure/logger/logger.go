@@ -10,6 +10,7 @@ import (
 
 var (
 	timeFormat           = "2006-01-02 15:04:05.000"
+	// Writer is a log writer. default is os.Stdout.
 	Writer     io.Writer = os.Stdout
 	now                  = time.Now
 )
