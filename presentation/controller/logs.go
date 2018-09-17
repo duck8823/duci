@@ -11,10 +11,12 @@ import (
 	"net/http"
 )
 
+// LogController is a handler of stored log.
 type LogController struct {
 	LogStore logstore.Service
 }
 
+// ServeHTTP responses a log of specific uuid.
 func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {

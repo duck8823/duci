@@ -18,15 +18,19 @@ import (
 	"strings"
 )
 
+// SkipBuild is a error of build skip.
 var SkipBuild = errors.New("build skip")
 
+// WebhooksController is a handler of webhook.
 type WebhooksController struct {
 	Runner runner.Runner
 	GitHub github.Service
 }
 
+// Command represents docker command.
 type Command []string
 
+// ServeHTTP receive webhook.
 func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestID, err := requestID(r)
 	if err != nil {
