@@ -27,6 +27,18 @@ after_success:
   # for coverage report
   - GO111MODULE=off go get -u github.com/mattn/goveralls
   - if [ "$TRAVIS_GO_VERSION" = "1.11" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
+  # for reviewdog
+  - GO111MODULE=off go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
+  - GO111MODULE=off go get github.com/golang/lint/golint
+  - GO111MODULE=off go get github.com/kisielk/errcheck
+  - GO111MODULE=off go get honnef.co/go/tools/cmd/gosimple
+  - GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
+  - GO111MODULE=off go get honnef.co/go/tools/cmd/unused
+  - GO111MODULE=off go get github.com/client9/misspell/cmd/misspell
+  - GO111MODULE=off go get mvdan.cc/unparam
+  - GO111MODULE=off go get github.com/mgechev/revive
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
+  - if [ "$TRAVIS_GO_VERSION" = "1.11" ]; then reviewdog -reporter=github-pr-check; fi
 before_deploy:
   # copy dependencies to vendor
   - go mod vendor
