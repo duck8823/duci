@@ -19,7 +19,7 @@ const (
 	// SUCCESS represents success state.
 	SUCCESS State = "success"
 	// ERROR represents error state.
-	ERROR   State = "error"
+	ERROR State = "error"
 	// FAILURE represents failure state.
 	FAILURE State = "failure"
 )
