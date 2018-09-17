@@ -9,12 +9,14 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
+// TargetSource stores clone URL, Ref and SHA for target
 type TargetSource struct {
 	URL string
 	Ref string
 	SHA plumbing.Hash
 }
 
+// Service describes a git service.
 type Service interface {
 	Clone(ctx context.Context, dir string, src TargetSource) error
 }
@@ -23,6 +25,7 @@ type sshGitService struct {
 	auth transport.AuthMethod
 }
 
+// New returns the Service with ssh key path.
 func New(sshKeyPath string) (Service, error) {
 	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
 	if err != nil {
@@ -31,6 +34,7 @@ func New(sshKeyPath string) (Service, error) {
 	return &sshGitService{auth: auth}, nil
 }
 
+// Clone a repository into the path with target source.
 func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:           src.URL,

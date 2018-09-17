@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// Create a tar archive with directory.
 func Create(dir string, output io.Writer) error {
 	writer := tar.NewWriter(output)
 	defer writer.Close()

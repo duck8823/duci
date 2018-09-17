@@ -12,10 +12,12 @@ import (
 
 var now = time.Now
 
+// Log is a interface represents docker log.
 type Log interface {
 	ReadLine() (*LogLine, error)
 }
 
+// LogLine stores timestamp and a line.
 type LogLine struct {
 	Timestamp time.Time
 	Message   []byte
@@ -25,6 +27,7 @@ type buildLogger struct {
 	reader *bufio.Reader
 }
 
+// ReadLine returns LogLine.
 func (l *buildLogger) ReadLine() (*LogLine, error) {
 	for {
 		line, _, readErr := l.reader.ReadLine()
@@ -48,6 +51,7 @@ type runLogger struct {
 	reader *bufio.Reader
 }
 
+// ReadLine returns LogLine.
 func (l *runLogger) ReadLine() (*LogLine, error) {
 	for {
 		line, _, readErr := l.reader.ReadLine()

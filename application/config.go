@@ -23,27 +23,32 @@ var (
 
 type maskString string
 
+// MarshalJSON returns masked string.
 func (s maskString) MarshalJSON() ([]byte, error) {
 	return []byte(`"***"`), nil
 }
 
+// Configuration of application.
 type Configuration struct {
 	Server *Server `yaml:"server" json:"server"`
 	GitHub *GitHub `yaml:"github" json:"github"`
 	Job    *Job    `yaml:"job" json:"job"`
 }
 
+// Server describes a configuration of server.
 type Server struct {
 	WorkDir      string `yaml:"workdir" json:"workdir"`
 	Port         int    `yaml:"port" json:"port"`
 	DatabasePath string `yaml:"database_path" json:"databasePath"`
 }
 
+// GitHub describes a configuration of github.
 type GitHub struct {
 	SSHKeyPath string     `yaml:"ssh_key_path" json:"sshKeyPath"`
 	APIToken   maskString `yaml:"api_token" json:"apiToken"`
 }
 
+// Job describes a configuration of each jobs.
 type Job struct {
 	Timeout     int64 `yaml:"timeout" json:"timeout"`
 	Concurrency int   `yaml:"concurrency" json:"concurrency"`
@@ -67,11 +72,13 @@ func init() {
 	}
 }
 
+// String returns values of configuration
 func (c *Configuration) String() string {
 	data, _ := json.Marshal(c)
 	return string(data)
 }
 
+// Set configuration with file path
 func (c *Configuration) Set(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -82,10 +89,12 @@ func (c *Configuration) Set(path string) error {
 	return yaml.NewDecoder(bytes.NewReader(data)).Decode(c)
 }
 
+// Addr returns a string of server port
 func (c *Configuration) Addr() string {
 	return fmt.Sprintf(":%d", c.Server.Port)
 }
 
+// Timeout returns timeout duration.
 func (c *Configuration) Timeout() time.Duration {
 	return time.Duration(c.Job.Timeout) * time.Second
 }
