@@ -18,8 +18,8 @@ import (
 	"strings"
 )
 
-// SkipBuild is a error of build skip.
-var SkipBuild = errors.New("build skip")
+// ErrSkipBuild is a error of build skip.
+var ErrSkipBuild = errors.New("build skip")
 
 // WebhooksController is a handler of webhook.
 type WebhooksController struct {
@@ -59,7 +59,7 @@ func (c *WebhooksController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (c *WebhooksController) runWithIssueCommentEvent(requestID uuid.UUID, w http.ResponseWriter, r *http.Request) {
 	ctx, src, command, err := c.parseIssueComment(requestID, r)
-	if err == SkipBuild {
+	if err == ErrSkipBuild {
 		logger.Info(requestID, "skip build")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(err.Error()))
@@ -151,11 +151,11 @@ func runtimeURL(r *http.Request) *url.URL {
 
 func command(event *go_github.IssueCommentEvent) (Command, error) {
 	if !isValidAction(event.Action) {
-		return Command{}, SkipBuild
+		return Command{}, ErrSkipBuild
 	}
 
 	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(event.Comment.GetBody())) {
-		return Command{}, SkipBuild
+		return Command{}, ErrSkipBuild
 	}
 	phrase := regexp.MustCompile("^ci\\s+").ReplaceAllString(event.Comment.GetBody(), "")
 	command := strings.Split(phrase, " ")

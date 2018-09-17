@@ -21,8 +21,8 @@ import (
 	"path"
 )
 
-// Failure is a error describes task failure.
-var Failure = errors.New("Task Failure")
+// ErrFailure is a error describes task failure.
+var ErrFailure = errors.New("Task Failure")
 
 // Runner is a interface describes task runner.
 type Runner interface {
@@ -92,7 +92,7 @@ func (r *DockerRunner) run(ctx context.Context, src github.TargetSource, command
 		return errors.WithStack(err)
 	}
 	if code != 0 {
-		return Failure
+		return ErrFailure
 	}
 
 	return err
@@ -198,7 +198,7 @@ func (r *DockerRunner) timeout(ctx context.Context, src github.TargetSource) {
 }
 
 func (r *DockerRunner) finish(ctx context.Context, src github.TargetSource, err error) {
-	if err == Failure {
+	if err == ErrFailure {
 		logger.Error(ctx.UUID(), err.Error())
 		r.GitHub.CreateCommitStatus(ctx, src, github.FAILURE, "failure job")
 	} else if err != nil {

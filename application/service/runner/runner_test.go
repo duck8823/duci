@@ -744,8 +744,8 @@ func TestRunnerImpl_Run(t *testing.T) {
 		)
 
 		// then
-		if err != runner.Failure {
-			t.Errorf("error must be %s, but got %s", runner.Failure, err)
+		if err != runner.ErrFailure {
+			t.Errorf("error must be %s, but got %s", runner.ErrFailure, err)
 		}
 	})
 
@@ -821,7 +821,7 @@ func TestRunnerImpl_Run(t *testing.T) {
 
 		// then
 		if err.Error() != "context deadline exceeded" {
-			t.Errorf("error must be runner.Failure, but got %+v", err)
+			t.Errorf("error must be runner.ErrFailure, but got %+v", err)
 		}
 	})
 }
