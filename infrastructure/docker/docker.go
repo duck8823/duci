@@ -21,6 +21,7 @@ type RuntimeOptions struct {
 // Environments represents a docker `-e` option.
 type Environments map[string]interface{}
 
+// ToArray returns string array of environments
 func (e Environments) ToArray() []string {
 	var a []string
 	for key, val := range e {
@@ -29,9 +30,10 @@ func (e Environments) ToArray() []string {
 	return a
 }
 
-// Environments represents a docker `-v` option.
+// Volumes represents a docker `-v` option.
 type Volumes []string
 
+// ToMap returns map of volumes.
 func (v Volumes) ToMap() map[string]struct{} {
 	m := make(map[string]struct{})
 	for _, volume := range v {

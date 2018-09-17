@@ -13,6 +13,7 @@ import (
 	"net/http"
 )
 
+// New returns handler of application.
 func New() (http.Handler, error) {
 	logstoreService, githubService, err := createCommonServices()
 	if err != nil {

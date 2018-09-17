@@ -11,6 +11,7 @@ import (
 	"path"
 )
 
+// State represents state of commit status
 type State = string
 
 const (

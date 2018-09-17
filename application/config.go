@@ -14,10 +14,12 @@ import (
 )
 
 const (
+	// Name is a application name.
 	Name = "duci"
 )
 
 var (
+	// Config is a application configuration.
 	Config *Configuration
 )
 
