@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-func TestRunnerImpl_Run(t *testing.T) {
+func TestRunnerImpl_Run_Normal(t *testing.T) {
 	// setup
 	ctrl := gomock.NewController(t)
 
@@ -289,6 +289,11 @@ func TestRunnerImpl_Run(t *testing.T) {
 			t.Errorf("must not error. but: %+v", err)
 		}
 	})
+}
+
+func TestRunnerImpl_Run_NonNormal(t *testing.T) {
+	// setup
+	ctrl := gomock.NewController(t)
 
 	t.Run("when failed to git clone", func(t *testing.T) {
 		// given
