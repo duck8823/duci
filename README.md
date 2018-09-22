@@ -46,17 +46,26 @@ volumes:
 ```
 
 ## Server Settings
-### Run Server
+### Install Server
 If you have already set $GOPATH, you can install it with the following command.
 ```bash
 $ go get -u github.com/duck8823/duci
-$ duci 
 ```
 
 ### Setting SSH
 This server clone from github.com with **SSH** protocol
 using private key `$HOME/.ssh/id_rsa` (default).  
 Please set the public key of the pair at https://github.com/settings/keys.
+
+### Add Webhooks to Your GitHub repository
+duci start to listen webhook with port `8080` (default) and endpoint `/`.  
+Add endpoint of duci to target repository.  
+`https://github.com/<owner>/<repository>/settings/hooks`
+
+### Run Server
+```bash
+$ duci
+```
 
 ### Server Configuration file
 You can specify configuration file with `-c` option.
@@ -82,11 +91,6 @@ You can check the default value.
 ```bash
 $ duci -h
 ```
-
-### Add Webhooks to GitHub repository
-duci start to listen webhook with port `8080` and endpoint `/`.  
-Add endpoint of duci to target repository.  
-`https://github.com/<owner>/<repository>/settings/hooks`
 
 ## Using Docker
 You can use Docker to run server.
