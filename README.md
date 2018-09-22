@@ -14,6 +14,7 @@ duci just only execute the task in docker container.
 - Execute the task triggered by GitHub pull request comment or push 
 - Execute tasks asynchronously
 - Create GitHub commit status
+- Store and Show logs
 
 ## How to use
 ### Target Repository
@@ -114,6 +115,25 @@ $ docker-compose -f docker-compose.win.yml up
 $ git clone https://github.com/duck8823/duci.git
 $ cd duci
 $ docker-compose -f docker-compose.mac.yml up
+```
+
+## Read job log
+GitHub send payload as webhook including `X-GitHub-Delivery` header.  
+You can read job log with the `X-GitHub-Delivery` value formatted UUID.
+
+```bash
+$ curl -XGET http://localhost:8080/logs/{X-GitHub-Delivery}
+```
+
+The endpoint returns NDJSON (Newline Delimited JSON) formatted log.
+
+```jsons
+{"time":"2018-09-21T22:19:42.572879+09:00","message":"Step 1/10 : FROM golang:1.11-alpine"}
+{"time":"2018-09-21T22:19:42.573093+09:00","message":"\n"}
+{"time":"2018-09-21T22:19:42.573494+09:00","message":" ---\u003e 233ed4ed14bf\n"}
+{"time":"2018-09-21T22:19:42.573616+09:00","message":"Step 2/10 : MAINTAINER shunsuke maeda \u003cduck8823@gmail.com\u003e"}
+{"time":"2018-09-21T22:19:42.573734+09:00","message":"\n"}
+...
 ```
 
 ## License
