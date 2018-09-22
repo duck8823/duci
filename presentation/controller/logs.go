@@ -18,6 +18,7 @@ type LogController struct {
 
 // ServeHTTP responses a log of specific uuid.
 func (c *LogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)

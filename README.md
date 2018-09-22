@@ -103,20 +103,6 @@ $ docker run -p 8080:8080 \
              duck8823/duci
 ```
 
-##### docker-compose for Windows
-```bash
-$ git clone https://github.com/duck8823/duci.git
-$ cd duci
-$ docker-compose -f docker-compose.win.yml up
-```
-
-##### docker-compose for Mac
-```bash
-$ git clone https://github.com/duck8823/duci.git
-$ cd duci
-$ docker-compose -f docker-compose.mac.yml up
-```
-
 ## Read job log
 GitHub send payload as webhook including `X-GitHub-Delivery` header.  
 You can read job log with the `X-GitHub-Delivery` value formatted UUID.
