@@ -16,7 +16,7 @@ type TargetSource struct {
 // ToGitTargetSource returns a git.TargetSource.
 func (s TargetSource) ToGitTargetSource() git.TargetSource {
 	var url string
-	if application.Config.GitHub.SSHKeyPath == "" {
+	if application.Config.GitHub.SSHKeyPath != "" {
 		url = s.Repo.GetSSHURL()
 	} else {
 		url = s.Repo.GetCloneURL()
