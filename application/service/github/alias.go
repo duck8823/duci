@@ -6,6 +6,7 @@ import "github.com/google/go-github/github"
 type Repository interface {
 	GetFullName() string
 	GetSSHURL() string
+	GetCloneURL() string
 }
 
 // PullRequest is a type alias of github.PullRequest

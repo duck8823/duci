@@ -33,6 +33,7 @@ func TestTargetSource_ToGitTargetSource(t *testing.T) {
 type MockRepository struct {
 	FullName string
 	SSHURL   string
+	CloneURL string
 }
 
 func (r *MockRepository) GetFullName() string {
@@ -41,4 +42,8 @@ func (r *MockRepository) GetFullName() string {
 
 func (r *MockRepository) GetSSHURL() string {
 	return r.SSHURL
+}
+
+func (r *MockRepository) GetCloneURL() string {
+	return r.CloneURL
 }

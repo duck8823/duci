@@ -15,6 +15,7 @@ import (
 type MockRepo struct {
 	FullName string
 	SSHURL   string
+	CloneURL string
 }
 
 func (r *MockRepo) GetFullName() string {
@@ -23,6 +24,10 @@ func (r *MockRepo) GetFullName() string {
 
 func (r *MockRepo) GetSSHURL() string {
 	return r.SSHURL
+}
+
+func (r *MockRepo) GetCloneURL() string {
+	return r.CloneURL
 }
 
 func TestService_GetPullRequest(t *testing.T) {

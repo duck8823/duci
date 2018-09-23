@@ -1,6 +1,7 @@
 package git
 
 import (
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
@@ -25,9 +26,14 @@ type sshGitService struct {
 	auth transport.AuthMethod
 }
 
-// New returns the Service with ssh key path.
-func New(sshKeyPath string) (Service, error) {
-	auth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
+type httpGitService struct{}
+
+// New returns the Service.
+func New() (Service, error) {
+	if application.Config.GitHub.SSHKeyPath == "" {
+		return &httpGitService{}, nil
+	}
+	auth, err := ssh.NewPublicKeysFromFile("git", application.Config.GitHub.SSHKeyPath, "")
 	if err != nil {
 		return nil, err
 	}
@@ -47,14 +53,39 @@ func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource)
 		return errors.WithStack(err)
 	}
 
-	wt, err := gitRepository.Worktree()
+	if err := checkout(gitRepository, src.SHA); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+// Clone a repository into the path with target source.
+func (s *httpGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
+	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
+		URL:           src.URL,
+		Progress:      &ProgressLogger{ctx.UUID()},
+		ReferenceName: plumbing.ReferenceName(src.Ref),
+		Depth:         1,
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := checkout(gitRepository, src.SHA); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func checkout(repo *git.Repository, sha plumbing.Hash) error {
+	wt, err := repo.Worktree()
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
 	if err := wt.Checkout(&git.CheckoutOptions{
-		Hash:   src.SHA,
-		Branch: plumbing.ReferenceName(src.SHA.String()),
+		Hash:   sha,
+		Branch: plumbing.ReferenceName(sha.String()),
 		Create: true,
 	}); err != nil {
 		return errors.WithStack(err)

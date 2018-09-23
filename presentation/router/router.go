@@ -49,7 +49,7 @@ func createCommonServices() (logstore.Service, github.Service, error) {
 }
 
 func createRunner(logstoreService logstore.Service, githubService github.Service) (runner.Runner, error) {
-	gitClient, err := git.New(application.Config.GitHub.SSHKeyPath)
+	gitClient, err := git.New()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
