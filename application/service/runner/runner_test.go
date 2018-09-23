@@ -100,7 +100,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			}
 
 			// and
-			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+			repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 			// when
 			err := r.Run(
@@ -187,7 +187,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			}
 
 			// and
-			repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+			repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 			// when
 			err := r.Run(
@@ -275,7 +275,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -349,7 +349,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -385,7 +385,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -454,7 +454,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -524,7 +524,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -595,7 +595,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -668,7 +668,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -739,7 +739,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -815,7 +815,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{"duck8823/duci", "git@github.com:duck8823/duci.git"}
+		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
@@ -834,6 +834,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 type MockRepo struct {
 	FullName string
 	SSHURL   string
+	CloneURL string
 }
 
 func (r *MockRepo) GetFullName() string {
@@ -842,6 +843,10 @@ func (r *MockRepo) GetFullName() string {
 
 func (r *MockRepo) GetSSHURL() string {
 	return r.SSHURL
+}
+
+func (r *MockRepo) GetCloneURL() string {
+	return r.CloneURL
 }
 
 type MockBuildLog struct {

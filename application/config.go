@@ -64,7 +64,7 @@ func init() {
 			DatabasePath: path.Join(os.Getenv("HOME"), ".duci/db"),
 		},
 		GitHub: &GitHub{
-			SSHKeyPath: path.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+			SSHKeyPath: "",
 			APIToken:   maskString(os.Getenv("GITHUB_API_TOKEN")),
 		},
 		Job: &Job{
