@@ -96,6 +96,30 @@ func TestSshGitService_Clone(t *testing.T) {
 				t.Error("erro must occur")
 			}
 		})
+
+		t.Run("with wrong sha", func(t *testing.T) {
+			// setup
+			tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
+				t.Fatalf("%+v", err)
+			}
+
+			// when
+			err := client.Clone(
+				context.New("test/task", uuid.New(), &url.URL{}),
+				tempDir,
+				git.TargetSource{
+					URL: "git@github.com:duck8823/duci.git",
+					Ref: "refs/heads/master",
+					SHA: plumbing.NewHash(uuid.New().String()),
+				},
+			)
+
+			// then
+			if err == nil {
+				t.Error("error must occur")
+			}
+		})
 	})
 }
 
@@ -160,6 +184,30 @@ func TestHttpGitService_Clone(t *testing.T) {
 			// then
 			if err == nil {
 				t.Error("erro must occur")
+			}
+		})
+
+		t.Run("with wrong sha", func(t *testing.T) {
+			// setup
+			tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
+				t.Fatalf("%+v", err)
+			}
+
+			// when
+			err := client.Clone(
+				context.New("test/task", uuid.New(), &url.URL{}),
+				tempDir,
+				git.TargetSource{
+					URL: "git@github.com:duck8823/duci.git",
+					Ref: "refs/heads/master",
+					SHA: plumbing.NewHash(uuid.New().String()),
+				},
+			)
+
+			// then
+			if err == nil {
+				t.Error("error must occur")
 			}
 		})
 	})
