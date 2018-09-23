@@ -53,9 +53,8 @@ If you have already set $GOPATH, you can install it with the following command.
 $ go get -u github.com/duck8823/duci
 ```
 
-### Setting SSH
-This server clone from github.com with **SSH** protocol
-using private key `$HOME/.ssh/id_rsa` (default).  
+### Setting SSH (optional)
+If target repository is private, You can use SSH key to clone repository from github.com.  
 Please set the public key of the pair at https://github.com/settings/keys.
 
 ### Add Webhooks to Your GitHub repository
@@ -79,12 +78,13 @@ server:
   port: 8080
   database_path: '$HOME/.duci/db'
 github:
-  ssh_key_path: '$HOME/.ssh/id_rsa'
+  # (optional) You can use SSH key to clone. ex. '${HOME}/.ssh/id_rsa'
+  ssh_key_path: ''
   # For create commit status. You can also use environment variable
   api_token: ${GITHUB_API_TOKEN}
 job:
   timeout: 600
-  concurrency: `number of cpu`
+  concurrency: 4 # default is number of cpu
 ```
 
 You can check the default value.
