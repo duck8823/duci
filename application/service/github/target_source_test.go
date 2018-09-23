@@ -1,6 +1,7 @@
 package github_test
 
 import (
+	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/google/go-cmp/cmp"
@@ -10,24 +11,50 @@ import (
 )
 
 func TestTargetSource_ToGitTargetSource(t *testing.T) {
-	// given
-	expected := git.TargetSource{
-		URL: "url",
-		Ref: "ref",
-		SHA: plumbing.Hash{},
-	}
+	t.Run("without ssh key path", func(t *testing.T) {
+		// given
+		expected := git.TargetSource{
+			URL: "url",
+			Ref: "ref",
+			SHA: plumbing.Hash{},
+		}
 
-	// and
-	src := github.TargetSource{
-		Repo: &MockRepository{FullName: "fullName", SSHURL: expected.URL},
-		Ref:  expected.Ref,
-		SHA:  expected.SHA,
-	}
+		// and
+		src := github.TargetSource{
+			Repo: &MockRepository{FullName: "fullName", CloneURL: expected.URL},
+			Ref:  expected.Ref,
+			SHA:  expected.SHA,
+		}
 
-	// expect
-	if !reflect.DeepEqual(expected, src.ToGitTargetSource()) {
-		t.Errorf("must be equals, but not. diff: %+v", cmp.Diff(expected, src.ToGitTargetSource()))
-	}
+		// expect
+		if !reflect.DeepEqual(expected, src.ToGitTargetSource()) {
+			t.Errorf("must be equals, but not. diff: %+v", cmp.Diff(expected, src.ToGitTargetSource()))
+		}
+	})
+
+	t.Run("with ssh key path", func(t *testing.T) {
+		// given
+		application.Config.GitHub.SSHKeyPath = "path/to/ssh_key"
+
+		// and
+		expected := git.TargetSource{
+			URL: "url",
+			Ref: "ref",
+			SHA: plumbing.Hash{},
+		}
+
+		// and
+		src := github.TargetSource{
+			Repo: &MockRepository{FullName: "fullName", SSHURL: expected.URL},
+			Ref:  expected.Ref,
+			SHA:  expected.SHA,
+		}
+
+		// expect
+		if !reflect.DeepEqual(expected, src.ToGitTargetSource()) {
+			t.Errorf("must be equals, but not. diff: %+v", cmp.Diff(expected, src.ToGitTargetSource()))
+		}
+	})
 }
 
 type MockRepository struct {
