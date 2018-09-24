@@ -6,12 +6,12 @@ import (
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/google/uuid"
+	"github.com/labstack/gommon/random"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/url"
 	"os"
 	"path"
 	"testing"
-	"time"
 )
 
 func TestNew(t *testing.T) {
@@ -46,7 +46,8 @@ func TestSshGitService_Clone(t *testing.T) {
 
 		t.Run("when target directory exists", func(t *testing.T) {
 			// setup
-			tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+			tempDir := path.Join(os.TempDir(), dirStr)
 			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
 				t.Fatalf("%+v", err)
 			}
@@ -99,7 +100,8 @@ func TestSshGitService_Clone(t *testing.T) {
 
 		t.Run("with wrong sha", func(t *testing.T) {
 			// setup
-			tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+			tempDir := path.Join(os.TempDir(), dirStr)
 			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
 				t.Fatalf("%+v", err)
 			}
@@ -136,7 +138,8 @@ func TestHttpGitService_Clone(t *testing.T) {
 
 		t.Run("when target directory exists", func(t *testing.T) {
 			// setup
-			tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+			tempDir := path.Join(os.TempDir(), dirStr)
 			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
 				t.Fatalf("%+v", err)
 			}
@@ -189,7 +192,8 @@ func TestHttpGitService_Clone(t *testing.T) {
 
 		t.Run("with wrong sha", func(t *testing.T) {
 			// setup
-			tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+			tempDir := path.Join(os.TempDir(), dirStr)
 			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
 				t.Fatalf("%+v", err)
 			}
