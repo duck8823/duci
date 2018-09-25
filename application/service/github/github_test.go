@@ -134,7 +134,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			github.SUCCESS,
 			"",
 		); err != nil {
@@ -159,7 +159,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			github.SUCCESS,
 			"",
 		); err == nil {
@@ -179,7 +179,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			github.SUCCESS,
 			"",
 		); err == nil {
@@ -215,7 +215,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New(taskName, requestID, &url.URL{Scheme: "http", Host: "host:8080"}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			state,
 			description,
 		); err == nil {

@@ -10,11 +10,11 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
-// TargetSource stores clone URL, Ref and SHA for target
-type TargetSource struct {
-	URL string
-	Ref string
-	SHA plumbing.Hash
+// TargetSource is a interface returns clone URL, Ref and SHA for target
+type TargetSource interface {
+	GetURL() string
+	GetRef() string
+	GetSHA() plumbing.Hash
 }
 
 // Service describes a git service.
@@ -43,17 +43,17 @@ func New() (Service, error) {
 // Clone a repository into the path with target source.
 func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
-		URL:           src.URL,
+		URL:           src.GetURL(),
 		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx.UUID()},
-		ReferenceName: plumbing.ReferenceName(src.Ref),
+		ReferenceName: plumbing.ReferenceName(src.GetRef()),
 		Depth:         1,
 	})
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if err := checkout(gitRepository, src.SHA); err != nil {
+	if err := checkout(gitRepository, src.GetSHA()); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -62,16 +62,16 @@ func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource)
 // Clone a repository into the path with target source.
 func (s *httpGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
 	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
-		URL:           src.URL,
+		URL:           src.GetURL(),
 		Progress:      &ProgressLogger{ctx.UUID()},
-		ReferenceName: plumbing.ReferenceName(src.Ref),
+		ReferenceName: plumbing.ReferenceName(src.GetRef()),
 		Depth:         1,
 	})
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if err := checkout(gitRepository, src.SHA); err != nil {
+	if err := checkout(gitRepository, src.GetSHA()); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

@@ -48,7 +48,7 @@ func (mr *MockServiceMockRecorder) GetPullRequest(ctx, repository, num interface
 }
 
 // CreateCommitStatus mocks base method
-func (m *MockService) CreateCommitStatus(ctx context.Context, src github.TargetSource, state github.State, description string) error {
+func (m *MockService) CreateCommitStatus(ctx context.Context, src *github.TargetSource, state github.State, description string) error {
 	ret := m.ctrl.Call(m, "CreateCommitStatus", ctx, src, state, description)
 	ret0, _ := ret[0].(error)
 	return ret0

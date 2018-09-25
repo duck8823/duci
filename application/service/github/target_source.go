@@ -2,7 +2,6 @@ package github
 
 import (
 	"github.com/duck8823/duci/application"
-	"github.com/duck8823/duci/application/service/git"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
@@ -13,17 +12,20 @@ type TargetSource struct {
 	SHA  plumbing.Hash
 }
 
-// ToGitTargetSource returns a git.TargetSource.
-func (s TargetSource) ToGitTargetSource() git.TargetSource {
-	var url string
+// GetURL returns a clone URL
+func (s *TargetSource) GetURL() string {
 	if application.Config.GitHub.SSHKeyPath != "" {
-		url = s.Repo.GetSSHURL()
-	} else {
-		url = s.Repo.GetCloneURL()
+		return s.Repo.GetSSHURL()
 	}
-	return git.TargetSource{
-		URL: url,
-		Ref: s.Ref,
-		SHA: s.SHA,
-	}
+	return s.Repo.GetCloneURL()
+}
+
+// GetRef returns a ref
+func (s *TargetSource) GetRef() string {
+	return s.Ref
+}
+
+// GetSHA returns a hash
+func (s *TargetSource) GetSHA() plumbing.Hash {
+	return s.SHA
 }

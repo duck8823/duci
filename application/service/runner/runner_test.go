@@ -105,7 +105,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			// when
 			err := r.Run(
 				context.New("test/task", uuid.New(), &url.URL{}),
-				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 				"Hello World.",
 			)
 
@@ -192,7 +192,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			// when
 			err := r.Run(
 				context.New("test/task", uuid.New(), &url.URL{}),
-				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 				"Hello World.",
 			)
 
@@ -280,7 +280,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -354,7 +354,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -390,7 +390,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -459,7 +459,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -529,7 +529,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -600,7 +600,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -673,7 +673,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -744,7 +744,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -820,7 +820,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
