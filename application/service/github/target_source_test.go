@@ -3,6 +3,7 @@ package github_test
 import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/github"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"testing"
 )
 
@@ -43,11 +44,35 @@ func TestTargetSource_GetURL(t *testing.T) {
 }
 
 func TestTargetSource_GetRef(t *testing.T) {
+	// given
+	expected := "ref"
 
+	// and
+	sut := github.TargetSource{Ref: expected}
+
+	// when
+	actual := sut.GetRef()
+
+	// expect
+	if actual != expected {
+		t.Errorf("must equal. wont %#v, but got %#v", expected, actual)
+	}
 }
 
 func TestTargetSource_GetSHA(t *testing.T) {
+	// given
+	expected := plumbing.NewHash("hello world.")
 
+	// and
+	sut := github.TargetSource{SHA: expected}
+
+	// when
+	actual := sut.GetSHA()
+
+	// expect
+	if actual != expected {
+		t.Errorf("must equal. wont %#v, but got %#v", expected, actual)
+	}
 }
 
 type MockRepository struct {
