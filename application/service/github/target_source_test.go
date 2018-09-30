@@ -16,7 +16,7 @@ func TestTargetSource_GetURL(t *testing.T) {
 		expected := "clone_url"
 
 		sut := github.TargetSource{
-			Repo: &MockRepository{SSHURL: "ssh_url", CloneURL: expected},
+			Repo: &github.MockRepo{SSHURL: "ssh_url", CloneURL: expected},
 		}
 
 		// expect
@@ -33,7 +33,7 @@ func TestTargetSource_GetURL(t *testing.T) {
 		expected := "ssh_url"
 
 		sut := github.TargetSource{
-			Repo: &MockRepository{SSHURL: expected, CloneURL: "clone_url"},
+			Repo: &github.MockRepo{SSHURL: expected, CloneURL: "clone_url"},
 		}
 
 		// expect
@@ -73,22 +73,4 @@ func TestTargetSource_GetSHA(t *testing.T) {
 	if actual != expected {
 		t.Errorf("must equal. wont %#v, but got %#v", expected, actual)
 	}
-}
-
-type MockRepository struct {
-	FullName string
-	SSHURL   string
-	CloneURL string
-}
-
-func (r *MockRepository) GetFullName() string {
-	return r.FullName
-}
-
-func (r *MockRepository) GetSSHURL() string {
-	return r.SSHURL
-}
-
-func (r *MockRepository) GetCloneURL() string {
-	return r.CloneURL
 }

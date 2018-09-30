@@ -56,7 +56,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
-				&MockTargetSource{
+				&git.MockTargetSource{
 					URL: "git@github.com:duck8823/duci.git",
 					Ref: "refs/heads/master",
 					SHA: plumbing.ZeroHash,
@@ -85,7 +85,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				wrongPath,
-				&MockTargetSource{
+				&git.MockTargetSource{
 					URL: "git@github.com:duck8823/duci.git",
 					Ref: "refs/heads/master",
 					SHA: plumbing.ZeroHash,
@@ -110,7 +110,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
-				&MockTargetSource{
+				&git.MockTargetSource{
 					URL: "git@github.com:duck8823/duci.git",
 					Ref: "refs/heads/master",
 					SHA: plumbing.NewHash(uuid.New().String()),
@@ -148,7 +148,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
-				&MockTargetSource{
+				&git.MockTargetSource{
 					URL: "https://github.com/duck8823/duci.git",
 					Ref: "refs/heads/master",
 					SHA: plumbing.ZeroHash,
@@ -177,7 +177,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				wrongPath,
-				&MockTargetSource{
+				&git.MockTargetSource{
 					URL: "https://github.com/duck8823/duci.git",
 					Ref: "refs/heads/master",
 					SHA: plumbing.ZeroHash,
@@ -202,7 +202,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			err := client.Clone(
 				context.New("test/task", uuid.New(), &url.URL{}),
 				tempDir,
-				&MockTargetSource{
+				&git.MockTargetSource{
 					URL: "git@github.com:duck8823/duci.git",
 					Ref: "refs/heads/master",
 					SHA: plumbing.NewHash(uuid.New().String()),
@@ -215,22 +215,4 @@ func TestHttpGitService_Clone(t *testing.T) {
 			}
 		})
 	})
-}
-
-type MockTargetSource struct {
-	URL string
-	Ref string
-	SHA plumbing.Hash
-}
-
-func (t *MockTargetSource) GetURL() string {
-	return t.URL
-}
-
-func (t *MockTargetSource) GetRef() string {
-	return t.Ref
-}
-
-func (t *MockTargetSource) GetSHA() plumbing.Hash {
-	return t.SHA
 }
