@@ -7,6 +7,8 @@ import (
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/random"
+	"github.com/pkg/errors"
+	go_git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/url"
 	"os"
@@ -33,8 +35,39 @@ func TestNew(t *testing.T) {
 	})
 }
 
+func TestSshGitService_Clone2(t *testing.T) {
+	// setup
+	application.Config.GitHub.SSHKeyPath = path.Join(os.Getenv("HOME"), ".ssh/id_rsa")
+
+	t.Run("when failure git clone", func(t *testing.T) {
+		// given
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			return nil, errors.New("test")
+		})
+
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
+
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{},
+		); err == nil {
+			t.Error("error must not nil.")
+		}
+
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
+}
+
 func TestSshGitService_Clone(t *testing.T) {
 	// setup
+	git.SetPlainCloneFunc(go_git.PlainClone)
 	application.Config.GitHub.SSHKeyPath = path.Join(os.Getenv("HOME"), ".ssh/id_rsa")
 
 	t.Run("with correct key", func(t *testing.T) {
