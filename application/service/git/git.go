@@ -10,6 +10,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
+var plainClone = git.PlainClone
+
 // TargetSource is a interface returns clone URL, Ref and SHA for target
 type TargetSource interface {
 	GetURL() string
@@ -42,7 +44,7 @@ func New() (Service, error) {
 
 // Clone a repository into the path with target source.
 func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
-	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
+	gitRepository, err := plainClone(dir, false, &git.CloneOptions{
 		URL:           src.GetURL(),
 		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx.UUID()},
@@ -61,7 +63,7 @@ func (s *sshGitService) Clone(ctx context.Context, dir string, src TargetSource)
 
 // Clone a repository into the path with target source.
 func (s *httpGitService) Clone(ctx context.Context, dir string, src TargetSource) error {
-	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
+	gitRepository, err := plainClone(dir, false, &git.CloneOptions{
 		URL:           src.GetURL(),
 		Progress:      &ProgressLogger{ctx.UUID()},
 		ReferenceName: plumbing.ReferenceName(src.GetRef()),
