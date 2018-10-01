@@ -116,6 +116,45 @@ func TestSshGitService_Clone(t *testing.T) {
 		// cleanup
 		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
+
+	t.Run("when failure git checkout", func(t *testing.T) {
+		// setup
+		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+		tempDir := path.Join(os.TempDir(), dirStr)
+		if err := os.MkdirAll(tempDir, 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		// and
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			// git init
+			repo, err := go_git.PlainInit(tempDir, false)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			return repo, nil
+		})
+
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
+
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{
+				Ref: "HEAD",
+			},
+		); err == nil {
+			t.Error("error must occur. but got nil")
+		}
+
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
 }
 
 func TestHttpGitService_Clone(t *testing.T) {
@@ -193,6 +232,45 @@ func TestHttpGitService_Clone(t *testing.T) {
 			},
 		); err != nil {
 			t.Errorf("error must not occur. but got %+v", err)
+		}
+
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
+
+	t.Run("when failure git checkout", func(t *testing.T) {
+		// setup
+		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+		tempDir := path.Join(os.TempDir(), dirStr)
+		if err := os.MkdirAll(tempDir, 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		// and
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			// git init
+			repo, err := go_git.PlainInit(tempDir, false)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			return repo, nil
+		})
+
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
+
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{
+				Ref: "HEAD",
+			},
+		); err == nil {
+			t.Error("error must occur. but got nil")
 		}
 
 		// cleanup
