@@ -53,7 +53,7 @@ type Client interface {
 }
 
 type clientImpl struct {
-	moby *moby.Client
+	moby Moby
 }
 
 // New returns docker client.
