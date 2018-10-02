@@ -1,6 +1,7 @@
 package docker_test
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -10,11 +11,11 @@ import (
 	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/url"
 	"os"
-	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -44,11 +45,6 @@ func TestClientImpl_Build(t *testing.T) {
 		t.Fatalf("error occurred: %+v", err)
 	}
 
-	// and
-	ctrl := gomock.NewController(t)
-	mockMoby := mock_docker.NewMockMoby(ctrl)
-	sut.SetMoby(mockMoby)
-
 	t.Run("when success image build", func(t *testing.T) {
 		// given
 		expected := "hello world"
@@ -56,9 +52,14 @@ func TestClientImpl_Build(t *testing.T) {
 		r := ioutil.NopCloser(sr)
 
 		// and
+		ctrl := gomock.NewController(t)
+		mockMoby := mock_docker.NewMockMoby(ctrl)
+
 		mockMoby.EXPECT().
 			ImageBuild(gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(types.ImageBuildResponse{Body: r}, nil)
+
+		sut.SetMoby(mockMoby)
 
 		// when
 		log, err := sut.Build(context.New("test/task", uuid.New(), &url.URL{}), nil, "", "")
@@ -82,9 +83,14 @@ func TestClientImpl_Build(t *testing.T) {
 
 	t.Run("when failure image build", func(t *testing.T) {
 		// given
+		ctrl := gomock.NewController(t)
+		mockMoby := mock_docker.NewMockMoby(ctrl)
+
 		mockMoby.EXPECT().
 			ImageBuild(gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(types.ImageBuildResponse{}, errors.New("test error"))
+
+		sut.SetMoby(mockMoby)
 
 		// expect
 		if _, err := sut.Build(
@@ -100,144 +106,162 @@ func TestClientImpl_Build(t *testing.T) {
 
 func TestClientImpl_Run(t *testing.T) {
 	// setup
-	cli, err := docker.New()
+	sut, err := docker.New()
 	if err != nil {
 		t.Fatalf("error occurred: %+v", err)
 	}
 
-	t.Run("without environments", func(t *testing.T) {
-		// setup
-		opts := docker.RuntimeOptions{}
+	t.Run("when failure create container", func(t *testing.T) {
+		// given
+		id := random.String(64, random.Alphanumeric, random.Symbols)
 
-		t.Run("without command", func(t *testing.T) {
-			t.Parallel()
+		// and
+		ctrl := gomock.NewController(t)
+		mockMoby := mock_docker.NewMockMoby(ctrl)
 
+		mockMoby.EXPECT().
+			ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes().
+			Return(container.ContainerCreateCreatedBody{ID: id}, errors.New("test error"))
+
+		sut.SetMoby(mockMoby)
+
+		// when
+		actual, _, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
+
+		// then
+		if actual != "" {
+			t.Errorf("id must be empty string, but got %+v", actual)
+		}
+
+		if err == nil {
+			t.Error("error must occur, but got nil")
+		}
+	})
+
+	t.Run("when success create container", func(t *testing.T) {
+		t.Run("when failure start container", func(t *testing.T) {
 			// given
-			imagePull(t, "hello-world:latest")
+			id := random.String(64, random.Alphanumeric, random.Symbols)
+
+			// and
+			ctrl := gomock.NewController(t)
+			mockMoby := mock_docker.NewMockMoby(ctrl)
+
+			mockMoby.EXPECT().
+				ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				AnyTimes().
+				Return(container.ContainerCreateCreatedBody{ID: id}, nil)
+
+			mockMoby.EXPECT().
+				ContainerStart(gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(errors.New("test error"))
+
+			sut.SetMoby(mockMoby)
 
 			// when
-			containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "hello-world")
-			if err != nil {
-				t.Fatalf("error occurred: %+v", err)
-			}
-			containerWait(t, containerID)
-
-			logs := containerLogsString(t, containerID)
+			actual, _, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
 
 			// then
-			if !strings.Contains(logs, "Hello from Docker!") {
-				t.Error("logs must contains `Hello from Docker!`")
+			if actual != id {
+				t.Errorf("id must be equal %+v, but got %+v", id, actual)
 			}
 
-			// cleanup
-			removeContainer(t, containerID)
-		})
-
-		t.Run("with command", func(t *testing.T) {
-			t.Parallel()
-
-			// given
-			imagePull(t, "alpine:latest")
-
-			// when
-			containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "echo", "Hello-world")
-			if err != nil {
-				t.Fatalf("error occurred: %+v", err)
-			}
-			containerWait(t, containerID)
-
-			logs := containerLogsString(t, containerID)
-
-			// then
-			if strings.Contains(logs, "hello-world") {
-				t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
-			}
-
-			// cleanup
-			removeContainer(t, containerID)
-		})
-
-		t.Run("with missing command", func(t *testing.T) {
-			t.Parallel()
-
-			// given
-			imagePull(t, "alpine:latest")
-
-			// expect
-			containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "missing_command")
 			if err == nil {
-				t.Error("error must occur")
+				t.Error("error must occur, but got nil")
 			}
-
-			// cleanup
-			removeContainer(t, containerID)
 		})
-	})
 
-	t.Run("with environments", func(t *testing.T) {
-		t.Parallel()
+		t.Run("when success start container", func(t *testing.T) {
+			t.Run("when failure get log", func(t *testing.T) {
+				// given
+				id := random.String(64, random.Alphanumeric, random.Symbols)
 
-		// given
-		imagePull(t, "alpine:latest")
+				// and
+				ctrl := gomock.NewController(t)
+				mockMoby := mock_docker.NewMockMoby(ctrl)
 
-		// and
-		opts := docker.RuntimeOptions{
-			Environments: docker.Environments{"ENV": "hello-world"},
-		}
+				mockMoby.EXPECT().
+					ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					AnyTimes().
+					Return(container.ContainerCreateCreatedBody{ID: id}, nil)
 
-		// when
-		containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "sh", "-c", "echo hello $ENV")
-		if err != nil {
-			t.Fatalf("error occurred: %+v", err)
-		}
-		containerWait(t, containerID)
+				mockMoby.EXPECT().
+					ContainerStart(gomock.Any(), gomock.Any(), gomock.Any()).
+					AnyTimes().
+					Return(nil)
 
-		logs := containerLogsString(t, containerID)
+				mockMoby.EXPECT().
+					ContainerLogs(gomock.Any(), gomock.Any(), gomock.Any()).
+					Return(nil, errors.New("test error"))
 
-		// then
-		if !strings.Contains(logs, "hello-world") {
-			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
-		}
+				sut.SetMoby(mockMoby)
 
-		// cleanup
-		removeContainer(t, containerID)
-	})
+				// when
+				actual, _, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
 
-	t.Run("with volumes", func(t *testing.T) {
-		if os.Getenv("CI") == "duci" {
-			t.Skip("skip if CI ( Docker in Docker )")
-			// TODO reduce external dependencies
-		}
-		t.Parallel()
+				// then
+				if actual != id {
+					t.Errorf("id must be equal %+v, but got %+v", id, actual)
+				}
 
-		// given
-		imagePull(t, "alpine:latest")
+				if err == nil {
+					t.Error("error must occur, but got nil")
+				}
+			})
 
-		// and
-		path, err := filepath.Abs("testdata")
-		if err != nil {
-			t.Fatalf("error occurred: %+v", err)
-		}
-		opts := docker.RuntimeOptions{
-			Volumes: docker.Volumes{fmt.Sprintf("%s:/tmp/testdata", path)},
-		}
+			t.Run("when success get log", func(t *testing.T) {
+				t.Run("with valid log", func(t *testing.T) {
+					// given
+					id := random.String(64, random.Alphanumeric, random.Symbols)
 
-		// when
-		containerID, _, err := cli.Run(context.New("test/task", uuid.New(), &url.URL{}), opts, "alpine", "cat", "/tmp/testdata/data")
-		if err != nil {
-			t.Fatalf("error occurred: %+v", err)
-		}
-		containerWait(t, containerID)
+					prefix := []byte{1, 0, 0, 0, 1, 1, 1, 1}
+					msg := "hello test"
+					log := ioutil.NopCloser(bytes.NewReader(append(prefix, []byte(msg)...)))
 
-		logs := containerLogsString(t, containerID)
+					// and
+					ctrl := gomock.NewController(t)
+					mockMoby := mock_docker.NewMockMoby(ctrl)
 
-		// then
-		if !strings.Contains(logs, "hello-world") {
-			t.Errorf("logs must be equal `hello-world`. actual: %+v", logs)
-		}
+					mockMoby.EXPECT().
+						ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+						AnyTimes().
+						Return(container.ContainerCreateCreatedBody{ID: id}, nil)
 
-		// cleanup
-		removeContainer(t, containerID)
+					mockMoby.EXPECT().
+						ContainerStart(gomock.Any(), gomock.Any(), gomock.Any()).
+						AnyTimes().
+						Return(nil)
+
+					mockMoby.EXPECT().
+						ContainerLogs(gomock.Any(), gomock.Any(), gomock.Any()).
+						Return(log, nil)
+
+					sut.SetMoby(mockMoby)
+
+					// when
+					actualID, actualLog, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
+
+					// then
+					if actualID != id {
+						t.Errorf("id must be equal %+v, but got %+v", id, actualID)
+					}
+
+					if actualLog == nil {
+						t.Errorf("log must not nil")
+					} else {
+						line, _ := actualLog.ReadLine()
+						if string(line.Message) != msg {
+							t.Errorf("message must equal. wont %+v, but got %+v", msg, string(line.Message))
+						}
+					}
+
+					if err != nil {
+						t.Error("error must occur, but got nil")
+					}
+				})
+			})
+		})
 	})
 }
 
