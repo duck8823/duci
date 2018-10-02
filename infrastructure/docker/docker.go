@@ -57,7 +57,7 @@ type clientImpl struct {
 }
 
 // New returns docker client.
-func New() (Client, error) {
+func New() (*clientImpl, error) {
 	cli, err := moby.NewEnvClient()
 	if err != nil {
 		return nil, errors.WithStack(err)

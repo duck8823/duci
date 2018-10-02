@@ -7,8 +7,10 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/infrastructure/docker"
+	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
-	"github.com/labstack/gommon/random"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -37,85 +39,61 @@ func TestNew(t *testing.T) {
 
 func TestClientImpl_Build(t *testing.T) {
 	// setup
-	cli, err := docker.New()
+	sut, err := docker.New()
 	if err != nil {
 		t.Fatalf("error occurred: %+v", err)
 	}
 
-	t.Run("with correct archive", func(t *testing.T) {
-		t.Run("without sub directory", func(t *testing.T) {
-			t.Parallel()
+	// and
+	ctrl := gomock.NewController(t)
+	mockMoby := mock_docker.NewMockMoby(ctrl)
+	sut.SetMoby(mockMoby)
 
-			// given
-			tag := strings.ToLower(random.String(64))
-
-			tar, err := os.Open("testdata/correct_archive.tar")
-			if err != nil {
-				t.Fatalf("error occurred: %+v", err)
-			}
-
-			// when
-			logger, err := cli.Build(context.New("test/task", uuid.New(), &url.URL{}), tar, tag, "./Dockerfile")
-			if err != nil {
-				t.Fatalf("error occurred: %+v", err)
-			}
-			wait(t, logger)
-
-			images := dockerImages(t)
-
-			// then
-			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
-				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
-			}
-
-			// cleanup
-			removeImage(t, tag)
-		})
-
-		t.Run("with sub directory", func(t *testing.T) {
-			t.Parallel()
-
-			// given
-			tag := strings.ToLower(random.String(64))
-
-			tar, err := os.Open("testdata/correct_archive_subdir.tar")
-			if err != nil {
-				t.Fatalf("error occurred: %+v", err)
-			}
-
-			// when
-			logger, err := cli.Build(context.New("test/task", uuid.New(), &url.URL{}), tar, tag, ".duci/Dockerfile")
-			if err != nil {
-				t.Fatalf("error occurred: %+v", err)
-			}
-			wait(t, logger)
-
-			images := dockerImages(t)
-
-			// then
-			if !contains(images, fmt.Sprintf("%s:latest", tag)) {
-				t.Errorf("docker images must contains. images: %+v, tag: %+v", images, tag)
-			}
-
-			// cleanup
-			removeImage(t, tag)
-		})
-	})
-
-	t.Run("with invalid archive", func(t *testing.T) {
-		t.Parallel()
-
+	t.Run("when success image build", func(t *testing.T) {
 		// given
-		tag := strings.ToLower(random.String(64))
+		expected := "hello world"
+		sr := strings.NewReader(fmt.Sprintf("{\"stream\":\"%s\"}", expected))
+		r := ioutil.NopCloser(sr)
 
-		tar, err := os.Open("testdata/invalid_archive.tar")
+		// and
+		mockMoby.EXPECT().
+			ImageBuild(gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(types.ImageBuildResponse{Body: r}, nil)
+
+		// when
+		log, err := sut.Build(context.New("test/task", uuid.New(), &url.URL{}), nil, "", "")
+
+		// then
 		if err != nil {
-			t.Fatalf("error occurred: %+v", err)
+			t.Errorf("error must not occur, but got %+v", err)
 		}
 
+		// and
+		line, err := log.ReadLine()
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+
+		// and
+		if string(line.Message) != expected {
+			t.Errorf("must be equal. wont %#v, but got %#v", expected, string(line.Message))
+		}
+	})
+
+	t.Run("when failure image build", func(t *testing.T) {
+		// given
+		mockMoby.EXPECT().
+			ImageBuild(gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(types.ImageBuildResponse{}, errors.New("test error"))
+
 		// expect
-		if _, err := cli.Build(context.New("test/task", uuid.New(), &url.URL{}), tar, tag, "./Dockerfile"); err == nil {
-			t.Error("error must not be nil")
+		if _, err := sut.Build(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			nil,
+			"",
+			"",
+		); err == nil {
+			t.Errorf("error must occur, but got %+v", err)
 		}
 	})
 }
