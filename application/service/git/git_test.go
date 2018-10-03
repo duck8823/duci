@@ -1,6 +1,10 @@
 package git_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
@@ -38,7 +42,31 @@ func TestNew(t *testing.T) {
 
 func TestSshGitService_Clone(t *testing.T) {
 	// setup
-	application.Config.GitHub.SSHKeyPath = path.Join(os.Getenv("HOME"), ".ssh/id_rsa")
+	privateKey, err := rsa.GenerateKey(rand.Reader, 256)
+	if err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyBlock := pem.Block{
+		Type:    "RSA PRIVATE KEY",
+		Headers: nil,
+		Bytes:   privateKeyDer,
+	}
+	privateKeyPem := string(pem.EncodeToMemory(&privateKeyBlock))
+
+	tempDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+	if err := os.MkdirAll(tempDir, 0700); err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+	keyPath := path.Join(tempDir, "id_rsa")
+	file, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+
+	file.WriteString(privateKeyPem)
+
+	application.Config.GitHub.SSHKeyPath = keyPath
 
 	t.Run("when failure git clone", func(t *testing.T) {
 		// given

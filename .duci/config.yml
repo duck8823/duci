@@ -1,4 +1,3 @@
 ---
 volumes:
-  - ${HOME}/.ssh:/root/.ssh:ro
   - ${GOPATH}/pkg/mod/cache:/go/pkg/mod/cache
