@@ -8,6 +8,8 @@ import (
 	"io"
 )
 
+// Moby is a interface of docker client
+// see also github.com/moby/moby/client
 type Moby interface {
 	ImageBuild(
 		ctx context.Context,
