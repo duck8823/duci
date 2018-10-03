@@ -64,7 +64,9 @@ func TestSshGitService_Clone(t *testing.T) {
 		t.Fatalf("error occur: %+v", err)
 	}
 
-	file.WriteString(privateKeyPem)
+	if _, err := file.WriteString(privateKeyPem); err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
 
 	application.Config.GitHub.SSHKeyPath = keyPath
 
