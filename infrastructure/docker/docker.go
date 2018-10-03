@@ -53,11 +53,11 @@ type Client interface {
 }
 
 type clientImpl struct {
-	moby *moby.Client
+	moby Moby
 }
 
 // New returns docker client.
-func New() (Client, error) {
+func New() (*clientImpl, error) {
 	cli, err := moby.NewEnvClient()
 	if err != nil {
 		return nil, errors.WithStack(err)

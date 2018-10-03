@@ -20,3 +20,7 @@ type RunLogger = runLogger
 func (l *runLogger) SetReader(r *bufio.Reader) {
 	l.reader = r
 }
+
+func (c *clientImpl) SetMoby(m Moby) {
+	c.moby = m
+}

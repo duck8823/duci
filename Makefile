@@ -10,8 +10,6 @@ test:
 docker-test:
 	docker build -t duck8823/duci:test -f .duci/Dockerfile .
 	docker run --rm \
-	           -v /var/run/docker.sock:/var/run/docker.sock \
-	           -v ${HOME}/.ssh:/root/.ssh:ro \
 	           -v ${GOPATH}/pkg/mod/cache:/go/pkg/mod/cache \
 	           duck8823/duci:test
 

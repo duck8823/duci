@@ -28,7 +28,7 @@ const (
 // Service describes a github service.
 type Service interface {
 	GetPullRequest(ctx context.Context, repository Repository, num int) (*PullRequest, error)
-	CreateCommitStatus(ctx context.Context, src TargetSource, state State, description string) error
+	CreateCommitStatus(ctx context.Context, src *TargetSource, state State, description string) error
 }
 
 type serviceImpl struct {
@@ -70,7 +70,7 @@ func (s *serviceImpl) GetPullRequest(ctx context.Context, repository Repository,
 }
 
 // CreateCommitStatus create commit status to github.
-func (s *serviceImpl) CreateCommitStatus(ctx context.Context, src TargetSource, state State, description string) error {
+func (s *serviceImpl) CreateCommitStatus(ctx context.Context, src *TargetSource, state State, description string) error {
 	name := &RepositoryName{src.Repo.GetFullName()}
 	owner, err := name.Owner()
 	if err != nil {

@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"io"
 	"net/url"
 	"os"
 	"path"
@@ -59,14 +58,14 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq("./Dockerfile")).
 				Times(1).
-				Return(&MockBuildLog{}, nil)
+				Return(&runner.MockBuildLog{}, nil)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not("./Dockerfile")).
 				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", &MockJobLog{}, nil)
+				Return("", &runner.MockJobLog{}, nil)
 			mockDocker.EXPECT().
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -100,12 +99,12 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			}
 
 			// and
-			repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+			repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 			// when
 			err := r.Run(
 				context.New("test/task", uuid.New(), &url.URL{}),
-				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 				"Hello World.",
 			)
 
@@ -146,14 +145,14 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			mockDocker := mock_docker.NewMockClient(ctrl)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
-				Return(&MockBuildLog{}, nil)
+				Return(&runner.MockBuildLog{}, nil)
 			mockDocker.EXPECT().
 				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
 				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", &MockJobLog{}, nil)
+				Return("", &runner.MockJobLog{}, nil)
 			mockDocker.EXPECT().
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -187,12 +186,12 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			}
 
 			// and
-			repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+			repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 			// when
 			err := r.Run(
 				context.New("test/task", uuid.New(), &url.URL{}),
-				github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+				&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 				"Hello World.",
 			)
 
@@ -234,11 +233,11 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(&MockBuildLog{}, nil)
+			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Eq(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &MockJobLog{}, nil)
+			Return("", &runner.MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Not(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Return("", nil, errors.New("must not call this"))
@@ -275,12 +274,12 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -349,12 +348,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -385,12 +384,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -454,12 +453,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -524,12 +523,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -557,7 +556,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(&MockBuildLog{}, nil)
+			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -595,12 +594,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -630,11 +629,11 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker := mock_docker.NewMockClient(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(&MockBuildLog{}, nil)
+			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &MockJobLog{}, nil)
+			Return("", &runner.MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -668,12 +667,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -701,11 +700,11 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(&MockBuildLog{}, nil)
+			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &MockJobLog{}, nil)
+			Return("", &runner.MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -739,12 +738,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -774,13 +773,13 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return(&MockBuildLog{}, nil)
+			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Log, error) {
 				time.Sleep(3 * time.Second)
-				return "container_id", &MockJobLog{}, nil
+				return "container_id", &runner.MockJobLog{}, nil
 			})
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
@@ -815,12 +814,12 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		}
 
 		// and
-		repo := &MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
+		repo := &runner.MockRepo{FullName: "duck8823/duci", SSHURL: "git@github.com:duck8823/duci.git"}
 
 		// when
 		err := r.Run(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
+			&github.TargetSource{Repo: repo, Ref: "master", SHA: plumbing.ZeroHash},
 			"Hello World.",
 		)
 
@@ -829,38 +828,6 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			t.Errorf("error must be runner.ErrFailure, but got %+v", err)
 		}
 	})
-}
-
-type MockRepo struct {
-	FullName string
-	SSHURL   string
-	CloneURL string
-}
-
-func (r *MockRepo) GetFullName() string {
-	return r.FullName
-}
-
-func (r *MockRepo) GetSSHURL() string {
-	return r.SSHURL
-}
-
-func (r *MockRepo) GetCloneURL() string {
-	return r.CloneURL
-}
-
-type MockBuildLog struct {
-}
-
-func (l *MockBuildLog) ReadLine() (*docker.LogLine, error) {
-	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("{\"stream\":\"Hello World,\"}")}, io.EOF
-}
-
-type MockJobLog struct {
-}
-
-func (l *MockJobLog) ReadLine() (*docker.LogLine, error) {
-	return &docker.LogLine{Timestamp: time.Now(), Message: []byte("Hello World,")}, io.EOF
 }
 
 func cloneSuccess(_ interface{}, dir string, _ interface{}) error {

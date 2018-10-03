@@ -12,24 +12,6 @@ import (
 	"testing"
 )
 
-type MockRepo struct {
-	FullName string
-	SSHURL   string
-	CloneURL string
-}
-
-func (r *MockRepo) GetFullName() string {
-	return r.FullName
-}
-
-func (r *MockRepo) GetSSHURL() string {
-	return r.SSHURL
-}
-
-func (r *MockRepo) GetCloneURL() string {
-	return r.CloneURL
-}
-
 func TestService_GetPullRequest(t *testing.T) {
 	// setup
 	s, err := github.New()
@@ -39,7 +21,7 @@ func TestService_GetPullRequest(t *testing.T) {
 
 	t.Run("when github server returns status ok", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "duck8823/duci",
 			SSHURL:   "git@github.com:duck8823/duci.git",
 		}
@@ -72,7 +54,7 @@ func TestService_GetPullRequest(t *testing.T) {
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "duck8823/duci",
 			SSHURL:   "git@github.com:duck8823/duci.git",
 		}
@@ -101,7 +83,7 @@ func TestService_GetPullRequest(t *testing.T) {
 
 	t.Run("with invalid repository", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "",
 		}
 		num := 5
@@ -122,7 +104,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 
 	t.Run("when github server returns status ok", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "duck8823/duci",
 		}
 
@@ -134,7 +116,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			github.SUCCESS,
 			"",
 		); err != nil {
@@ -147,7 +129,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "duck8823/duci",
 		}
 
@@ -159,7 +141,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			github.SUCCESS,
 			"",
 		); err == nil {
@@ -172,14 +154,14 @@ func TestService_CreateCommitStatus(t *testing.T) {
 
 	t.Run("with invalid repository", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "",
 		}
 
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New("test/task", uuid.New(), &url.URL{}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			github.SUCCESS,
 			"",
 		); err == nil {
@@ -189,7 +171,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 
 	t.Run("with long description", func(t *testing.T) {
 		// given
-		repo := &MockRepo{
+		repo := &github.MockRepo{
 			FullName: "duck8823/duci",
 		}
 
@@ -215,7 +197,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		// expect
 		if err := s.CreateCommitStatus(
 			context.New(taskName, requestID, &url.URL{Scheme: "http", Host: "host:8080"}),
-			github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
+			&github.TargetSource{Repo: repo, SHA: plumbing.Hash{}},
 			state,
 			description,
 		); err == nil {

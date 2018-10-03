@@ -1,13 +1,20 @@
 package git_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/random"
+	"github.com/pkg/errors"
+	go_git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"net/url"
 	"os"
 	"path"
@@ -35,93 +42,148 @@ func TestNew(t *testing.T) {
 
 func TestSshGitService_Clone(t *testing.T) {
 	// setup
-	application.Config.GitHub.SSHKeyPath = path.Join(os.Getenv("HOME"), ".ssh/id_rsa")
+	privateKey, err := rsa.GenerateKey(rand.Reader, 256)
+	if err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyBlock := pem.Block{
+		Type:    "RSA PRIVATE KEY",
+		Headers: nil,
+		Bytes:   privateKeyDer,
+	}
+	privateKeyPem := string(pem.EncodeToMemory(&privateKeyBlock))
 
-	t.Run("with correct key", func(t *testing.T) {
-		// setup
-		client, err := git.New()
+	tempDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+	if err := os.MkdirAll(tempDir, 0700); err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+	keyPath := path.Join(tempDir, "id_rsa")
+	file, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+
+	if _, err := file.WriteString(privateKeyPem); err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+
+	application.Config.GitHub.SSHKeyPath = keyPath
+
+	t.Run("when failure git clone", func(t *testing.T) {
+		// given
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			return nil, errors.New("test")
+		})
+
+		// and
+		sut, err := git.New()
 		if err != nil {
 			t.Fatalf("error occurred. %+v", err)
 		}
 
-		t.Run("when target directory exists", func(t *testing.T) {
-			// setup
-			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-			tempDir := path.Join(os.TempDir(), dirStr)
-			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
-				t.Fatalf("%+v", err)
-			}
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{},
+		); err == nil {
+			t.Error("error must not nil.")
+		}
 
-			// when
-			err := client.Clone(
-				context.New("test/task", uuid.New(), &url.URL{}),
-				tempDir,
-				git.TargetSource{
-					URL: "git@github.com:duck8823/duci.git",
-					Ref: "refs/heads/master",
-					SHA: plumbing.ZeroHash,
-				},
-			)
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
 
-			// then
+	t.Run("when success git clone", func(t *testing.T) {
+		// setup
+		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+		tempDir := path.Join(os.TempDir(), dirStr)
+		if err := os.MkdirAll(tempDir, 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		// and
+		var hash plumbing.Hash
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			// git init
+			repo, err := go_git.PlainInit(tempDir, false)
 			if err != nil {
-				t.Errorf("must not error. %+v", err)
+				t.Fatalf("error occur: %+v", err)
 			}
-
-			if _, err := os.Stat(path.Join(tempDir, ".git")); err != nil {
-				t.Errorf("must create dir: %s", path.Join(tempDir, ".git"))
+			w, err := repo.Worktree()
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
 			}
+			// commit
+			hash, err = w.Commit("init. commit", &go_git.CommitOptions{
+				Author: &object.Signature{},
+			})
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			return repo, nil
 		})
 
-		t.Run("when target directory not exists", func(t *testing.T) {
-			if os.Getuid() == 0 {
-				t.Skip("skip if root user")
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
+
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{
+				Ref: "HEAD",
+				SHA: hash,
+			},
+		); err != nil {
+			t.Errorf("error must not occur. but got %+v", err)
+		}
+
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
+
+	t.Run("when failure git checkout", func(t *testing.T) {
+		// setup
+		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+		tempDir := path.Join(os.TempDir(), dirStr)
+		if err := os.MkdirAll(tempDir, 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		// and
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			// git init
+			repo, err := go_git.PlainInit(tempDir, false)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
 			}
-
-			// given
-			wrongPath := "/path/to/not/exists"
-
-			// when
-			err := client.Clone(
-				context.New("test/task", uuid.New(), &url.URL{}),
-				wrongPath,
-				git.TargetSource{
-					URL: "git@github.com:duck8823/duci.git",
-					Ref: "refs/heads/master",
-					SHA: plumbing.ZeroHash,
-				},
-			)
-
-			// then
-			if err == nil {
-				t.Error("erro must occur")
-			}
+			return repo, nil
 		})
 
-		t.Run("with wrong sha", func(t *testing.T) {
-			// setup
-			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-			tempDir := path.Join(os.TempDir(), dirStr)
-			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
-				t.Fatalf("%+v", err)
-			}
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
 
-			// when
-			err := client.Clone(
-				context.New("test/task", uuid.New(), &url.URL{}),
-				tempDir,
-				git.TargetSource{
-					URL: "git@github.com:duck8823/duci.git",
-					Ref: "refs/heads/master",
-					SHA: plumbing.NewHash(uuid.New().String()),
-				},
-			)
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{
+				Ref: "HEAD",
+			},
+		); err == nil {
+			t.Error("error must occur. but got nil")
+		}
 
-			// then
-			if err == nil {
-				t.Error("error must occur")
-			}
-		})
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 }
 
@@ -129,90 +191,119 @@ func TestHttpGitService_Clone(t *testing.T) {
 	// setup
 	application.Config.GitHub.SSHKeyPath = ""
 
-	t.Run("with correct key", func(t *testing.T) {
-		// setup
-		client, err := git.New()
+	t.Run("when failure git clone", func(t *testing.T) {
+		// given
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			return nil, errors.New("test")
+		})
+
+		// and
+		sut, err := git.New()
 		if err != nil {
 			t.Fatalf("error occurred. %+v", err)
 		}
 
-		t.Run("when target directory exists", func(t *testing.T) {
-			// setup
-			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-			tempDir := path.Join(os.TempDir(), dirStr)
-			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
-				t.Fatalf("%+v", err)
-			}
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{},
+		); err == nil {
+			t.Error("error must not nil.")
+		}
 
-			// when
-			err := client.Clone(
-				context.New("test/task", uuid.New(), &url.URL{}),
-				tempDir,
-				git.TargetSource{
-					URL: "https://github.com/duck8823/duci.git",
-					Ref: "refs/heads/master",
-					SHA: plumbing.ZeroHash,
-				},
-			)
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
 
-			// then
+	t.Run("when success git clone", func(t *testing.T) {
+		// setup
+		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+		tempDir := path.Join(os.TempDir(), dirStr)
+		if err := os.MkdirAll(tempDir, 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		// and
+		var hash plumbing.Hash
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			// git init
+			repo, err := go_git.PlainInit(tempDir, false)
 			if err != nil {
-				t.Errorf("must not error. %+v", err)
+				t.Fatalf("error occur: %+v", err)
 			}
-
-			if _, err := os.Stat(path.Join(tempDir, ".git")); err != nil {
-				t.Errorf("must create dir: %s", path.Join(tempDir, ".git"))
+			w, err := repo.Worktree()
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
 			}
+			// commit
+			hash, err = w.Commit("init. commit", &go_git.CommitOptions{
+				Author: &object.Signature{},
+			})
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			return repo, nil
 		})
 
-		t.Run("when target directory not exists", func(t *testing.T) {
-			if os.Getuid() == 0 {
-				t.Skip("skip if root user")
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
+
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{
+				Ref: "HEAD",
+				SHA: hash,
+			},
+		); err != nil {
+			t.Errorf("error must not occur. but got %+v", err)
+		}
+
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
+	})
+
+	t.Run("when failure git checkout", func(t *testing.T) {
+		// setup
+		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
+		tempDir := path.Join(os.TempDir(), dirStr)
+		if err := os.MkdirAll(tempDir, 0700); err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		// and
+		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+			// git init
+			repo, err := go_git.PlainInit(tempDir, false)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
 			}
-
-			// given
-			wrongPath := "/path/to/not/exists"
-
-			// when
-			err := client.Clone(
-				context.New("test/task", uuid.New(), &url.URL{}),
-				wrongPath,
-				git.TargetSource{
-					URL: "https://github.com/duck8823/duci.git",
-					Ref: "refs/heads/master",
-					SHA: plumbing.ZeroHash,
-				},
-			)
-
-			// then
-			if err == nil {
-				t.Error("erro must occur")
-			}
+			return repo, nil
 		})
 
-		t.Run("with wrong sha", func(t *testing.T) {
-			// setup
-			dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-			tempDir := path.Join(os.TempDir(), dirStr)
-			if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
-				t.Fatalf("%+v", err)
-			}
+		// and
+		sut, err := git.New()
+		if err != nil {
+			t.Fatalf("error occurred. %+v", err)
+		}
 
-			// when
-			err := client.Clone(
-				context.New("test/task", uuid.New(), &url.URL{}),
-				tempDir,
-				git.TargetSource{
-					URL: "git@github.com:duck8823/duci.git",
-					Ref: "refs/heads/master",
-					SHA: plumbing.NewHash(uuid.New().String()),
-				},
-			)
+		// expect
+		if err := sut.Clone(
+			context.New("test/task", uuid.New(), &url.URL{}),
+			"",
+			&git.MockTargetSource{
+				Ref: "HEAD",
+			},
+		); err == nil {
+			t.Error("error must occur. but got nil")
+		}
 
-			// then
-			if err == nil {
-				t.Error("error must occur")
-			}
-		})
+		// cleanup
+		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 }

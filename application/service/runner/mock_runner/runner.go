@@ -35,7 +35,7 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Run mocks base method
-func (m *MockRunner) Run(ctx context.Context, src github.TargetSource, command ...string) error {
+func (m *MockRunner) Run(ctx context.Context, src *github.TargetSource, command ...string) error {
 	varargs := []interface{}{ctx, src}
 	for _, a := range command {
 		varargs = append(varargs, a)

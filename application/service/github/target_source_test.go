@@ -2,75 +2,75 @@ package github_test
 
 import (
 	"github.com/duck8823/duci/application"
-	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
-	"github.com/google/go-cmp/cmp"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"reflect"
 	"testing"
 )
 
-func TestTargetSource_ToGitTargetSource(t *testing.T) {
+func TestTargetSource_GetURL(t *testing.T) {
 	t.Run("without ssh key path", func(t *testing.T) {
 		// given
-		expected := git.TargetSource{
-			URL: "url",
-			Ref: "ref",
-			SHA: plumbing.Hash{},
-		}
+		application.Config.GitHub.SSHKeyPath = ""
 
 		// and
-		src := github.TargetSource{
-			Repo: &MockRepository{FullName: "fullName", CloneURL: expected.URL},
-			Ref:  expected.Ref,
-			SHA:  expected.SHA,
+		expected := "clone_url"
+
+		sut := github.TargetSource{
+			Repo: &github.MockRepo{SSHURL: "ssh_url", CloneURL: expected},
 		}
 
 		// expect
-		if !reflect.DeepEqual(expected, src.ToGitTargetSource()) {
-			t.Errorf("must be equals, but not. diff: %+v", cmp.Diff(expected, src.ToGitTargetSource()))
+		if sut.GetURL() != expected {
+			t.Errorf("url must equal. wont %#v, but got %#v", expected, sut.GetURL())
 		}
 	})
 
-	t.Run("with ssh key path", func(t *testing.T) {
+	t.Run("without ssh key path", func(t *testing.T) {
 		// given
 		application.Config.GitHub.SSHKeyPath = "path/to/ssh_key"
 
 		// and
-		expected := git.TargetSource{
-			URL: "url",
-			Ref: "ref",
-			SHA: plumbing.Hash{},
-		}
+		expected := "ssh_url"
 
-		// and
-		src := github.TargetSource{
-			Repo: &MockRepository{FullName: "fullName", SSHURL: expected.URL},
-			Ref:  expected.Ref,
-			SHA:  expected.SHA,
+		sut := github.TargetSource{
+			Repo: &github.MockRepo{SSHURL: expected, CloneURL: "clone_url"},
 		}
 
 		// expect
-		if !reflect.DeepEqual(expected, src.ToGitTargetSource()) {
-			t.Errorf("must be equals, but not. diff: %+v", cmp.Diff(expected, src.ToGitTargetSource()))
+		if sut.GetURL() != expected {
+			t.Errorf("url must equal. wont %#v, but got %#v", expected, sut.GetURL())
 		}
 	})
 }
 
-type MockRepository struct {
-	FullName string
-	SSHURL   string
-	CloneURL string
+func TestTargetSource_GetRef(t *testing.T) {
+	// given
+	expected := "ref"
+
+	// and
+	sut := github.TargetSource{Ref: expected}
+
+	// when
+	actual := sut.GetRef()
+
+	// expect
+	if actual != expected {
+		t.Errorf("must equal. wont %#v, but got %#v", expected, actual)
+	}
 }
 
-func (r *MockRepository) GetFullName() string {
-	return r.FullName
-}
+func TestTargetSource_GetSHA(t *testing.T) {
+	// given
+	expected := plumbing.NewHash("hello world.")
 
-func (r *MockRepository) GetSSHURL() string {
-	return r.SSHURL
-}
+	// and
+	sut := github.TargetSource{SHA: expected}
 
-func (r *MockRepository) GetCloneURL() string {
-	return r.CloneURL
+	// when
+	actual := sut.GetSHA()
+
+	// expect
+	if actual != expected {
+		t.Errorf("must equal. wont %#v, but got %#v", expected, actual)
+	}
 }
