@@ -42,33 +42,7 @@ func TestNew(t *testing.T) {
 
 func TestSshGitService_Clone(t *testing.T) {
 	// setup
-	privateKey, err := rsa.GenerateKey(rand.Reader, 256)
-	if err != nil {
-		t.Fatalf("error occur: %+v", err)
-	}
-	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
-	privateKeyBlock := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   privateKeyDer,
-	}
-	privateKeyPem := string(pem.EncodeToMemory(&privateKeyBlock))
-
-	tempDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
-	if err := os.MkdirAll(tempDir, 0700); err != nil {
-		t.Fatalf("error occur: %+v", err)
-	}
-	keyPath := path.Join(tempDir, "id_rsa")
-	file, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		t.Fatalf("error occur: %+v", err)
-	}
-
-	if _, err := file.WriteString(privateKeyPem); err != nil {
-		t.Fatalf("error occur: %+v", err)
-	}
-
-	application.Config.GitHub.SSHKeyPath = keyPath
+	application.Config.GitHub.SSHKeyPath = createTemporaryKey(t)
 
 	t.Run("when failure git clone", func(t *testing.T) {
 		// given
@@ -306,4 +280,36 @@ func TestHttpGitService_Clone(t *testing.T) {
 		// cleanup
 		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
+}
+
+func createTemporaryKey(t *testing.T) string {
+	t.Helper()
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 256)
+	if err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyBlock := pem.Block{
+		Type:    "RSA PRIVATE KEY",
+		Headers: nil,
+		Bytes:   privateKeyDer,
+	}
+	privateKeyPem := string(pem.EncodeToMemory(&privateKeyBlock))
+
+	tempDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+	if err := os.MkdirAll(tempDir, 0700); err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+	keyPath := path.Join(tempDir, "id_rsa")
+	file, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+
+	if _, err := file.WriteString(privateKeyPem); err != nil {
+		t.Fatalf("error occur: %+v", err)
+	}
+
+	return keyPath
 }
