@@ -70,11 +70,7 @@ func (c *WebhooksController) runWithIssueCommentEvent(requestID uuid.UUID, w htt
 		return
 	}
 
-	go func() {
-		if err := c.Runner.Run(ctx, src, command...); err != nil {
-			logger.Errorf(requestID, "error occur: %+v", err)
-		}
-	}()
+	go c.run(ctx, src, command...)
 }
 
 func (c *WebhooksController) parseIssueComment(requestID uuid.UUID, r *http.Request) (context.Context, *github.TargetSource, Command, error) {
@@ -128,11 +124,13 @@ func (c *WebhooksController) runWithPushEvent(requestID uuid.UUID, w http.Respon
 	}
 
 	ctx := context.New(fmt.Sprintf("%s/push", application.Name), requestID, runtimeURL(r))
-	go func() {
-		if err := c.Runner.Run(ctx, &github.TargetSource{Repo: event.GetRepo(), Ref: event.GetRef(), SHA: plumbing.NewHash(sha)}); err != nil {
-			logger.Errorf(requestID, "error occur: %+v", err)
-		}
-	}()
+	go c.run(ctx, &github.TargetSource{Repo: event.GetRepo(), Ref: event.GetRef(), SHA: plumbing.NewHash(sha)})
+}
+
+func (c *WebhooksController) run(ctx context.Context, src *github.TargetSource, cmd ...string) {
+	if err := c.Runner.Run(ctx, src); err != nil {
+		logger.Errorf(ctx.UUID(), "error occur: %+v", err)
+	}
 }
 
 func requestID(r *http.Request) (uuid.UUID, error) {
