@@ -31,6 +31,9 @@ func New() (http.Handler, error) {
 	rtr := chi.NewRouter()
 	rtr.Post("/", webhooksCtrl.ServeHTTP)
 	rtr.Get("/logs/{uuid}", logCtrl.ServeHTTP)
+	rtr.Get("/health", func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(http.StatusOK)
+	})
 
 	return rtr, nil
 }
