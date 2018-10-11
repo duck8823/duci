@@ -50,6 +50,7 @@ type Client interface {
 	Rm(ctx context.Context, containerID string) error
 	Rmi(ctx context.Context, tag string) error
 	ExitCode(ctx context.Context, containerID string) (int64, error)
+	Info(ctx context.Context) (types.Info, error)
 }
 
 type clientImpl struct {
@@ -135,4 +136,13 @@ func (c *clientImpl) ExitCode(ctx context.Context, containerID string) (int64, e
 	case e := <-err:
 		return -1, errors.WithStack(e)
 	}
+}
+
+// Status returns error when failure get docker status.
+func (c *clientImpl) Info(ctx context.Context) (types.Info, error) {
+	info, err := c.moby.Info(ctx)
+	if err != nil {
+		return types.Info{}, errors.WithStack(err)
+	}
+	return info, nil
 }

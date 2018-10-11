@@ -125,3 +125,16 @@ func (m *MockMoby) ContainerWait(ctx context.Context, containerID string, condit
 func (mr *MockMobyMockRecorder) ContainerWait(ctx, containerID, condition interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ContainerWait", reflect.TypeOf((*MockMoby)(nil).ContainerWait), ctx, containerID, condition)
 }
+
+// Info mocks base method
+func (m *MockMoby) Info(ctx context.Context) (types.Info, error) {
+	ret := m.ctrl.Call(m, "Info", ctx)
+	ret0, _ := ret[0].(types.Info)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Info indicates an expected call of Info
+func (mr *MockMobyMockRecorder) Info(ctx interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockMoby)(nil).Info), ctx)
+}

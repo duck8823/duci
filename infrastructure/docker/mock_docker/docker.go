@@ -6,6 +6,7 @@ package mock_docker
 
 import (
 	context "context"
+	types "github.com/docker/docker/api/types"
 	docker "github.com/duck8823/duci/infrastructure/docker"
 	gomock "github.com/golang/mock/gomock"
 	io "io"
@@ -102,4 +103,17 @@ func (m *MockClient) ExitCode(ctx context.Context, containerID string) (int64, e
 // ExitCode indicates an expected call of ExitCode
 func (mr *MockClientMockRecorder) ExitCode(ctx, containerID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExitCode", reflect.TypeOf((*MockClient)(nil).ExitCode), ctx, containerID)
+}
+
+// Info mocks base method
+func (m *MockClient) Info(ctx context.Context) (types.Info, error) {
+	ret := m.ctrl.Call(m, "Info", ctx)
+	ret0, _ := ret[0].(types.Info)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Info indicates an expected call of Info
+func (mr *MockClientMockRecorder) Info(ctx interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockClient)(nil).Info), ctx)
 }

@@ -2,11 +2,12 @@ package router
 
 import (
 	"github.com/duck8823/duci/application"
+	"github.com/duck8823/duci/application/service/docker"
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/application/service/runner"
-	"github.com/duck8823/duci/infrastructure/docker"
+	moby "github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
@@ -15,25 +16,29 @@ import (
 
 // New returns handler of application.
 func New() (http.Handler, error) {
+	dockerClient, err := moby.New()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	logstoreService, githubService, err := createCommonServices()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	dockerRunner, err := createRunner(logstoreService, githubService)
+	dockerRunner, err := createRunner(logstoreService, githubService, dockerClient)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
 	webhooksCtrl := &controller.WebhooksController{Runner: dockerRunner, GitHub: githubService}
 	logCtrl := &controller.LogController{LogStore: logstoreService}
+	healthCtrl := &controller.HealthController{Docker: docker.New(dockerClient)}
 
 	rtr := chi.NewRouter()
 	rtr.Post("/", webhooksCtrl.ServeHTTP)
 	rtr.Get("/logs/{uuid}", logCtrl.ServeHTTP)
-	rtr.Get("/health", func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(http.StatusOK)
-	})
+	rtr.Get("/health", healthCtrl.ServeHTTP)
 
 	return rtr, nil
 }
@@ -51,12 +56,8 @@ func createCommonServices() (logstore.Service, github.Service, error) {
 	return logstoreService, githubService, nil
 }
 
-func createRunner(logstoreService logstore.Service, githubService github.Service) (runner.Runner, error) {
+func createRunner(logstoreService logstore.Service, githubService github.Service, dockerClient moby.Client) (runner.Runner, error) {
 	gitClient, err := git.New()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	dockerClient, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
