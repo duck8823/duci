@@ -48,4 +48,7 @@ type Moby interface {
 		containerID string,
 		condition container.WaitCondition,
 	) (<-chan container.ContainerWaitOKBody, <-chan error)
+	Info(
+		ctx context.Context,
+	) (types.Info, error)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
@@ -460,6 +461,58 @@ func TestClientImpl_ExitCode(t *testing.T) {
 		// when
 		if _, actualErr := sut.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), conID); actualErr == nil {
 			t.Error("error must occur but got nil")
+		}
+	})
+}
+
+func TestClientImpl_Info(t *testing.T) {
+	// setup
+	sut, err := docker.New()
+	if err != nil {
+		t.Fatalf("error occurred: %+v", err)
+	}
+
+	t.Run("without error", func(t *testing.T) {
+		// given
+		expected := types.Info{ID: uuid.New().String()}
+
+		// and
+		ctrl := gomock.NewController(t)
+		mockMoby := mock_docker.NewMockMoby(ctrl)
+
+		mockMoby.EXPECT().
+			Info(gomock.Any()).
+			Return(expected, nil)
+
+		sut.SetMoby(mockMoby)
+
+		// when
+		actual, err := sut.Info(context.New("test", uuid.New(), nil))
+
+		// then
+		if !cmp.Equal(actual, expected) {
+			t.Errorf("must be equal. %+v", cmp.Diff(actual, expected))
+		}
+
+		if err != nil {
+			t.Errorf("error must not occur, but got %+v", err)
+		}
+	})
+
+	t.Run("with error", func(t *testing.T) {
+		// given
+		ctrl := gomock.NewController(t)
+		mockMoby := mock_docker.NewMockMoby(ctrl)
+
+		mockMoby.EXPECT().
+			Info(gomock.Any()).
+			Return(types.Info{}, errors.New("test"))
+
+		sut.SetMoby(mockMoby)
+
+		// expect
+		if _, err := sut.Info(context.New("test", uuid.New(), nil)); err == nil {
+			t.Error("error must occur, but got nil")
 		}
 	})
 }
