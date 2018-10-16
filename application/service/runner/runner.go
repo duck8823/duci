@@ -5,12 +5,12 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
 	"github.com/duck8823/duci/application/semaphore"
+	"github.com/duck8823/duci/application/service/docker"
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/data/model"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
-	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
@@ -33,7 +33,7 @@ type Runner interface {
 type DockerRunner struct {
 	Git         git.Service
 	GitHub      github.Service
-	Docker      docker.Client
+	Docker      docker.Service
 	LogStore    logstore.Service
 	BaseWorkDir string
 }
@@ -79,7 +79,7 @@ func (r *DockerRunner) run(ctx context.Context, src *github.TargetSource, comman
 		return errors.WithStack(err)
 	}
 
-	conID, err := r.dockerRun(ctx, workDir, src.Repo, command...)
+	conID, err := r.dockerRun(ctx, workDir, src.Repo, command)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -105,7 +105,8 @@ func (r *DockerRunner) dockerBuild(ctx context.Context, dir string, repo github.
 	}
 	defer tarball.Close()
 
-	buildLog, err := r.Docker.Build(ctx, tarball, repo.GetFullName(), dockerfilePath(dir))
+	tag := docker.Tag(repo.GetFullName())
+	buildLog, err := r.Docker.Build(ctx, tarball, tag, dockerfilePath(dir))
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -131,21 +132,22 @@ func createTarball(workDir string) (*os.File, error) {
 	return readFile, nil
 }
 
-func dockerfilePath(workDir string) string {
+func dockerfilePath(workDir string) docker.Dockerfile {
 	dockerfile := "./Dockerfile"
 	if exists(path.Join(workDir, ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
-	return dockerfile
+	return docker.Dockerfile(dockerfile)
 }
 
-func (r *DockerRunner) dockerRun(ctx context.Context, dir string, repo github.Repository, cmd ...string) (string, error) {
+func (r *DockerRunner) dockerRun(ctx context.Context, dir string, repo github.Repository, cmd docker.Command) (docker.ContainerID, error) {
 	opts, err := runtimeOpts(dir)
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
 
-	conID, runLog, err := r.Docker.Run(ctx, opts, repo.GetFullName(), cmd...)
+	tag := docker.Tag(repo.GetFullName())
+	conID, runLog, err := r.Docker.Run(ctx, opts, tag, cmd)
 	if err != nil {
 		return conID, errors.WithStack(err)
 	}
