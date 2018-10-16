@@ -3,13 +3,13 @@ package runner_test
 import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/context"
+	"github.com/duck8823/duci/application/service/docker"
+	"github.com/duck8823/duci/application/service/docker/mock_docker"
 	"github.com/duck8823/duci/application/service/git/mock_git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/github/mock_github"
 	"github.com/duck8823/duci/application/service/logstore/mock_logstore"
 	"github.com/duck8823/duci/application/service/runner"
-	"github.com/duck8823/duci/infrastructure/docker"
-	"github.com/duck8823/duci/infrastructure/docker/mock_docker"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -54,22 +54,22 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 				})
 
 			// and
-			mockDocker := mock_docker.NewMockClient(ctrl)
+			mockDocker := mock_docker.NewMockService(ctrl)
 			mockDocker.EXPECT().
-				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq("./Dockerfile")).
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(docker.Dockerfile("./Dockerfile"))).
 				Times(1).
 				Return(&runner.MockBuildLog{}, nil)
 			mockDocker.EXPECT().
-				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not("./Dockerfile")).
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(docker.Dockerfile("./Dockerfile"))).
 				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", &runner.MockJobLog{}, nil)
+				Return(docker.ContainerID(""), &runner.MockJobLog{}, nil)
 			mockDocker.EXPECT().
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
-				Return(int64(0), nil)
+				Return(docker.ExitCode(0), nil)
 			mockDocker.EXPECT().
 				Rm(gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -142,21 +142,21 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 				})
 
 			// and
-			mockDocker := mock_docker.NewMockClient(ctrl)
+			mockDocker := mock_docker.NewMockService(ctrl)
 			mockDocker.EXPECT().
-				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(".duci/Dockerfile")).
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Eq(docker.Dockerfile(".duci/Dockerfile"))).
 				Return(&runner.MockBuildLog{}, nil)
 			mockDocker.EXPECT().
-				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(".duci/Dockerfile")).
+				Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Not(docker.Dockerfile(".duci/Dockerfile"))).
 				Return(nil, errors.New("must not call this"))
 			mockDocker.EXPECT().
 				Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
-				Return("", &runner.MockJobLog{}, nil)
+				Return(docker.ContainerID(""), &runner.MockJobLog{}, nil)
 			mockDocker.EXPECT().
 				ExitCode(gomock.Any(), gomock.Any()).
 				AnyTimes().
-				Return(int64(0), nil)
+				Return(docker.ExitCode(0), nil)
 			mockDocker.EXPECT().
 				Rm(gomock.Any(), gomock.Any()).
 				AnyTimes().
@@ -230,21 +230,21 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			})
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Eq(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &runner.MockJobLog{}, nil)
+			Return(docker.ContainerID(""), &runner.MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Not(docker.RuntimeOptions{Volumes: []string{"/hello:/hello"}}), gomock.Any(), gomock.Any()).
-			Return("", nil, errors.New("must not call this"))
+			Return(docker.ContainerID(""), nil, errors.New("must not call this"))
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -308,7 +308,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(errors.New("error"))
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
@@ -318,7 +318,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -413,7 +413,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(0)
@@ -423,7 +423,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -482,7 +482,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -493,7 +493,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -552,7 +552,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -560,11 +560,11 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", nil, errors.New("test"))
+			Return(docker.ContainerID(""), nil, errors.New("test"))
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -626,18 +626,18 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			DoAndReturn(cloneSuccess)
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(&runner.MockBuildLog{}, nil)
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &runner.MockJobLog{}, nil)
+			Return(docker.ContainerID(""), &runner.MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -696,7 +696,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			DoAndReturn(cloneSuccess)
 
 		// and
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -704,11 +704,11 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			Return("", &runner.MockJobLog{}, nil)
+			Return(docker.ContainerID(""), &runner.MockJobLog{}, nil)
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(1), nil)
+			Return(docker.ExitCode(1), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().
@@ -769,7 +769,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		// and
 		application.Config.Job.Timeout = 1
 
-		mockDocker := mock_docker.NewMockClient(ctrl)
+		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
 			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
@@ -777,14 +777,14 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 		mockDocker.EXPECT().
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
-			DoAndReturn(func(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Log, error) {
+			DoAndReturn(func(_, _, _, _ interface{}) (docker.ContainerID, docker.Log, error) {
 				time.Sleep(3 * time.Second)
-				return "container_id", &runner.MockJobLog{}, nil
+				return docker.ContainerID("container_id"), &runner.MockJobLog{}, nil
 			})
 		mockDocker.EXPECT().
 			ExitCode(gomock.Any(), gomock.Any()).
 			AnyTimes().
-			Return(int64(0), nil)
+			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			Rm(gomock.Any(), gomock.Any()).
 			AnyTimes().

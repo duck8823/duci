@@ -7,7 +7,6 @@ package mock_docker
 import (
 	context "context"
 	docker "github.com/duck8823/duci/application/service/docker"
-	docker0 "github.com/duck8823/duci/infrastructure/docker"
 	gomock "github.com/golang/mock/gomock"
 	io "io"
 	reflect "reflect"
@@ -37,9 +36,9 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Build mocks base method
-func (m *MockService) Build(ctx context.Context, file io.Reader, tag docker.Tag, dockerfile docker.Dockerfile) (docker0.Log, error) {
+func (m *MockService) Build(ctx context.Context, file io.Reader, tag docker.Tag, dockerfile docker.Dockerfile) (docker.Log, error) {
 	ret := m.ctrl.Call(m, "Build", ctx, file, tag, dockerfile)
-	ret0, _ := ret[0].(docker0.Log)
+	ret0, _ := ret[0].(docker.Log)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +49,10 @@ func (mr *MockServiceMockRecorder) Build(ctx, file, tag, dockerfile interface{})
 }
 
 // Run mocks base method
-func (m *MockService) Run(ctx context.Context, opts docker0.RuntimeOptions, tag docker.Tag, cmd docker.Command) (docker.ContainerID, docker0.Log, error) {
+func (m *MockService) Run(ctx context.Context, opts docker.RuntimeOptions, tag docker.Tag, cmd docker.Command) (docker.ContainerID, docker.Log, error) {
 	ret := m.ctrl.Call(m, "Run", ctx, opts, tag, cmd)
 	ret0, _ := ret[0].(docker.ContainerID)
-	ret1, _ := ret[1].(docker0.Log)
+	ret1, _ := ret[1].(docker.Log)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }

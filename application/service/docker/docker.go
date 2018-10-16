@@ -7,25 +7,31 @@ import (
 	"io"
 )
 
-// Dockerfile represents a path to dockerfile
-type Dockerfile string
-
-// ContainerID describes a container id of docker
-type ContainerID string
+// Log represents a log.
+type Log = docker.Log
 
 // Tag describes a docker tag
 type Tag string
 
-// ExitCode describes a exit code
-type ExitCode int64
+// Dockerfile represents a path to dockerfile
+type Dockerfile string
+
+// RuntimeOptions represents a options
+type RuntimeOptions = docker.RuntimeOptions
 
 // Command describes a docker CMD
 type Command []string
 
+// ContainerID describes a container id of docker
+type ContainerID string
+
+// ExitCode describes a exit code
+type ExitCode int64
+
 // Service is a interface describe docker service.
 type Service interface {
-	Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (docker.Log, error)
-	Run(ctx context.Context, opts docker.RuntimeOptions, tag Tag, cmd Command) (ContainerID, docker.Log, error)
+	Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error)
+	Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error)
 	Rm(ctx context.Context, containerID ContainerID) error
 	Rmi(ctx context.Context, tag Tag) error
 	ExitCode(ctx context.Context, containerID ContainerID) (ExitCode, error)
@@ -37,12 +43,16 @@ type serviceImpl struct {
 }
 
 // New returns instance of docker service
-func New(moby docker.Client) Service {
-	return &serviceImpl{moby}
+func New() (Service, error) {
+	cli, err := docker.New()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return &serviceImpl{moby: cli}, nil
 }
 
 // Build a docker image.
-func (s *serviceImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (docker.Log, error) {
+func (s *serviceImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error) {
 	log, err := s.moby.Build(ctx, file, string(tag), string(dockerfile))
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -51,7 +61,7 @@ func (s *serviceImpl) Build(ctx context.Context, file io.Reader, tag Tag, docker
 }
 
 // Run docker container with command.
-func (s *serviceImpl) Run(ctx context.Context, opts docker.RuntimeOptions, tag Tag, cmd Command) (ContainerID, docker.Log, error) {
+func (s *serviceImpl) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
 	conID, log, err := s.moby.Run(ctx, opts, string(tag), cmd...)
 	if err != nil {
 		return ContainerID(conID), nil, errors.WithStack(err)
