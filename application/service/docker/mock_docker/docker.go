@@ -6,7 +6,8 @@ package mock_docker
 
 import (
 	context "context"
-	docker "github.com/duck8823/duci/infrastructure/docker"
+	docker "github.com/duck8823/duci/application/service/docker"
+	docker0 "github.com/duck8823/duci/infrastructure/docker"
 	gomock "github.com/golang/mock/gomock"
 	io "io"
 	reflect "reflect"
@@ -36,9 +37,9 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Build mocks base method
-func (m *MockService) Build(ctx context.Context, file io.Reader, tag, dockerfile string) (docker.Log, error) {
+func (m *MockService) Build(ctx context.Context, file io.Reader, tag docker.Tag, dockerfile docker.Dockerfile) (docker0.Log, error) {
 	ret := m.ctrl.Call(m, "Build", ctx, file, tag, dockerfile)
-	ret0, _ := ret[0].(docker.Log)
+	ret0, _ := ret[0].(docker0.Log)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,26 +50,21 @@ func (mr *MockServiceMockRecorder) Build(ctx, file, tag, dockerfile interface{})
 }
 
 // Run mocks base method
-func (m *MockService) Run(ctx context.Context, opts docker.RuntimeOptions, tag string, cmd ...string) (string, docker.Log, error) {
-	varargs := []interface{}{ctx, opts, tag}
-	for _, a := range cmd {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Run", varargs...)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(docker.Log)
+func (m *MockService) Run(ctx context.Context, opts docker0.RuntimeOptions, tag docker.Tag, cmd docker.Command) (docker.ContainerID, docker0.Log, error) {
+	ret := m.ctrl.Call(m, "Run", ctx, opts, tag, cmd)
+	ret0, _ := ret[0].(docker.ContainerID)
+	ret1, _ := ret[1].(docker0.Log)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
 // Run indicates an expected call of Run
-func (mr *MockServiceMockRecorder) Run(ctx, opts, tag interface{}, cmd ...interface{}) *gomock.Call {
-	varargs := append([]interface{}{ctx, opts, tag}, cmd...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockService)(nil).Run), varargs...)
+func (mr *MockServiceMockRecorder) Run(ctx, opts, tag, cmd interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockService)(nil).Run), ctx, opts, tag, cmd)
 }
 
 // Rm mocks base method
-func (m *MockService) Rm(ctx context.Context, containerID string) error {
+func (m *MockService) Rm(ctx context.Context, containerID docker.ContainerID) error {
 	ret := m.ctrl.Call(m, "Rm", ctx, containerID)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -80,7 +76,7 @@ func (mr *MockServiceMockRecorder) Rm(ctx, containerID interface{}) *gomock.Call
 }
 
 // Rmi mocks base method
-func (m *MockService) Rmi(ctx context.Context, tag string) error {
+func (m *MockService) Rmi(ctx context.Context, tag docker.Tag) error {
 	ret := m.ctrl.Call(m, "Rmi", ctx, tag)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -92,9 +88,9 @@ func (mr *MockServiceMockRecorder) Rmi(ctx, tag interface{}) *gomock.Call {
 }
 
 // ExitCode mocks base method
-func (m *MockService) ExitCode(ctx context.Context, containerID string) (int64, error) {
+func (m *MockService) ExitCode(ctx context.Context, containerID docker.ContainerID) (docker.ExitCode, error) {
 	ret := m.ctrl.Call(m, "ExitCode", ctx, containerID)
-	ret0, _ := ret[0].(int64)
+	ret0, _ := ret[0].(docker.ExitCode)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
