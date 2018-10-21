@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 	"runtime"
 	"time"
 )
@@ -89,6 +90,11 @@ func (c *Configuration) Set(path string) error {
 	data, _ := ioutil.ReadAll(file)
 	data = []byte(os.ExpandEnv(string(data)))
 	return yaml.NewDecoder(bytes.NewReader(data)).Decode(c)
+}
+
+// Type returns value type of itself
+func (c *Configuration) Type() string {
+	return reflect.TypeOf(c).String()
 }
 
 // Addr returns a string of server port
