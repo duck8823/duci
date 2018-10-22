@@ -37,7 +37,7 @@ func main() {
 			}
 		},
 	}
-	serverCmd.PersistentFlags().Var(application.Config, "config", "configuration file path")
+	serverCmd.PersistentFlags().VarP(application.Config, "config", "c", "configuration file path")
 
 	rootCmd := &cobra.Command{Use: "duci"}
 	rootCmd.AddCommand(serverCmd)
