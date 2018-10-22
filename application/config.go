@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"reflect"
 	"runtime"
 	"time"
 )
@@ -94,7 +93,7 @@ func (c *Configuration) Set(path string) error {
 
 // Type returns value type of itself
 func (c *Configuration) Type() string {
-	return reflect.TypeOf(c).String()
+	return "string"
 }
 
 // Addr returns a string of server port
