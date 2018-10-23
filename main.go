@@ -14,28 +14,7 @@ import (
 func main() {
 	serverCmd := &cobra.Command{
 		Use: "server",
-		Run: func(cmd *cobra.Command, args []string) {
-			mainID := uuid.New()
-
-			if err := semaphore.Make(); err != nil {
-				logger.Errorf(mainID, "Failed to initialize a semaphore.\n%+v", err)
-				os.Exit(1)
-				return
-			}
-
-			rtr, err := router.New()
-			if err != nil {
-				logger.Errorf(mainID, "Failed to initialize controllers.\n%+v", err)
-				os.Exit(1)
-				return
-			}
-
-			if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
-				logger.Errorf(mainID, "Failed to run server.\n%+v", err)
-				os.Exit(1)
-				return
-			}
-		},
+		Run: serverCmd,
 	}
 	serverCmd.PersistentFlags().VarP(application.Config, "config", "c", "configuration file path")
 
@@ -45,5 +24,28 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		logger.Errorf(uuid.New(), "Failed to execute command.\n%+v", err)
 		os.Exit(1)
+	}
+}
+
+func serverCmd(cmd *cobra.Command, _ []string) {
+	mainID := uuid.New()
+
+	if err := semaphore.Make(); err != nil {
+		logger.Errorf(mainID, "Failed to initialize a semaphore.\n%+v", err)
+		os.Exit(1)
+		return
+	}
+
+	rtr, err := router.New()
+	if err != nil {
+		logger.Errorf(mainID, "Failed to initialize controllers.\n%+v", err)
+		os.Exit(1)
+		return
+	}
+
+	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
+		logger.Errorf(mainID, "Failed to run server.\n%+v", err)
+		os.Exit(1)
+		return
 	}
 }
