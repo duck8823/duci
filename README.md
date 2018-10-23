@@ -64,7 +64,7 @@ Add endpoint of duci to target repository.
 
 ### Run Server
 ```bash
-$ duci
+$ duci server
 ```
 
 ### Server Configuration file
@@ -90,7 +90,7 @@ job:
 You can check the default value.
 
 ```bash
-$ duci -h
+$ duci server -h
 ```
 
 ## Using Docker
