@@ -42,5 +42,8 @@ func main() {
 	rootCmd := &cobra.Command{Use: "duci"}
 	rootCmd.AddCommand(serverCmd)
 
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		logger.Errorf(uuid.New(), "Failed to execute command.\n%+v", err)
+		os.Exit(1)
+	}
 }
