@@ -18,4 +18,5 @@ COPY --from=build /go/src/github.com/duck8823/duci/duci .
 
 EXPOSE 8080
 
-CMD ["./duci"]
+ENTRYPOINT ["./duci"]
+CMD ["server"]
