@@ -91,6 +91,11 @@ func (c *Configuration) Set(path string) error {
 	return yaml.NewDecoder(bytes.NewReader(data)).Decode(c)
 }
 
+// Type returns value type of itself
+func (c *Configuration) Type() string {
+	return "string"
+}
+
 // Addr returns a string of server port
 func (c *Configuration) Addr() string {
 	return fmt.Sprintf(":%d", c.Server.Port)

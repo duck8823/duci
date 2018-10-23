@@ -1,21 +1,34 @@
 package main
 
 import (
-	"flag"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/presentation/router"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	"net/http"
 	"os"
 )
 
 func main() {
-	mainID := uuid.New()
+	serverCmd := &cobra.Command{
+		Use: "server",
+		Run: serverCmd,
+	}
+	serverCmd.PersistentFlags().VarP(application.Config, "config", "c", "configuration file path")
 
-	flag.Var(application.Config, "c", "configuration file path")
-	flag.Parse()
+	rootCmd := &cobra.Command{Use: "duci"}
+	rootCmd.AddCommand(serverCmd)
+
+	if err := rootCmd.Execute(); err != nil {
+		logger.Errorf(uuid.New(), "Failed to execute command.\n%+v", err)
+		os.Exit(1)
+	}
+}
+
+func serverCmd(cmd *cobra.Command, _ []string) {
+	mainID := uuid.New()
 
 	if err := semaphore.Make(); err != nil {
 		logger.Errorf(mainID, "Failed to initialize a semaphore.\n%+v", err)
