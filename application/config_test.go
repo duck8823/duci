@@ -109,6 +109,16 @@ func TestConfiguration_Set(t *testing.T) {
 	})
 }
 
+func TestConfiguration_Type(t *testing.T) {
+	// when
+	actual := application.Config.Type()
+
+	// expect
+	if actual != "string" {
+		t.Errorf("type should equal string, but got %+v", actual)
+	}
+}
+
 func TestConfiguration_Addr(t *testing.T) {
 	// given
 	application.Config.Server.Port = 8823
