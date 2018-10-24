@@ -2,6 +2,11 @@
 build:
 	go build
 
+cross-build:
+	GOOS=windows go build
+	GOOS=linux go build
+	GOOS=darwin go build
+
 test:
 	go test -coverprofile cover.out $$(go list ./... | grep -v mock_)
 	go tool cover -html cover.out -o cover.html
@@ -14,4 +19,4 @@ docker-test:
 	           duck8823/duci:test
 
 clean:
-	rm -f duci go.sum cover.out cover.html
+	rm -f duci duci.exe go.sum cover.out cover.html

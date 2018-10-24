@@ -2,7 +2,6 @@
 .idea
 
 # golang
-duci
 go.sum
 cover.out
 cover.html
@@ -15,3 +14,5 @@ vendor
 # app
 /config.yml
 release-notes.txt
+duci
+duci.exe
