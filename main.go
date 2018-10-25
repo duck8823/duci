@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/infrastructure/logger"
@@ -16,10 +17,16 @@ func main() {
 		Use: "server",
 		Run: serverCmd,
 	}
-	serverCmd.PersistentFlags().VarP(application.Config, "config", "c", "configuration file path")
+	serverCmd.PersistentFlags().VarPF(application.Config, "config", "c", "configuration file path")
+
+	configCmd := &cobra.Command{
+		Use: "config",
+		Run: configCmd,
+	}
+	configCmd.PersistentFlags().VarPF(application.Config, "config", "c", "configuration file path")
 
 	rootCmd := &cobra.Command{Use: "duci"}
-	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(serverCmd, configCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.Errorf(uuid.New(), "Failed to execute command.\n%+v", err)
@@ -27,7 +34,7 @@ func main() {
 	}
 }
 
-func serverCmd(cmd *cobra.Command, _ []string) {
+func serverCmd(_ *cobra.Command, _ []string) {
 	mainID := uuid.New()
 
 	if err := semaphore.Make(); err != nil {
@@ -48,4 +55,10 @@ func serverCmd(cmd *cobra.Command, _ []string) {
 		os.Exit(1)
 		return
 	}
+}
+
+func configCmd(_ *cobra.Command, _ []string) {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "    ")
+	enc.Encode(application.Config)
 }
