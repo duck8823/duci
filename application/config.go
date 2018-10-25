@@ -2,7 +2,6 @@ package application
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -74,10 +73,9 @@ func init() {
 	}
 }
 
-// String returns values of configuration
+// String returns default config path
 func (c *Configuration) String() string {
-	data, _ := json.Marshal(c)
-	return string(data)
+	return ""
 }
 
 // Set configuration with file path
