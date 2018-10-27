@@ -62,5 +62,8 @@ func serverCmd(_ *cobra.Command, _ []string) {
 func configCmd(_ *cobra.Command, _ []string) {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "    ")
-	enc.Encode(application.Config)
+	if err := enc.Encode(application.Config); err != nil {
+		logger.Errorf(uuid.New(), "Failed to display config.\n%+v", err)
+		os.Exit(1)
+	}
 }
