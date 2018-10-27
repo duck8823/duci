@@ -15,12 +15,14 @@ import (
 func main() {
 	serverCmd := &cobra.Command{
 		Use: "server",
+		Short: "Start server",
 		Run: serverCmd,
 	}
 	serverCmd.PersistentFlags().VarPF(application.Config, "config", "c", "configuration file path")
 
 	configCmd := &cobra.Command{
 		Use: "config",
+		Short: "Display configuration",
 		Run: configCmd,
 	}
 	configCmd.PersistentFlags().VarPF(application.Config, "config", "c", "configuration file path")
