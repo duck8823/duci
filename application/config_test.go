@@ -114,3 +114,20 @@ func TestConfiguration_Timeout(t *testing.T) {
 		t.Errorf("addr should equal 8823 sec, but got %+v", actual)
 	}
 }
+
+func TestMaskString_MarshalJSON(t *testing.T) {
+	// given
+	sut := application.MaskString("hoge")
+
+	// when
+	actual, err := sut.MarshalJSON()
+
+	// then
+	if err != nil {
+		t.Errorf("error must not occur, but got %+v", err)
+	}
+
+	if string(actual) != "\"***\"" {
+		t.Errorf("wont masked string, but got '%s'", actual)
+	}
+}
