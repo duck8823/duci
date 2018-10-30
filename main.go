@@ -13,19 +13,21 @@ import (
 )
 
 func main() {
+	var configPath string
+
 	serverCmd := &cobra.Command{
-		Use: "server",
+		Use:   "server",
 		Short: "Start server",
-		Run: serverCmd,
+		Run:   serverCmd,
 	}
-	serverCmd.PersistentFlags().VarPF(application.Config, "config", "c", "configuration file path")
+	serverCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
 
 	configCmd := &cobra.Command{
-		Use: "config",
+		Use:   "config",
 		Short: "Display configuration",
-		Run: configCmd,
+		Run:   configCmd,
 	}
-	configCmd.PersistentFlags().VarPF(application.Config, "config", "c", "configuration file path")
+	configCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
 
 	rootCmd := &cobra.Command{Use: "duci"}
 	rootCmd.AddCommand(serverCmd, configCmd)
@@ -36,34 +38,53 @@ func main() {
 	}
 }
 
-func serverCmd(_ *cobra.Command, _ []string) {
-	mainID := uuid.New()
+func serverCmd(cmd *cobra.Command, _ []string) {
+	readConfiguration(cmd)
 
 	if err := semaphore.Make(); err != nil {
-		logger.Errorf(mainID, "Failed to initialize a semaphore.\n%+v", err)
+		logger.Errorf(uuid.New(), "Failed to initialize a semaphore.\n%+v", err)
 		os.Exit(1)
 		return
 	}
 
 	rtr, err := router.New()
 	if err != nil {
-		logger.Errorf(mainID, "Failed to initialize controllers.\n%+v", err)
+		logger.Errorf(uuid.New(), "Failed to initialize controllers.\n%+v", err)
 		os.Exit(1)
 		return
 	}
 
 	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
-		logger.Errorf(mainID, "Failed to run server.\n%+v", err)
+		logger.Errorf(uuid.New(), "Failed to run server.\n%+v", err)
 		os.Exit(1)
 		return
 	}
 }
 
-func configCmd(_ *cobra.Command, _ []string) {
+func configCmd(cmd *cobra.Command, _ []string) {
+	readConfiguration(cmd)
+
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "    ")
 	if err := enc.Encode(application.Config); err != nil {
 		logger.Errorf(uuid.New(), "Failed to display config.\n%+v", err)
 		os.Exit(1)
 	}
+}
+
+func readConfiguration(cmd *cobra.Command) {
+	configFilePath := cmd.Flag("config").Value.String()
+	if !exists(configFilePath) && configFilePath == application.DefaultConfigurationPath {
+		return
+	}
+
+	if err := application.Config.Set(configFilePath); err != nil {
+		logger.Errorf(uuid.New(), "Failed to set configuration.\n%+v", err)
+		os.Exit(1)
+	}
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }

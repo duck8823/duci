@@ -15,6 +15,8 @@ import (
 const (
 	// Name is a application name.
 	Name = "duci"
+	// DefaultConfigPath is a path to configuration file
+	DefaultConfigurationPath = "./config.yml"
 )
 
 var (
