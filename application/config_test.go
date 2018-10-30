@@ -1,7 +1,6 @@
 package application_test
 
 import (
-	"fmt"
 	"github.com/duck8823/duci/application"
 	"github.com/google/go-cmp/cmp"
 	"os"
@@ -12,40 +11,11 @@ import (
 
 func TestConfiguration_String(t *testing.T) {
 	// given
-	conf := &application.Configuration{
-		Server: &application.Server{
-			WorkDir:      "/path/to/work_dir",
-			DatabasePath: "path/to/databasePath",
-			Port:         1234,
-		},
-		GitHub: &application.GitHub{
-			SSHKeyPath: "/path/to/ssh_key_path",
-			APIToken:   "github_api_token",
-		},
-		Job: &application.Job{
-			Timeout:     60,
-			Concurrency: 8,
-		},
-	}
+	sut := &application.Configuration{}
 
-	// and
-	expected := fmt.Sprintf(
-		"{\"server\":{\"workdir\":\"%s\",\"port\":%d,\"databasePath\":\"%s\"},"+
-			"\"github\":{\"sshKeyPath\":\"%s\",\"apiToken\":\"***\"},\"job\":{\"timeout\":%d,\"concurrency\":%d}}",
-		conf.Server.WorkDir,
-		conf.Server.Port,
-		conf.Server.DatabasePath,
-		conf.GitHub.SSHKeyPath,
-		conf.Job.Timeout,
-		conf.Job.Concurrency,
-	)
-
-	// when
-	actual := conf.String()
-
-	// then
-	if actual != expected {
-		t.Errorf("find differences:\n %+v", cmp.Diff(actual, expected))
+	// expect
+	if sut.String() != "" {
+		t.Errorf("must be empty string, but got \"%s\"", sut.String())
 	}
 }
 
@@ -142,5 +112,22 @@ func TestConfiguration_Timeout(t *testing.T) {
 	// then
 	if actual != 8823*time.Second {
 		t.Errorf("addr should equal 8823 sec, but got %+v", actual)
+	}
+}
+
+func TestMaskString_MarshalJSON(t *testing.T) {
+	// given
+	sut := application.MaskString("hoge")
+
+	// when
+	actual, err := sut.MarshalJSON()
+
+	// then
+	if err != nil {
+		t.Errorf("error must not occur, but got %+v", err)
+	}
+
+	if string(actual) != "\"***\"" {
+		t.Errorf("wont masked string, but got '%s'", actual)
 	}
 }
