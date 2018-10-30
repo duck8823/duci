@@ -90,7 +90,7 @@ job:
 You can check the default value.
 
 ```bash
-$ duci server -h
+$ duci config
 ```
 
 ## Using Docker
