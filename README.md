@@ -87,7 +87,7 @@ job:
   concurrency: 4 # default is number of cpu
 ```
 
-You can check the default value.
+You can check the configuration values.
 
 ```bash
 $ duci config
