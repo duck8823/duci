@@ -122,6 +122,23 @@ The endpoint returns NDJSON (Newline Delimited JSON) formatted log.
 ...
 ```
 
+## Health Check
+This server has an health check API endpoint (`/health`) that returns the health of the service. The endpoint returns `200` status code if all green.  
+
+```bash
+$ curl -XGET -I http://localhost:8080/health
+```
+
+```
+HTTP/1.1 200 OK
+Date: Wed, 31 Oct 2018 20:33:42 GMT
+Content-Length: 0
+```
+
+The check items are as follows
+
+- Whether the Docker daemon is running or not
+
 ## License
 MIT License
 
