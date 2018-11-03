@@ -778,7 +778,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(func(_, _, _, _ interface{}) (docker.ContainerID, docker.Log, error) {
-				time.Sleep(3 * time.Second)
+				time.Sleep(10 * time.Second)
 				return docker.ContainerID("container_id"), &runner.MockJobLog{}, nil
 			})
 		mockDocker.EXPECT().
