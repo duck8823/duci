@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"time"
 )
@@ -60,9 +60,9 @@ type Job struct {
 func init() {
 	Config = &Configuration{
 		Server: &Server{
-			WorkDir:      path.Join(os.TempDir(), Name),
+			WorkDir:      filepath.Join(os.TempDir(), Name),
 			Port:         8080,
-			DatabasePath: path.Join(os.Getenv("HOME"), ".duci/db"),
+			DatabasePath: filepath.Join(os.Getenv("HOME"), ".duci/db"),
 		},
 		GitHub: &GitHub{
 			SSHKeyPath: "",

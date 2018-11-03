@@ -17,7 +17,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 )
 
@@ -72,7 +72,7 @@ func TestSshGitService_Clone(t *testing.T) {
 	t.Run("when success git clone", func(t *testing.T) {
 		// setup
 		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-		tempDir := path.Join(os.TempDir(), dirStr)
+		tempDir := filepath.Join(os.TempDir(), dirStr)
 		if err := os.MkdirAll(tempDir, 0700); err != nil {
 			t.Fatalf("%+v", err)
 		}
@@ -124,7 +124,7 @@ func TestSshGitService_Clone(t *testing.T) {
 	t.Run("when failure git checkout", func(t *testing.T) {
 		// setup
 		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-		tempDir := path.Join(os.TempDir(), dirStr)
+		tempDir := filepath.Join(os.TempDir(), dirStr)
 		if err := os.MkdirAll(tempDir, 0700); err != nil {
 			t.Fatalf("%+v", err)
 		}
@@ -193,7 +193,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 	t.Run("when success git clone", func(t *testing.T) {
 		// setup
 		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-		tempDir := path.Join(os.TempDir(), dirStr)
+		tempDir := filepath.Join(os.TempDir(), dirStr)
 		if err := os.MkdirAll(tempDir, 0700); err != nil {
 			t.Fatalf("%+v", err)
 		}
@@ -245,7 +245,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 	t.Run("when failure git checkout", func(t *testing.T) {
 		// setup
 		dirStr := fmt.Sprintf("duci_test_%s", random.String(16, random.Alphanumeric))
-		tempDir := path.Join(os.TempDir(), dirStr)
+		tempDir := filepath.Join(os.TempDir(), dirStr)
 		if err := os.MkdirAll(tempDir, 0700); err != nil {
 			t.Fatalf("%+v", err)
 		}
@@ -297,11 +297,11 @@ func createTemporaryKey(t *testing.T) string {
 	}
 	privateKeyPem := string(pem.EncodeToMemory(&privateKeyBlock))
 
-	tempDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+	tempDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 	if err := os.MkdirAll(tempDir, 0700); err != nil {
 		t.Fatalf("error occur: %+v", err)
 	}
-	keyPath := path.Join(tempDir, "id_rsa")
+	keyPath := filepath.Join(tempDir, "id_rsa")
 	file, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		t.Fatalf("error occur: %+v", err)

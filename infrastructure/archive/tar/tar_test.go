@@ -7,7 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -20,16 +20,16 @@ func TestCreate(t *testing.T) {
 		testDir := createTestDir(t)
 
 		// given
-		archiveDir := path.Join(testDir, "archive")
+		archiveDir := filepath.Join(testDir, "archive")
 
-		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0400)
-		createFile(t, path.Join(archiveDir, "dir", "file"), "this is file in the dir.", 0400)
+		createFile(t, filepath.Join(archiveDir, "file"), "this is file.", 0400)
+		createFile(t, filepath.Join(archiveDir, "dir", "file"), "this is file in the dir.", 0400)
 
-		if err := os.MkdirAll(path.Join(archiveDir, "empty"), 0700); err != nil {
+		if err := os.MkdirAll(filepath.Join(archiveDir, "empty"), 0700); err != nil {
 			t.Fatalf("%+v", err)
 		}
 
-		output := path.Join(testDir, "output.tar")
+		output := filepath.Join(testDir, "output.tar")
 		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
 		if err != nil {
 			t.Fatalf("%+v", err)
@@ -39,7 +39,7 @@ func TestCreate(t *testing.T) {
 		// and
 		expected := Files{
 			{
-				Name:    "dir/file",
+				Name:    filepath.Join("dir", "file"),
 				Content: "this is file in the dir.",
 			},
 			{
@@ -68,7 +68,7 @@ func TestCreate(t *testing.T) {
 		testDir := createTestDir(t)
 
 		// given
-		output := path.Join(testDir, "output.tar")
+		output := filepath.Join(testDir, "output.tar")
 		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
 		if err != nil {
 			t.Fatalf("%+v", err)
@@ -89,11 +89,11 @@ func TestCreate(t *testing.T) {
 		testDir := createTestDir(t)
 
 		// given
-		archiveDir := path.Join(testDir, "archive")
+		archiveDir := filepath.Join(testDir, "archive")
 
-		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0400)
+		createFile(t, filepath.Join(archiveDir, "file"), "this is file.", 0400)
 
-		output := path.Join(testDir, "output.tar")
+		output := filepath.Join(testDir, "output.tar")
 		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
 		if err != nil {
 			t.Fatalf("%+v", err)
@@ -118,11 +118,11 @@ func TestCreate(t *testing.T) {
 		testDir := createTestDir(t)
 
 		// given
-		archiveDir := path.Join(testDir, "archive")
+		archiveDir := filepath.Join(testDir, "archive")
 
-		createFile(t, path.Join(archiveDir, "file"), "this is file.", 0000)
+		createFile(t, filepath.Join(archiveDir, "file"), "this is file.", 0000)
 
-		output := path.Join(testDir, "output.tar")
+		output := filepath.Join(testDir, "output.tar")
 		tarFile, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0400)
 		if err != nil {
 			t.Fatalf("%+v", err)
@@ -176,8 +176,8 @@ func readTarArchive(t *testing.T, output string) Files {
 func createTestDir(t *testing.T) string {
 	t.Helper()
 
-	tempDir := path.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
-	if err := os.MkdirAll(path.Join(tempDir, "dir"), 0700); err != nil {
+	tempDir := filepath.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
+	if err := os.MkdirAll(filepath.Join(tempDir, "dir"), 0700); err != nil {
 		t.Fatalf("%+v", err)
 	}
 
@@ -187,8 +187,8 @@ func createTestDir(t *testing.T) string {
 func createFile(t *testing.T, name string, content string, perm os.FileMode) {
 	t.Helper()
 
-	paths := strings.Split(name, "/")
-	dir := strings.Join(paths[:len(paths)-1], "/")
+	paths := strings.Split(name, string(os.PathSeparator))
+	dir := strings.Join(paths[:len(paths)-1], string(os.PathSeparator))
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		t.Fatalf("%+v", err)
 	}

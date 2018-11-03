@@ -57,7 +57,7 @@ func newContent(path string, dir string) (*content, error) {
 	}
 
 	header := &tar.Header{
-		Name: strings.Replace(file.Name(), dir+"/", "", -1),
+		Name: strings.Replace(file.Name(), dir+string(os.PathSeparator), "", -1),
 		Mode: 0600,
 		Size: int64(len(data)),
 	}
