@@ -16,7 +16,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -42,7 +42,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 						return err
 					}
 
-					dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+					dockerfile, err := os.OpenFile(filepath.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
 					if err != nil {
 						return err
 					}
@@ -91,7 +91,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 				Return(nil)
 
 			r := &runner.DockerRunner{
-				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+				BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 				Git:         mockGit,
 				GitHub:      mockGitHub,
 				Docker:      mockDocker,
@@ -126,11 +126,11 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 				Times(1).
 				DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
-					if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
+					if err := os.MkdirAll(filepath.Join(dir, ".duci"), 0700); err != nil {
 						return err
 					}
 
-					dockerfile, err := os.OpenFile(path.Join(dir, ".duci/Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+					dockerfile, err := os.OpenFile(filepath.Join(dir, ".duci/Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
 					if err != nil {
 						return err
 					}
@@ -178,7 +178,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 				Return(nil)
 
 			r := &runner.DockerRunner{
-				BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+				BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 				Git:         mockGit,
 				GitHub:      mockGitHub,
 				Docker:      mockDocker,
@@ -214,11 +214,11 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 		mockGit.EXPECT().Clone(gomock.Any(), gomock.Any(), gomock.Any()).
 			Times(1).
 			DoAndReturn(func(_ interface{}, dir string, _ interface{}) error {
-				if err := os.MkdirAll(path.Join(dir, ".duci"), 0700); err != nil {
+				if err := os.MkdirAll(filepath.Join(dir, ".duci"), 0700); err != nil {
 					return err
 				}
 
-				dockerfile, err := os.OpenFile(path.Join(dir, ".duci/config.yml"), os.O_RDWR|os.O_CREATE, 0600)
+				dockerfile, err := os.OpenFile(filepath.Join(dir, ".duci/config.yml"), os.O_RDWR|os.O_CREATE, 0600)
 				if err != nil {
 					return err
 				}
@@ -266,7 +266,7 @@ func TestRunnerImpl_Run_Normal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -340,7 +340,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -378,7 +378,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(errors.New("test error"))
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			GitHub:      mockGitHub,
 			LogStore:    mockLogStore,
 		}
@@ -515,7 +515,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -586,7 +586,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -659,7 +659,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -730,7 +730,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -806,7 +806,7 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 			Return(nil)
 
 		r := &runner.DockerRunner{
-			BaseWorkDir: path.Join(os.TempDir(), "test-runner"),
+			BaseWorkDir: filepath.Join(os.TempDir(), "test-runner"),
 			Git:         mockGit,
 			GitHub:      mockGitHub,
 			Docker:      mockDocker,
@@ -835,7 +835,7 @@ func cloneSuccess(_ interface{}, dir string, _ interface{}) error {
 		return err
 	}
 
-	dockerfile, err := os.OpenFile(path.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
+	dockerfile, err := os.OpenFile(filepath.Join(dir, "Dockerfile"), os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}

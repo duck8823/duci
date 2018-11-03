@@ -18,7 +18,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // ErrFailure is a error describes task failure.
@@ -67,7 +67,7 @@ func (r *DockerRunner) Run(ctx context.Context, src *github.TargetSource, comman
 }
 
 func (r *DockerRunner) run(ctx context.Context, src *github.TargetSource, command ...string) error {
-	workDir := path.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
+	workDir := filepath.Join(r.BaseWorkDir, random.String(36, random.Alphanumeric))
 
 	if err := r.Git.Clone(ctx, workDir, src); err != nil {
 		return errors.WithStack(err)
@@ -117,7 +117,7 @@ func (r *DockerRunner) dockerBuild(ctx context.Context, dir string, repo github.
 }
 
 func createTarball(workDir string) (*os.File, error) {
-	tarFilePath := path.Join(workDir, "duci.tar")
+	tarFilePath := filepath.Join(workDir, "duci.tar")
 	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -134,7 +134,7 @@ func createTarball(workDir string) (*os.File, error) {
 
 func dockerfilePath(workDir string) docker.Dockerfile {
 	dockerfile := "./Dockerfile"
-	if exists(path.Join(workDir, ".duci/Dockerfile")) {
+	if exists(filepath.Join(workDir, ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
 	return docker.Dockerfile(dockerfile)
@@ -160,10 +160,10 @@ func (r *DockerRunner) dockerRun(ctx context.Context, dir string, repo github.Re
 func runtimeOpts(workDir string) (docker.RuntimeOptions, error) {
 	var opts docker.RuntimeOptions
 
-	if !exists(path.Join(workDir, ".duci/config.yml")) {
+	if !exists(filepath.Join(workDir, ".duci/config.yml")) {
 		return opts, nil
 	}
-	content, err := ioutil.ReadFile(path.Join(workDir, ".duci/config.yml"))
+	content, err := ioutil.ReadFile(filepath.Join(workDir, ".duci/config.yml"))
 	if err != nil {
 		return opts, errors.WithStack(err)
 	}
