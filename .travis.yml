@@ -8,6 +8,11 @@ go:
   - tip
   - "1.11"
 
+matrix:
+  exclude:
+    - go: tip
+      os: osx
+
 env:
   global:
     - GO111MODULE=on
