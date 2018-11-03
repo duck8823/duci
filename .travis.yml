@@ -46,4 +46,4 @@ deploy:
       tags: true
       condition:
         - $TRAVIS_GO_VERSION = "1.11"
-        - $$TRAVIS_OS_NAME = "linux"
+        - $TRAVIS_OS_NAME = "linux"
