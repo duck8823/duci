@@ -1,11 +1,18 @@
-sudo: required
-services:
-  - docker
+os:
+  - linux
+  - osx
+#  - windows is still early access stage: https://travis-ci.community/c/windows
 
 language: go
 go:
   - tip
   - "1.11"
+  - "1.11.x"
+
+matrix:
+  exclude:
+    - go: tip
+      os: osx
 
 env:
   global:
@@ -17,9 +24,6 @@ cache:
 
 install: true
 before_script:
-  # ssh settings
-  - openssl aes-256-cbc -K $encrypted_a66fdba2821d_key -iv $encrypted_a66fdba2821d_iv -in .travis/travis_key.enc -out ~/.ssh/id_rsa -d
-  - touch ~/.ssh/known_hosts
   # download dependencies
   - go mod download
 script:
@@ -27,7 +31,7 @@ script:
 after_success:
   # for coverage report
   - GO111MODULE=off go get -u github.com/mattn/goveralls
-  - if [ "$TRAVIS_GO_VERSION" = "1.11" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
+  - if [ "$TRAVIS_GO_VERSION" = "1.11" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
 before_deploy:
   # copy dependencies to vendor
   - go mod vendor
@@ -40,4 +44,6 @@ deploy:
     script: goreleaser --release-notes=release-notes.txt
     on:
       tags: true
-      condition: $TRAVIS_GO_VERSION = "1.11"
+      condition:
+        - $TRAVIS_GO_VERSION = "1.11"
+        - $$TRAVIS_OS_NAME = "linux"
