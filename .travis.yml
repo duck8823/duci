@@ -1,7 +1,3 @@
-sudo: required
-services:
-  - docker
-
 language: go
 go:
   - tip
@@ -17,9 +13,6 @@ cache:
 
 install: true
 before_script:
-  # ssh settings
-  - openssl aes-256-cbc -K $encrypted_a66fdba2821d_key -iv $encrypted_a66fdba2821d_iv -in .travis/travis_key.enc -out ~/.ssh/id_rsa -d
-  - touch ~/.ssh/known_hosts
   # download dependencies
   - go mod download
 script:
