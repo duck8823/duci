@@ -13,6 +13,8 @@ RUN go build
 
 FROM alpine
 
+RUN apk add --update --no-cache ca-certificates && update-ca-certificates
+
 WORKDIR /root/
 COPY --from=build /go/src/github.com/duck8823/duci/duci .
 
