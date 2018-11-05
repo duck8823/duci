@@ -98,6 +98,14 @@ You can use Docker to run server.
 ```
 $ docker run -p 8080:8080 \
              -e GITHUB_API_TOKEN=<your toekn> \
+             -v /var/run/docker.sock:/var/run/docker.sock \
+             duck8823/duci
+```
+
+If you wont to clone with SSH,
+```
+$ docker run -p 8080:8080 \
+             -e GITHUB_API_TOKEN=<your toekn> \
              -e SSH_KEY_PATH=/root/.ssh/id_rsa \
              -v ~/.ssh:/root/.ssh:ro \ 
              -v /var/run/docker.sock:/var/run/docker.sock \
