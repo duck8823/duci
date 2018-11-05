@@ -102,7 +102,7 @@ $ docker run -p 8080:8080 \
              duck8823/duci
 ```
 
-If you wont to clone with SSH,
+When you want to clone with SSH in container,
 ```
 $ docker run -p 8080:8080 \
              -e GITHUB_API_TOKEN=<your toekn> \
