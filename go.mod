@@ -9,7 +9,7 @@ require (
 	github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.6.0-rc.1.0.20180815020750-9bf62ca7b3fc+incompatible // indirect
-	github.com/docker/docker v0.7.3-0.20180814124044-678d4b3a6d4c
+	github.com/docker/docker v0.12.0
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/emirpasic/gods v1.9.0 // indirect
