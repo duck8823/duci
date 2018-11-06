@@ -16,7 +16,7 @@ require (
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gliderlabs/ssh v0.1.1 // indirect
-	github.com/go-chi/chi v3.3.2+incompatible
+	github.com/go-chi/chi v3.3.3+incompatible
 	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/mock v1.1.1
