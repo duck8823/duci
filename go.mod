@@ -69,7 +69,7 @@ require (
 	gopkg.in/h2non/gock.v1 v1.0.11
 	gopkg.in/src-d/go-billy.v4 v4.2.0 // indirect
 	gopkg.in/src-d/go-git-fixtures.v3 v3.1.0 // indirect
-	gopkg.in/src-d/go-git.v4 v4.6.0
+	gopkg.in/src-d/go-git.v4 v4.7.1
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.2.1
