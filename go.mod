@@ -34,7 +34,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20180711164746-82cf3f926438 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/labstack/gommon v0.2.1
+	github.com/labstack/gommon v0.2.7
 	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff // indirect
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
