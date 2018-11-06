@@ -66,7 +66,7 @@ require (
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
-	gopkg.in/h2non/gock.v1 v1.0.9
+	gopkg.in/h2non/gock.v1 v1.0.11
 	gopkg.in/src-d/go-billy.v4 v4.2.0 // indirect
 	gopkg.in/src-d/go-git-fixtures.v3 v3.1.0 // indirect
 	gopkg.in/src-d/go-git.v4 v4.6.0
