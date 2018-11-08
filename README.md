@@ -46,6 +46,15 @@ volumes:
   - '/path/to/host/dir:/path/to/container/dir'
 ```
 
+### Using environments
+You can set environment variables in docker container.  
+Add the following to `.duci/config.yml`
+
+```yaml
+environments:
+  - ENVIRONMENT_VAIRABLE=value
+```
+
 ## Server Settings
 ### Install Server
 If you have already set $GOPATH, you can install it with the following command.
