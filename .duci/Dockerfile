@@ -12,5 +12,5 @@ ENV CI=duci
 
 ENV GO111MODULE=on
 
-ENTRYPOINT ["go"]
-CMD ["test", "./..."]
+ENTRYPOINT ["make"]
+CMD ["test"]
