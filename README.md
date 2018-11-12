@@ -68,8 +68,8 @@ Please set the public key of the pair at https://github.com/settings/keys.
 
 ### Add Webhooks to Your GitHub repository
 duci start to listen webhook with port `8080` (default) and endpoint `/`.  
-Add endpoint of duci to target repository.  
-`https://github.com/<owner>/<repository>/settings/hooks`
+In GitHub target repository settings (`https://github.com/<owner>/<repository>/settings/hooks`),
+Add endpoint of duci to `Payload URL` and `application/json` to `Content type` respectively.
 
 ### Run Server
 ```bash
