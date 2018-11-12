@@ -23,7 +23,7 @@ require (
 	github.com/gorilla/mux v1.6.2 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/labstack/gommon v0.2.7
+	github.com/labstack/gommon v0.2.8
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
