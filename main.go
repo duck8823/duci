@@ -14,28 +14,9 @@ import (
 )
 
 func main() {
-	var configPath string
-
-	serverCmd := &cobra.Command{
-		Use:   "server",
-		Short: "Start server",
-		Run:   serverCmd,
-	}
-	serverCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
-
-	configCmd := &cobra.Command{
-		Use:   "config",
-		Short: "Display configuration",
-		Run:   configCmd,
-	}
-	configCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
-
-	healthCmd := &cobra.Command{
-		Use:   "health",
-		Short: "Health check",
-		Run:   healthCmd,
-	}
-	healthCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
+	serverCmd := createCmd("server", "Start server", serverCmd)
+	configCmd := createCmd("config", "Display configuration", configCmd)
+	healthCmd := createCmd("health", "health check", healthCmd)
 
 	rootCmd := &cobra.Command{Use: "duci"}
 	rootCmd.AddCommand(serverCmd, configCmd, healthCmd)
@@ -45,6 +26,18 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+func createCmd(use string, short string, run command) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   use,
+		Short: short,
+		Run:   run,
+	}
+	cmd.PersistentFlags().StringP("config", "c", application.DefaultConfigurationPath, "configuration file path")
+	return cmd
+}
+
+type command = func(cmd *cobra.Command, args []string)
 
 func serverCmd(cmd *cobra.Command, _ []string) {
 	readConfiguration(cmd)
