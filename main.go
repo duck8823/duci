@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
+	"github.com/duck8823/duci/application/service/docker"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/duck8823/duci/presentation/router"
 	"github.com/google/uuid"
@@ -13,30 +14,30 @@ import (
 )
 
 func main() {
-	var configPath string
-
-	serverCmd := &cobra.Command{
-		Use:   "server",
-		Short: "Start server",
-		Run:   serverCmd,
-	}
-	serverCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
-
-	configCmd := &cobra.Command{
-		Use:   "config",
-		Short: "Display configuration",
-		Run:   configCmd,
-	}
-	configCmd.PersistentFlags().StringVarP(&configPath, "config", "c", application.DefaultConfigurationPath, "configuration file path")
+	serverCmd := createCmd("server", "Start server", serverCmd)
+	configCmd := createCmd("config", "Display configuration", configCmd)
+	healthCmd := createCmd("health", "health check", healthCmd)
 
 	rootCmd := &cobra.Command{Use: "duci"}
-	rootCmd.AddCommand(serverCmd, configCmd)
+	rootCmd.AddCommand(serverCmd, configCmd, healthCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.Errorf(uuid.New(), "Failed to execute command.\n%+v", err)
 		os.Exit(1)
 	}
 }
+
+func createCmd(use string, short string, run command) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   use,
+		Short: short,
+		Run:   run,
+	}
+	cmd.PersistentFlags().StringP("config", "c", application.DefaultConfigurationPath, "configuration file path")
+	return cmd
+}
+
+type command = func(cmd *cobra.Command, args []string)
 
 func serverCmd(cmd *cobra.Command, _ []string) {
 	readConfiguration(cmd)
@@ -69,6 +70,24 @@ func configCmd(cmd *cobra.Command, _ []string) {
 	if err := enc.Encode(application.Config); err != nil {
 		logger.Errorf(uuid.New(), "Failed to display config.\n%+v", err)
 		os.Exit(1)
+	}
+}
+
+func healthCmd(cmd *cobra.Command, _ []string) {
+	readConfiguration(cmd)
+
+	dockerService, err := docker.New()
+	if err != nil {
+		logger.Errorf(uuid.New(), "Failed to set configuration.\n%+v", err)
+		os.Exit(1)
+	}
+
+	if err := dockerService.Status(); err != nil {
+		logger.Errorf(uuid.New(), "Unhealthy.\n%s", err)
+		os.Exit(1)
+	} else {
+		logger.Info(uuid.New(), "ok.")
+		os.Exit(0)
 	}
 }
 
