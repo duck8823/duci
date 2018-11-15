@@ -86,7 +86,7 @@ func healthCmd(cmd *cobra.Command, _ []string) {
 		logger.Errorf(uuid.New(), "Unhealthy.\n%s", err)
 		os.Exit(1)
 	} else {
-		logger.Info(uuid.New(), "Healthy.")
+		logger.Info(uuid.New(), "ok.")
 		os.Exit(0)
 	}
 }
