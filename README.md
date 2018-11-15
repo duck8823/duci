@@ -157,6 +157,16 @@ The check items are as follows
 
 - Whether the Docker daemon is running or not
 
+You can also check with `health` sub-command.
+
+```bash
+$ duci health
+```
+
+```
+[619a7576-b019-4b5b-8911-c2c8b111e21c] 2018-11-15 22:42:49.208 [INFO] ok.
+```
+
 ## License
 MIT License
 
