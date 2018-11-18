@@ -121,6 +121,17 @@ $ docker run -p 8080:8080 \
              duck8823/duci
 ```
 
+## Run with docker-compose
+With docker-compose, you can also start ui and reverse proxy together.
+
+```bash
+$ git clone https://github.com/duck8823/duci.git
+$ cd duci
+$ docker-compose up -d
+```
+
+If you start up on another host, set your host name (default: `localhost`) to environment variable `DUCI_HOST`.
+
 ## Read job log
 GitHub send payload as webhook including `X-GitHub-Delivery` header.  
 You can read job log with the `X-GitHub-Delivery` value formatted UUID.
