@@ -1,0 +1,30 @@
+---
+version: "3.7"
+services:
+  server:
+    image: duck8823/duci
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - GITHUB_API_TOKEN
+    labels:
+      traefik.frontend.rule: "ReplacePathRegex: /stream/logs/(.*) /logs/$$1"
+      traefik.frontend.priority: 1
+      traefik.port: "8080"
+  ui:
+    image: duck8823/duci-ui
+    environment:
+      - DUCI_LOGS_URL=http://${HOST:-localhost}/stream/logs/
+    restart: always
+    labels:
+      traefik.frontend.rule: "PathPrefix: /logs/, /_nuxt/"
+      traefik.frontend.priority: 5
+      traefik.port: "3000"
+  reverse-proxy:
+    image: traefik
+    command: --docker
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
