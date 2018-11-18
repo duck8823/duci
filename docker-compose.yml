@@ -14,7 +14,7 @@ services:
   ui:
     image: duck8823/duci-ui
     environment:
-      - DUCI_LOGS_URL=http://${HOST:-localhost}/stream/logs/
+      - DUCI_LOGS_URL=http://${DUCI_HOST:-localhost}/stream/logs/
     restart: always
     labels:
       traefik.frontend.rule: "PathPrefix: /logs/, /_nuxt/"
