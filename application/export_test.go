@@ -15,3 +15,7 @@ func SetRevision(rev string) {
 func SetCheckResponse(chr *latest.CheckResponse) {
 	checked = chr
 }
+
+func CheckLatestVersion() {
+	checkLatestVersion()
+}

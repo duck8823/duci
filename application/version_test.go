@@ -2,7 +2,9 @@ package application_test
 
 import (
 	"github.com/duck8823/duci/application"
+	"github.com/google/go-github/github"
 	"github.com/tcnksm/go-latest"
+	"gopkg.in/h2non/gock.v1"
 	"testing"
 )
 
@@ -85,5 +87,31 @@ func TestCurrentVersion(t *testing.T) {
 		if actual != tt.expected {
 			t.Errorf("wont '%+v', but got '%+v'", tt.expected, actual)
 		}
+	}
+}
+
+func TestCheckLatestVersion(t *testing.T) {
+	// then
+	expected := "0.0.2"
+	application.SetVersion("0.0.1")
+
+	// and
+	gock.New("https://api.github.com").
+		Get("/repos/duck8823/duci/tags").
+		Reply(200).
+		JSON([]github.RepositoryTag{
+			{Name: github.String("0.0.1")},
+			{Name: github.String(expected)},
+		})
+
+	// when
+	application.CheckLatestVersion()
+
+	// and
+	actual := application.CurrentVersion()
+
+	// then
+	if actual != expected {
+		t.Errorf("wont %+v, but got %+v", expected, actual)
 	}
 }

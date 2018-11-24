@@ -12,9 +12,7 @@ var (
 )
 
 func init() {
-	if res, err := latest.Check(&latest.GithubTag{Owner: "duck8823", Repository: "duci"}, version); err == nil {
-		checked = res
-	}
+	checkLatestVersion()
 }
 
 // VersionString returns application version with revision (commit hash)
@@ -35,4 +33,10 @@ func IsOutdatedVersion() bool {
 // CurrentVersion returns current version string
 func CurrentVersion() string {
 	return checked.Current
+}
+
+func checkLatestVersion() {
+	if res, err := latest.Check(&latest.GithubTag{Owner: "duck8823", Repository: "duci"}, version); err == nil {
+		checked = res
+	}
 }
