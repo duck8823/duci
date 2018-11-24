@@ -14,13 +14,13 @@ func displayVersion(cmd *cobra.Command, _ []string) {
 
 	println(fmt.Sprintf("Version: %s", application.VersionString()))
 	if application.IsOutdatedVersion() {
-		msg := fmt.Sprintf(
-			"%s is not latest, you should upgrade to v%s",
-			application.VersionStringShort(),
-			application.CurrentVersion(),
-		)
-		println(msg)
+		os.Exit(0)
+		return
 	}
 
-	os.Exit(0)
+	println(fmt.Sprintf(
+		"%s is not latest, you should upgrade to v%s",
+		application.VersionStringShort(),
+		application.CurrentVersion(),
+	))
 }
