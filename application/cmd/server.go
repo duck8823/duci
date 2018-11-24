@@ -11,7 +11,18 @@ import (
 	"os"
 )
 
-var serverCmd = createCmd("server", "Start server", runServer)
+var (
+	serverCmd = createCmd("server", "Start server", runServer)
+	logo      = `
+ ___    __ __    __  ____ 
+|   \  |  |  |  /  ]|    |
+|    \ |  |  | /  /  |  | 
+|  D  ||  |  |/  /   |  | 
+|     ||  :  /   \_  |  | 
+|     ||     \     | |  | 
+|_____| \__,_|\____||____|
+`
+)
 
 func runServer(cmd *cobra.Command, _ []string) {
 	readConfiguration(cmd)
@@ -29,6 +40,7 @@ func runServer(cmd *cobra.Command, _ []string) {
 		return
 	}
 
+	println(logo)
 	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
 		logger.Errorf(uuid.New(), "Failed to run server.\n%+v", err)
 		os.Exit(1)
