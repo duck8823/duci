@@ -12,7 +12,7 @@ builds:
       - amd64
       - 386
     ldflags:
-      - -s -w -X github.com/duck8823/application.version={{.Version}} -X github.com/duck8823/application.revesion={{.Commit}}
+      - -s -w -X github.com/duck8823/duci/application.version={{.Version}} -X github.com/duck8823/duci/application.revesion={{.Commit}}
 archive:
   format: tar.gz
   format_overrides:
