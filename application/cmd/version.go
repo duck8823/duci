@@ -13,7 +13,7 @@ func displayVersion(cmd *cobra.Command, _ []string) {
 	readConfiguration(cmd)
 
 	println(fmt.Sprintf("Version: %s", application.VersionString()))
-	if application.IsOutdatedVersion() {
+	if application.IsLatestVersion() {
 		os.Exit(0)
 		return
 	}

@@ -8,7 +8,7 @@ import (
 var (
 	version  = "dev"
 	revision = "unknown"
-	checked  = &latest.CheckResponse{Outdated: false, Current: "dev"}
+	checked  = &latest.CheckResponse{Latest: true, Current: "dev"}
 )
 
 func init() {
@@ -25,9 +25,9 @@ func VersionStringShort() string {
 	return version
 }
 
-// IsOutdatedVersion return witch outdated version or not
-func IsOutdatedVersion() bool {
-	return checked.Outdated
+// IsLatestVersion return witch latest version or not
+func IsLatestVersion() bool {
+	return checked.Latest
 }
 
 // CurrentVersion returns current version string

@@ -49,17 +49,17 @@ func TestVersionStringShort(t *testing.T) {
 func TestIsOutdatedVersion(t *testing.T) {
 	// where
 	for _, tt := range []struct {
-		outdated bool
+		latest   bool
 		expected bool
 	}{
 		{true, true},
 		{false, false},
 	} {
 		// given
-		application.SetCheckResponse(&latest.CheckResponse{Outdated: tt.outdated})
+		application.SetCheckResponse(&latest.CheckResponse{Latest: tt.latest})
 
 		// when
-		actual := application.IsOutdatedVersion()
+		actual := application.IsLatestVersion()
 
 		// then
 		if actual != tt.expected {
