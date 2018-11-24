@@ -12,7 +12,7 @@ import (
 var rootCmd = &cobra.Command{Use: "duci"}
 
 func init() {
-	rootCmd.AddCommand(serverCmd, configCmd, healthCmd)
+	rootCmd.AddCommand(serverCmd, configCmd, healthCmd, versionCmd)
 }
 
 func Execute(args []string) {
