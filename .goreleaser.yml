@@ -11,6 +11,8 @@ builds:
     goarch:
       - amd64
       - 386
+    ldflags:
+      - -s -w -X github.com/duck8823/application.version={{.Version}} -X github.com/duck8823/application.revesion={{.Commit}}
 archive:
   format: tar.gz
   format_overrides:
