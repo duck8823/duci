@@ -20,7 +20,7 @@ func displayVersion(cmd *cobra.Command, _ []string) {
 
 	println(fmt.Sprintf(
 		"%s is not latest, you should upgrade to v%s",
-		application.VersionStringShort(),
+		application.VersionString(),
 		application.CurrentVersion(),
 	))
 }

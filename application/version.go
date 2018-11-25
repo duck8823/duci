@@ -1,31 +1,26 @@
 package application
 
 import (
-	"fmt"
 	"github.com/tcnksm/go-latest"
+	"regexp"
 )
 
 var (
-	version  = "dev"
-	revision = "unknown"
-	checked  = &latest.CheckResponse{Latest: true, Current: "dev"}
+	version            = "dev"
+	versionSuffixRegex = regexp.MustCompile("-.+$")
+	checked            = &latest.CheckResponse{Latest: true, Current: version}
 )
 
 func init() {
 	checkLatestVersion()
 }
 
-// VersionString returns application version with revision (commit hash)
+// VersionString returns application version
 func VersionString() string {
-	return fmt.Sprintf("%s (%s)", version, revision)
-}
-
-// VersionStringShort returns application version
-func VersionStringShort() string {
 	return version
 }
 
-// IsLatestVersion return witch latest version or not
+// IsLatestVersion return witch latest stable version or not
 func IsLatestVersion() bool {
 	return checked.Latest
 }
@@ -36,7 +31,12 @@ func CurrentVersion() string {
 }
 
 func checkLatestVersion() {
-	if res, err := latest.Check(&latest.GithubTag{Owner: "duck8823", Repository: "duci"}, version); err == nil {
+	checkSrc := &latest.GithubTag{Owner: "duck8823", Repository: "duci", FixVersionStrFunc: trimSuffix}
+	if res, err := latest.Check(checkSrc, trimSuffix(version)); err == nil {
 		checked = res
 	}
+}
+
+func trimSuffix(tag string) string {
+	return versionSuffixRegex.ReplaceAllString(tag, "")
 }
