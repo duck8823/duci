@@ -18,6 +18,7 @@ func TestCreate(t *testing.T) {
 	t.Run("with correct target", func(t *testing.T) {
 		// setup
 		testDir := createTestDir(t)
+		defer os.RemoveAll(testDir)
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -58,14 +59,12 @@ func TestCreate(t *testing.T) {
 		if !reflect.DeepEqual(actual, expected) {
 			t.Errorf("wrong tar contents.\nactual: %+v\nwont: %+v", actual, expected)
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 
 	t.Run("with wrong directory path", func(t *testing.T) {
 		// setup
 		testDir := createTestDir(t)
+		defer os.RemoveAll(testDir)
 
 		// given
 		output := filepath.Join(testDir, "output.tar")
@@ -79,14 +78,12 @@ func TestCreate(t *testing.T) {
 		if err := tar.Create("/path/to/wrong/dir", tarFile); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 
 	t.Run("with closed output", func(t *testing.T) {
 		// setup
 		testDir := createTestDir(t)
+		defer os.RemoveAll(testDir)
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -104,9 +101,6 @@ func TestCreate(t *testing.T) {
 		if err := tar.Create(archiveDir, tarFile); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 
 	t.Run("with wrong permission in target", func(t *testing.T) {
@@ -116,6 +110,7 @@ func TestCreate(t *testing.T) {
 
 		// setup
 		testDir := createTestDir(t)
+		defer os.RemoveAll(testDir)
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -133,9 +128,6 @@ func TestCreate(t *testing.T) {
 		if err := tar.Create(archiveDir, tarFile); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 }
 

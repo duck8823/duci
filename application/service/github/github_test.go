@@ -35,6 +35,7 @@ func TestService_GetPullRequest(t *testing.T) {
 			JSON(&github.PullRequest{
 				ID: &id,
 			})
+		defer gock.Clean()
 
 		// when
 		pr, err := s.GetPullRequest(context.New("test/task", uuid.New(), &url.URL{}), repo, num)
@@ -47,9 +48,6 @@ func TestService_GetPullRequest(t *testing.T) {
 		if pr.GetID() != id {
 			t.Errorf("id must be equal %+v, but got %+v. \npr=%+v", id, pr.GetID(), pr)
 		}
-
-		// cleanup
-		gock.Clean()
 	})
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
@@ -64,6 +62,7 @@ func TestService_GetPullRequest(t *testing.T) {
 		gock.New("https://api.github.com").
 			Get(fmt.Sprintf("/repos/%s/pulls/%d", repo.FullName, num)).
 			Reply(404)
+		defer gock.Clean()
 
 		// when
 		pr, err := s.GetPullRequest(context.New("test/task", uuid.New(), &url.URL{}), repo, num)
@@ -76,9 +75,6 @@ func TestService_GetPullRequest(t *testing.T) {
 		if pr != nil {
 			t.Errorf("pr must nil, but got %+v", pr)
 		}
-
-		// cleanup
-		gock.Clean()
 	})
 
 	t.Run("with invalid repository", func(t *testing.T) {
@@ -112,6 +108,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		gock.New("https://api.github.com").
 			Post(fmt.Sprintf("/repos/%s/statuses/%s", repo.FullName, "0000000000000000000000000000000000000000")).
 			Reply(200)
+		defer gock.Clean()
 
 		// expect
 		if err := s.CreateCommitStatus(
@@ -122,9 +119,6 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		); err != nil {
 			t.Errorf("error must not occurred: but got %+v", err)
 		}
-
-		// cleanup
-		gock.Clean()
 	})
 
 	t.Run("when github server returns status not found", func(t *testing.T) {
@@ -137,6 +131,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		gock.New("https://api.github.com").
 			Post(fmt.Sprintf("/repos/%s/statuses/%s", repo.FullName, "0000000000000000000000000000000000000000")).
 			Reply(404)
+		defer gock.Clean()
 
 		// expect
 		if err := s.CreateCommitStatus(
@@ -147,9 +142,6 @@ func TestService_CreateCommitStatus(t *testing.T) {
 		); err == nil {
 			t.Error("errot must occred. but got nil")
 		}
-
-		// cleanup
-		gock.Clean()
 	})
 
 	t.Run("with invalid repository", func(t *testing.T) {
@@ -193,6 +185,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 				TargetURL:   &logUrl,
 			}).
 			Reply(404)
+		defer gock.Clean()
 
 		// expect
 		if err := s.CreateCommitStatus(
@@ -211,8 +204,5 @@ func TestService_CreateCommitStatus(t *testing.T) {
 				t.Logf("%+v", string(bytes))
 			}
 		}
-
-		// cleanup
-		gock.Clean()
 	})
 }

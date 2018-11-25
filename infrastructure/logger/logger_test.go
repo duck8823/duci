@@ -28,6 +28,7 @@ func TestDebug(t *testing.T) {
 	logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
+	defer logger.SetNowFunc(time.Now)
 
 	// when
 	logger.Debug(uuid.UUID{}, "Hello World.")
@@ -39,9 +40,6 @@ func TestDebug(t *testing.T) {
 	if actual != expected {
 		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
-
-	// cleanup
-	logger.SetNowFunc(time.Now)
 }
 
 func TestDebugf(t *testing.T) {
@@ -56,6 +54,7 @@ func TestDebugf(t *testing.T) {
 	logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
+	defer logger.SetNowFunc(time.Now)
 
 	// when
 	logger.Debugf(uuid.UUID{}, "Hello %s.", "World")
@@ -67,9 +66,6 @@ func TestDebugf(t *testing.T) {
 	if actual != expected {
 		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
-
-	// cleanup
-	logger.SetNowFunc(time.Now)
 }
 
 func TestInfo(t *testing.T) {
@@ -84,6 +80,7 @@ func TestInfo(t *testing.T) {
 	logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
+	defer logger.SetNowFunc(time.Now)
 
 	// when
 	logger.Info(uuid.UUID{}, "Hello World.")
@@ -95,9 +92,6 @@ func TestInfo(t *testing.T) {
 	if actual != expected {
 		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
-
-	// cleanup
-	logger.SetNowFunc(time.Now)
 }
 
 func TestInfof(t *testing.T) {
@@ -112,6 +106,7 @@ func TestInfof(t *testing.T) {
 	logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
+	defer logger.SetNowFunc(time.Now)
 
 	// when
 	logger.Infof(uuid.UUID{}, "Hello %s.", "World")
@@ -123,9 +118,6 @@ func TestInfof(t *testing.T) {
 	if actual != expected {
 		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
-
-	// cleanup
-	logger.SetNowFunc(time.Now)
 }
 
 func TestError(t *testing.T) {
@@ -140,6 +132,7 @@ func TestError(t *testing.T) {
 	logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
+	defer logger.SetNowFunc(time.Now)
 
 	// when
 	logger.Error(uuid.UUID{}, "Hello World.")
@@ -151,9 +144,6 @@ func TestError(t *testing.T) {
 	if actual != expected {
 		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
-
-	// cleanup
-	logger.SetNowFunc(time.Now)
 }
 
 func TestErrorf(t *testing.T) {
@@ -168,6 +158,7 @@ func TestErrorf(t *testing.T) {
 	logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
+	defer logger.SetNowFunc(time.Now)
 
 	// when
 	logger.Errorf(uuid.UUID{}, "Hello %s.", "World")
@@ -179,9 +170,6 @@ func TestErrorf(t *testing.T) {
 	if actual != expected {
 		t.Errorf("wrong logstore. wont: \"%+v\", got: \"%+v\"", expected, actual)
 	}
-
-	// cleanup
-	logger.SetNowFunc(time.Now)
 }
 
 func initLogger(t *testing.T) {

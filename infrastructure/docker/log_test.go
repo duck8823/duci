@@ -21,6 +21,7 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	docker.SetNowFunc(func() time.Time {
 		return date
 	})
+	defer docker.SetNowFunc(time.Now)
 
 	// and
 	reader := bufio.NewReader(strings.NewReader("{\"stream\":\"Hello World.\"}"))
@@ -42,9 +43,6 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("must be equal: wont %+v, but got %+v", expected, actual)
 	}
-
-	// cleanup
-	docker.SetNowFunc(time.Now)
 }
 
 func TestRunLogger_ReadLine(t *testing.T) {
@@ -58,6 +56,7 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	docker.SetNowFunc(func() time.Time {
 		return date
 	})
+	defer docker.SetNowFunc(time.Now)
 
 	t.Run("with correct format", func(t *testing.T) {
 		// given
@@ -126,7 +125,4 @@ func TestRunLogger_ReadLine(t *testing.T) {
 			t.Errorf("must be equal: wont %+v, but got %+v", expected, actual)
 		}
 	})
-
-	// cleanup
-	docker.SetNowFunc(time.Now)
 }

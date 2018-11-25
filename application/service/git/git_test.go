@@ -49,6 +49,7 @@ func TestSshGitService_Clone(t *testing.T) {
 		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			return nil, errors.New("test")
 		})
+		defer git.SetPlainCloneFunc(go_git.PlainClone)
 
 		// and
 		sut, err := git.New()
@@ -64,9 +65,6 @@ func TestSshGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must not nil.")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when success git clone", func(t *testing.T) {
@@ -98,6 +96,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer git.SetPlainCloneFunc(go_git.PlainClone)
 
 		// and
 		sut, err := git.New()
@@ -116,9 +115,6 @@ func TestSshGitService_Clone(t *testing.T) {
 		); err != nil {
 			t.Errorf("error must not occur. but got %+v", err)
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when failure git checkout", func(t *testing.T) {
@@ -138,6 +134,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer git.SetPlainCloneFunc(go_git.PlainClone)
 
 		// and
 		sut, err := git.New()
@@ -155,9 +152,6 @@ func TestSshGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must occur. but got nil")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 }
 
@@ -170,6 +164,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			return nil, errors.New("test")
 		})
+		defer git.SetPlainCloneFunc(go_git.PlainClone)
 
 		// and
 		sut, err := git.New()
@@ -185,9 +180,6 @@ func TestHttpGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must not nil.")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when success git clone", func(t *testing.T) {
@@ -219,6 +211,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer git.SetPlainCloneFunc(go_git.PlainClone)
 
 		// and
 		sut, err := git.New()
@@ -237,9 +230,6 @@ func TestHttpGitService_Clone(t *testing.T) {
 		); err != nil {
 			t.Errorf("error must not occur. but got %+v", err)
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when failure git checkout", func(t *testing.T) {
@@ -259,6 +249,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer git.SetPlainCloneFunc(go_git.PlainClone)
 
 		// and
 		sut, err := git.New()
@@ -276,9 +267,6 @@ func TestHttpGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must occur. but got nil")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 }
 

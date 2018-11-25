@@ -27,14 +27,12 @@ func TestNew(t *testing.T) {
 		// given
 		dockerHost := os.Getenv("DOCKER_HOST")
 		os.Setenv("DOCKER_HOST", "hoge")
+		defer os.Setenv("DOCKER_HOST", dockerHost)
 
 		// expect
 		if _, err := docker.New(); err == nil {
 			t.Errorf("error must occur")
 		}
-
-		// cleanup
-		os.Setenv("DOCKER_HOST", dockerHost)
 	})
 }
 
