@@ -18,7 +18,7 @@ func TestVersionString(t *testing.T) {
 		{"foo", "foo"},
 	} {
 		// given
-		application.SetVersion(tt.version)
+		reset := application.SetVersion(tt.version)
 
 		// when
 		actual := application.VersionString()
@@ -27,6 +27,9 @@ func TestVersionString(t *testing.T) {
 		if actual != tt.expected {
 			t.Errorf("wont '%+v', but got '%+v'", tt.expected, actual)
 		}
+
+		// cleanup
+		reset()
 	}
 }
 
@@ -40,7 +43,7 @@ func TestIsOutdatedVersion(t *testing.T) {
 		{false, false},
 	} {
 		// given
-		application.SetCheckResponse(&latest.CheckResponse{Latest: tt.latest})
+		reset := application.SetCheckResponse(&latest.CheckResponse{Latest: tt.latest})
 
 		// when
 		actual := application.IsLatestVersion()
@@ -49,6 +52,9 @@ func TestIsOutdatedVersion(t *testing.T) {
 		if actual != tt.expected {
 			t.Errorf("wont '%+v', but got '%+v'", tt.expected, actual)
 		}
+
+		// cleanup
+		reset()
 	}
 }
 
@@ -62,7 +68,7 @@ func TestCurrentVersion(t *testing.T) {
 		{"fuga", "fuga"},
 	} {
 		// given
-		application.SetCheckResponse(&latest.CheckResponse{Current: tt.current})
+		reset := application.SetCheckResponse(&latest.CheckResponse{Current: tt.current})
 
 		// when
 		actual := application.CurrentVersion()
@@ -71,13 +77,17 @@ func TestCurrentVersion(t *testing.T) {
 		if actual != tt.expected {
 			t.Errorf("wont '%+v', but got '%+v'", tt.expected, actual)
 		}
+
+		// cleanup
+		reset()
 	}
 }
 
 func TestCheckLatestVersion(t *testing.T) {
 	// given
 	expected := "0.0.2"
-	application.SetVersion("0.0.1")
+	reset := application.SetVersion("0.0.1")
+	defer reset()
 
 	// and
 	gock.New("https://api.github.com").

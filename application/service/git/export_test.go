@@ -5,8 +5,12 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
-func SetPlainCloneFunc(f func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)) {
+func SetPlainCloneFunc(f func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)) (reset func()) {
+	tmp := plainClone
 	plainClone = f
+	return func() {
+		plainClone = tmp
+	}
 }
 
 type MockTargetSource struct {

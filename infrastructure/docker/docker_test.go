@@ -27,14 +27,12 @@ func TestNew(t *testing.T) {
 		// given
 		dockerHost := os.Getenv("DOCKER_HOST")
 		os.Setenv("DOCKER_HOST", "hoge")
+		defer os.Setenv("DOCKER_HOST", dockerHost)
 
 		// expect
 		if _, err := docker.New(); err == nil {
 			t.Errorf("error must occur")
 		}
-
-		// cleanup
-		os.Setenv("DOCKER_HOST", dockerHost)
 	})
 }
 
@@ -59,7 +57,8 @@ func TestClientImpl_Build(t *testing.T) {
 			ImageBuild(gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(types.ImageBuildResponse{Body: r}, nil)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// when
 		log, err := sut.Build(context.New("test/task", uuid.New(), &url.URL{}), nil, "", "")
@@ -90,7 +89,8 @@ func TestClientImpl_Build(t *testing.T) {
 			ImageBuild(gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(types.ImageBuildResponse{}, errors.New("test error"))
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if _, err := sut.Build(
@@ -124,7 +124,8 @@ func TestClientImpl_Run(t *testing.T) {
 			AnyTimes().
 			Return(container.ContainerCreateCreatedBody{ID: id}, errors.New("test error"))
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// when
 		actual, _, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
@@ -157,7 +158,8 @@ func TestClientImpl_Run(t *testing.T) {
 				ContainerStart(gomock.Any(), gomock.Any(), gomock.Any()).
 				Return(errors.New("test error"))
 
-			sut.SetMoby(mockMoby)
+			reset := sut.SetMoby(mockMoby)
+			defer reset()
 
 			// when
 			actual, _, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
@@ -195,7 +197,8 @@ func TestClientImpl_Run(t *testing.T) {
 					ContainerLogs(gomock.Any(), gomock.Any(), gomock.Any()).
 					Return(nil, errors.New("test error"))
 
-				sut.SetMoby(mockMoby)
+				reset := sut.SetMoby(mockMoby)
+				defer reset()
 
 				// when
 				actual, _, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
@@ -237,7 +240,8 @@ func TestClientImpl_Run(t *testing.T) {
 						ContainerLogs(gomock.Any(), gomock.Any(), gomock.Any()).
 						Return(log, nil)
 
-					sut.SetMoby(mockMoby)
+					reset := sut.SetMoby(mockMoby)
+					defer reset()
 
 					// when
 					actualID, actualLog, err := sut.Run(context.New("test/task", uuid.New(), &url.URL{}), docker.RuntimeOptions{}, "hello-world")
@@ -283,7 +287,8 @@ func TestClientImpl_Rm(t *testing.T) {
 			ContainerRemove(gomock.Any(), gomock.Eq(conID), gomock.Any()).
 			Return(nil)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if err := sut.Rm(context.New("test/task", uuid.New(), &url.URL{}), conID); err != nil {
@@ -302,7 +307,8 @@ func TestClientImpl_Rm(t *testing.T) {
 			ContainerRemove(gomock.Any(), gomock.Eq(conID), gomock.Any()).
 			Return(errors.New("test error"))
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if err := sut.Rm(context.New("test/task", uuid.New(), &url.URL{}), conID); err == nil {
@@ -329,7 +335,8 @@ func TestClientImpl_Rmi(t *testing.T) {
 			ImageRemove(gomock.Any(), gomock.Eq(imageID), gomock.Any()).
 			Return(nil, nil)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if err := sut.Rmi(context.New("test/task", uuid.New(), &url.URL{}), imageID); err != nil {
@@ -348,7 +355,8 @@ func TestClientImpl_Rmi(t *testing.T) {
 			ImageRemove(gomock.Any(), gomock.Eq(imageID), gomock.Any()).
 			Return(nil, errors.New("test error"))
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if err := sut.Rmi(context.New("test/task", uuid.New(), &url.URL{}), imageID); err == nil {
@@ -375,7 +383,8 @@ func TestClientImpl_ExitCode2(t *testing.T) {
 			ImageRemove(gomock.Any(), gomock.Eq(imageID), gomock.Any()).
 			Return(nil, nil)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if err := sut.Rmi(context.New("test/task", uuid.New(), &url.URL{}), imageID); err != nil {
@@ -394,7 +403,8 @@ func TestClientImpl_ExitCode2(t *testing.T) {
 			ImageRemove(gomock.Any(), gomock.Eq(imageID), gomock.Any()).
 			Return(nil, errors.New("test error"))
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if err := sut.Rmi(context.New("test/task", uuid.New(), &url.URL{}), imageID); err == nil {
@@ -430,7 +440,8 @@ func TestClientImpl_ExitCode(t *testing.T) {
 			ContainerWait(gomock.Any(), gomock.Eq(conID), gomock.Any()).
 			Return(body, err)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// when
 		if code, _ := sut.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), conID); code != exitCode {
@@ -456,7 +467,8 @@ func TestClientImpl_ExitCode(t *testing.T) {
 			ContainerWait(gomock.Any(), gomock.Eq(conID), gomock.Any()).
 			Return(body, err)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// when
 		if _, actualErr := sut.ExitCode(context.New("test/task", uuid.New(), &url.URL{}), conID); actualErr == nil {
@@ -484,7 +496,8 @@ func TestClientImpl_Info(t *testing.T) {
 			Info(gomock.Any()).
 			Return(expected, nil)
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// when
 		actual, err := sut.Info(context.New("test", uuid.New(), nil))
@@ -508,7 +521,8 @@ func TestClientImpl_Info(t *testing.T) {
 			Info(gomock.Any()).
 			Return(types.Info{}, errors.New("test"))
 
-		sut.SetMoby(mockMoby)
+		reset := sut.SetMoby(mockMoby)
+		defer reset()
 
 		// expect
 		if _, err := sut.Info(context.New("test", uuid.New(), nil)); err == nil {

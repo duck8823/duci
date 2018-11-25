@@ -18,14 +18,16 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	}
 	date := time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
 
-	docker.SetNowFunc(func() time.Time {
+	resetNowFunc := docker.SetNowFunc(func() time.Time {
 		return date
 	})
+	defer resetNowFunc()
 
 	// and
 	reader := bufio.NewReader(strings.NewReader("{\"stream\":\"Hello World.\"}"))
 	logger := &docker.BuildLogger{}
-	logger.SetReader(reader)
+	reset := logger.SetReader(reader)
+	defer reset()
 
 	// and
 	expected := &docker.LogLine{Timestamp: date, Message: []byte("Hello World.")}
@@ -42,9 +44,6 @@ func TestBuildLogger_ReadLine(t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("must be equal: wont %+v, but got %+v", expected, actual)
 	}
-
-	// cleanup
-	docker.SetNowFunc(time.Now)
 }
 
 func TestRunLogger_ReadLine(t *testing.T) {
@@ -55,16 +54,18 @@ func TestRunLogger_ReadLine(t *testing.T) {
 	}
 	date := time.Date(2020, time.December, 4, 4, 32, 12, 3, jst)
 
-	docker.SetNowFunc(func() time.Time {
+	resetNowFunc := docker.SetNowFunc(func() time.Time {
 		return date
 	})
+	defer resetNowFunc()
 
 	t.Run("with correct format", func(t *testing.T) {
 		// given
 		prefix := []byte{1, 0, 0, 0, 9, 9, 9, 9}
 		reader := bufio.NewReader(bytes.NewReader(append(prefix, 'H', 'e', 'l', 'l', 'o')))
 		logger := &docker.RunLogger{}
-		logger.SetReader(reader)
+		reset := logger.SetReader(reader)
+		defer reset()
 
 		// and
 		expected := &docker.LogLine{Timestamp: date, Message: []byte("Hello")}
@@ -88,7 +89,8 @@ func TestRunLogger_ReadLine(t *testing.T) {
 		prefix := []byte{0, 0, 0, 0, 9, 9, 9, 9}
 		reader := bufio.NewReader(bytes.NewReader(append(prefix, 'H', 'e', 'l', 'l', 'o')))
 		logger := &docker.RunLogger{}
-		logger.SetReader(reader)
+		reset := logger.SetReader(reader)
+		defer reset()
 
 		// when
 		actual, err := logger.ReadLine()
@@ -108,7 +110,8 @@ func TestRunLogger_ReadLine(t *testing.T) {
 		// given
 		reader := bufio.NewReader(bytes.NewReader([]byte{'H', 'e', 'l', 'l', 'o'}))
 		logger := &docker.RunLogger{}
-		logger.SetReader(reader)
+		reset := logger.SetReader(reader)
+		defer reset()
 
 		// and
 		expected := &docker.LogLine{Timestamp: date, Message: []byte{}}
@@ -126,7 +129,4 @@ func TestRunLogger_ReadLine(t *testing.T) {
 			t.Errorf("must be equal: wont %+v, but got %+v", expected, actual)
 		}
 	})
-
-	// cleanup
-	docker.SetNowFunc(time.Now)
 }

@@ -17,7 +17,8 @@ import (
 func TestCreate(t *testing.T) {
 	t.Run("with correct target", func(t *testing.T) {
 		// setup
-		testDir := createTestDir(t)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -58,14 +59,12 @@ func TestCreate(t *testing.T) {
 		if !reflect.DeepEqual(actual, expected) {
 			t.Errorf("wrong tar contents.\nactual: %+v\nwont: %+v", actual, expected)
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 
 	t.Run("with wrong directory path", func(t *testing.T) {
 		// setup
-		testDir := createTestDir(t)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		output := filepath.Join(testDir, "output.tar")
@@ -79,14 +78,12 @@ func TestCreate(t *testing.T) {
 		if err := tar.Create("/path/to/wrong/dir", tarFile); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 
 	t.Run("with closed output", func(t *testing.T) {
 		// setup
-		testDir := createTestDir(t)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -104,9 +101,6 @@ func TestCreate(t *testing.T) {
 		if err := tar.Create(archiveDir, tarFile); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 
 	t.Run("with wrong permission in target", func(t *testing.T) {
@@ -115,7 +109,8 @@ func TestCreate(t *testing.T) {
 		}
 
 		// setup
-		testDir := createTestDir(t)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -133,9 +128,6 @@ func TestCreate(t *testing.T) {
 		if err := tar.Create(archiveDir, tarFile); err == nil {
 			t.Error("error must occur")
 		}
-
-		// cleanup
-		os.RemoveAll(testDir)
 	})
 }
 
@@ -173,7 +165,7 @@ func readTarArchive(t *testing.T, output string) Files {
 	return files
 }
 
-func createTestDir(t *testing.T) string {
+func createTestDir(t *testing.T) (tmpDir string, reset func()) {
 	t.Helper()
 
 	tempDir := filepath.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
@@ -181,7 +173,9 @@ func createTestDir(t *testing.T) string {
 		t.Fatalf("%+v", err)
 	}
 
-	return tempDir
+	return tempDir, func() {
+		os.RemoveAll(tempDir)
+	}
 }
 
 func createFile(t *testing.T, name string, content string, perm os.FileMode) {

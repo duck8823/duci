@@ -42,13 +42,16 @@ func TestNew(t *testing.T) {
 
 func TestSshGitService_Clone(t *testing.T) {
 	// setup
-	application.Config.GitHub.SSHKeyPath = createTemporaryKey(t)
+	path, remove := createTemporaryKey(t)
+	defer remove()
+	application.Config.GitHub.SSHKeyPath = path
 
 	t.Run("when failure git clone", func(t *testing.T) {
 		// given
-		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+		reset := git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			return nil, errors.New("test")
 		})
+		defer reset()
 
 		// and
 		sut, err := git.New()
@@ -64,9 +67,6 @@ func TestSshGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must not nil.")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when success git clone", func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestSshGitService_Clone(t *testing.T) {
 
 		// and
 		var hash plumbing.Hash
-		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+		reset := git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			// git init
 			repo, err := go_git.PlainInit(tempDir, false)
 			if err != nil {
@@ -98,6 +98,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer reset()
 
 		// and
 		sut, err := git.New()
@@ -116,9 +117,6 @@ func TestSshGitService_Clone(t *testing.T) {
 		); err != nil {
 			t.Errorf("error must not occur. but got %+v", err)
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when failure git checkout", func(t *testing.T) {
@@ -130,7 +128,7 @@ func TestSshGitService_Clone(t *testing.T) {
 		}
 
 		// and
-		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+		reset := git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			// git init
 			repo, err := go_git.PlainInit(tempDir, false)
 			if err != nil {
@@ -138,6 +136,7 @@ func TestSshGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer reset()
 
 		// and
 		sut, err := git.New()
@@ -155,9 +154,6 @@ func TestSshGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must occur. but got nil")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 }
 
@@ -167,9 +163,10 @@ func TestHttpGitService_Clone(t *testing.T) {
 
 	t.Run("when failure git clone", func(t *testing.T) {
 		// given
-		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+		reset := git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			return nil, errors.New("test")
 		})
+		defer reset()
 
 		// and
 		sut, err := git.New()
@@ -185,9 +182,6 @@ func TestHttpGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must not nil.")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when success git clone", func(t *testing.T) {
@@ -200,7 +194,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 
 		// and
 		var hash plumbing.Hash
-		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+		reset := git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			// git init
 			repo, err := go_git.PlainInit(tempDir, false)
 			if err != nil {
@@ -219,6 +213,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer reset()
 
 		// and
 		sut, err := git.New()
@@ -237,9 +232,6 @@ func TestHttpGitService_Clone(t *testing.T) {
 		); err != nil {
 			t.Errorf("error must not occur. but got %+v", err)
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 
 	t.Run("when failure git checkout", func(t *testing.T) {
@@ -251,7 +243,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 		}
 
 		// and
-		git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
+		reset := git.SetPlainCloneFunc(func(_ string, _ bool, _ *go_git.CloneOptions) (*go_git.Repository, error) {
 			// git init
 			repo, err := go_git.PlainInit(tempDir, false)
 			if err != nil {
@@ -259,6 +251,7 @@ func TestHttpGitService_Clone(t *testing.T) {
 			}
 			return repo, nil
 		})
+		defer reset()
 
 		// and
 		sut, err := git.New()
@@ -276,13 +269,10 @@ func TestHttpGitService_Clone(t *testing.T) {
 		); err == nil {
 			t.Error("error must occur. but got nil")
 		}
-
-		// cleanup
-		git.SetPlainCloneFunc(go_git.PlainClone)
 	})
 }
 
-func createTemporaryKey(t *testing.T) string {
+func createTemporaryKey(t *testing.T) (path string, reset func()) {
 	t.Helper()
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 256)
@@ -311,5 +301,7 @@ func createTemporaryKey(t *testing.T) string {
 		t.Fatalf("error occur: %+v", err)
 	}
 
-	return keyPath
+	return keyPath, func() {
+		os.RemoveAll(tempDir)
+	}
 }
