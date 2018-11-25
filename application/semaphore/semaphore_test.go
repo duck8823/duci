@@ -10,11 +10,11 @@ import (
 func TestMake(t *testing.T) {
 	// expect
 	if err := semaphore.Make(); err != nil {
-		t.Error("error must not occure at first")
+		t.Error("error must not occur at first")
 	}
 
 	if err := semaphore.Make(); err == nil {
-		t.Error("errpr must occure")
+		t.Error("error must occur")
 	}
 }
 

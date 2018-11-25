@@ -86,7 +86,7 @@ func TestService_GetPullRequest(t *testing.T) {
 
 		// expect
 		if _, err := s.GetPullRequest(context.New("test/task", uuid.New(), &url.URL{}), repo, num); err == nil {
-			t.Error("errot must occred. but got nil")
+			t.Error("error must occurred. but got nil")
 		}
 	})
 }
@@ -157,7 +157,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			github.SUCCESS,
 			"",
 		); err == nil {
-			t.Error("errot must occred. but got nil")
+			t.Error("error must occurred. but got nil")
 		}
 	})
 
@@ -194,7 +194,7 @@ func TestService_CreateCommitStatus(t *testing.T) {
 			state,
 			description,
 		); err == nil {
-			t.Error("errot must occred. but got nil")
+			t.Error("error must occurred. but got nil")
 		}
 
 		if !gock.IsDone() {
