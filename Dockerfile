@@ -9,7 +9,7 @@ ADD . .
 
 ENV GO111MODULE=on
 
-RUN go build
+RUN make build
 
 FROM alpine
 

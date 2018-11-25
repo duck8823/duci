@@ -12,15 +12,13 @@ func TestVersionString(t *testing.T) {
 	// where
 	for _, tt := range []struct {
 		version  string
-		revision string
 		expected string
 	}{
-		{"hoge", "fuga", "hoge (fuga)"},
-		{"foo", "bar", "foo (bar)"},
+		{"hoge", "hoge"},
+		{"foo", "foo"},
 	} {
 		// given
 		application.SetVersion(tt.version)
-		application.SetRevision(tt.revision)
 
 		// when
 		actual := application.VersionString()
@@ -29,20 +27,6 @@ func TestVersionString(t *testing.T) {
 		if actual != tt.expected {
 			t.Errorf("wont '%+v', but got '%+v'", tt.expected, actual)
 		}
-	}
-}
-
-func TestVersionStringShort(t *testing.T) {
-	// given
-	expected := "dev"
-	application.SetVersion(expected)
-
-	// when
-	actual := application.VersionStringShort()
-
-	// then
-	if actual != expected {
-		t.Errorf("wont '%+v', but got '%+v'", expected, actual)
 	}
 }
 
@@ -91,7 +75,7 @@ func TestCurrentVersion(t *testing.T) {
 }
 
 func TestCheckLatestVersion(t *testing.T) {
-	// then
+	// given
 	expected := "0.0.2"
 	application.SetVersion("0.0.1")
 
@@ -113,5 +97,26 @@ func TestCheckLatestVersion(t *testing.T) {
 	// then
 	if actual != expected {
 		t.Errorf("wont %+v, but got %+v", expected, actual)
+	}
+}
+
+func TestTrimSuffix(t *testing.T) {
+	// where
+	for _, tt := range []struct {
+		tag      string
+		expected string
+	}{
+		{"v0.0.1", "v0.0.1"},
+		{"v0.0.1-suffix", "v0.0.1"},
+		{"-suffix", ""},
+		{"v0.0.1-tag-suffix", "v0.0.1"},
+	} {
+		// when
+		actual := application.TrimSuffix(tt.tag)
+
+		// then
+		if actual != tt.expected {
+			t.Errorf("wont %+v, but got %+v", tt.expected, actual)
+		}
 	}
 }

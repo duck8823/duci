@@ -8,14 +8,14 @@ func SetVersion(ver string) {
 	version = ver
 }
 
-func SetRevision(rev string) {
-	revision = rev
-}
-
 func SetCheckResponse(chr *latest.CheckResponse) {
 	checked = chr
 }
 
 func CheckLatestVersion() {
 	checkLatestVersion()
+}
+
+func TrimSuffix(tag string) string {
+	return trimSuffix(tag)
 }
