@@ -35,7 +35,9 @@ func TestStoreServiceImpl_Append(t *testing.T) {
 	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &logstore.StoreServiceImpl{}
-	service.SetDB(mockStore)
+	reset := service.SetDB(mockStore)
+	defer reset()
+
 	t.Run("when store returns correct data", func(t *testing.T) {
 		// given
 		jst, err := time.LoadLocation("Asia/Tokyo")
@@ -230,7 +232,9 @@ func TestStoreServiceImpl_Get(t *testing.T) {
 	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &logstore.StoreServiceImpl{}
-	service.SetDB(mockStore)
+	reset := service.SetDB(mockStore)
+	defer reset()
+
 	t.Run("with error", func(t *testing.T) {
 		// setup
 		id, err := uuid.NewRandom()
@@ -332,7 +336,9 @@ func TestStoreServiceImpl_Start(t *testing.T) {
 	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &logstore.StoreServiceImpl{}
-	service.SetDB(mockStore)
+	reset := service.SetDB(mockStore)
+	defer reset()
+
 	t.Run("when put success", func(t *testing.T) {
 		// given
 		id, err := uuid.NewRandom()
@@ -391,7 +397,9 @@ func TestStoreServiceImpl_Finish(t *testing.T) {
 	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &logstore.StoreServiceImpl{}
-	service.SetDB(mockStore)
+	reset := service.SetDB(mockStore)
+	defer reset()
+
 	t.Run("with error", func(t *testing.T) {
 		// setup
 		id, err := uuid.NewRandom()
@@ -529,7 +537,9 @@ func TestStoreServiceImpl_Close(t *testing.T) {
 	mockStore := mock_store.NewMockStore(ctrl)
 
 	service := &logstore.StoreServiceImpl{}
-	service.SetDB(mockStore)
+	reset := service.SetDB(mockStore)
+	defer reset()
+
 	t.Run("with error", func(t *testing.T) {
 		// given
 		mockStore.EXPECT().

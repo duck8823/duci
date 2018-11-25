@@ -17,8 +17,8 @@ import (
 func TestCreate(t *testing.T) {
 	t.Run("with correct target", func(t *testing.T) {
 		// setup
-		testDir := createTestDir(t)
-		defer os.RemoveAll(testDir)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -63,8 +63,8 @@ func TestCreate(t *testing.T) {
 
 	t.Run("with wrong directory path", func(t *testing.T) {
 		// setup
-		testDir := createTestDir(t)
-		defer os.RemoveAll(testDir)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		output := filepath.Join(testDir, "output.tar")
@@ -82,8 +82,8 @@ func TestCreate(t *testing.T) {
 
 	t.Run("with closed output", func(t *testing.T) {
 		// setup
-		testDir := createTestDir(t)
-		defer os.RemoveAll(testDir)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -109,8 +109,8 @@ func TestCreate(t *testing.T) {
 		}
 
 		// setup
-		testDir := createTestDir(t)
-		defer os.RemoveAll(testDir)
+		testDir, remove := createTestDir(t)
+		defer remove()
 
 		// given
 		archiveDir := filepath.Join(testDir, "archive")
@@ -165,7 +165,7 @@ func readTarArchive(t *testing.T, output string) Files {
 	return files
 }
 
-func createTestDir(t *testing.T) string {
+func createTestDir(t *testing.T) (tmpDir string, reset func()) {
 	t.Helper()
 
 	tempDir := filepath.Join(os.TempDir(), fmt.Sprintf("duci_test_%v", time.Now().Unix()))
@@ -173,7 +173,9 @@ func createTestDir(t *testing.T) string {
 		t.Fatalf("%+v", err)
 	}
 
-	return tempDir
+	return tempDir, func() {
+		os.RemoveAll(tempDir)
+	}
 }
 
 func createFile(t *testing.T, name string, content string, perm os.FileMode) {

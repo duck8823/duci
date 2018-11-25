@@ -25,10 +25,10 @@ func TestDebug(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error occurred: %+v", err)
 	}
-	logger.SetNowFunc(func() time.Time {
+	reset := logger.SetNowFunc(func() time.Time {
 		return time.Date(1987, time.March, 27, 19, 19, 00, 00, jst)
 	})
-	defer logger.SetNowFunc(time.Now)
+	defer reset()
 
 	// when
 	logger.Debug(uuid.UUID{}, "Hello World.")
