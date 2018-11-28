@@ -10,7 +10,6 @@ import (
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/data/model"
-	"github.com/duck8823/duci/infrastructure/archive/tar"
 	"github.com/duck8823/duci/infrastructure/logger"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
@@ -116,30 +115,6 @@ func (r *DockerRunner) dockerBuild(ctx context.Context, dir string, repo github.
 	return nil
 }
 
-func createTarball(workDir string) (*os.File, error) {
-	tarFilePath := filepath.Join(workDir, "duci.tar")
-	writeFile, err := os.OpenFile(tarFilePath, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	defer writeFile.Close()
-
-	if err := tar.Create(workDir, writeFile); err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	readFile, _ := os.Open(tarFilePath)
-	return readFile, nil
-}
-
-func dockerfilePath(workDir string) docker.Dockerfile {
-	dockerfile := "./Dockerfile"
-	if exists(filepath.Join(workDir, ".duci/Dockerfile")) {
-		dockerfile = ".duci/Dockerfile"
-	}
-	return docker.Dockerfile(dockerfile)
-}
-
 func (r *DockerRunner) dockerRun(ctx context.Context, dir string, repo github.Repository, cmd docker.Command) (docker.ContainerID, error) {
 	opts, err := runtimeOpts(dir)
 	if err != nil {
@@ -210,9 +185,4 @@ func (r *DockerRunner) finish(ctx context.Context, src *github.TargetSource, err
 		r.GitHub.CreateCommitStatus(ctx, src, github.SUCCESS, "success")
 	}
 	r.LogStore.Finish(ctx.UUID())
-}
-
-func exists(name string) bool {
-	_, err := os.Stat(name)
-	return !os.IsNotExist(err)
 }

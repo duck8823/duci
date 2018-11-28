@@ -64,6 +64,7 @@ func (r *DockerTaskRunner) Run(ctx context.Context, dir string, opts RunOptions)
 	}
 }
 
+// run task in docker container
 func (r *DockerTaskRunner) run(ctx context.Context, dir string, opts RunOptions) error {
 	if err := r.dockerBuild(ctx, dir, opts.Tag); err != nil {
 		return errors.WithStack(err)
@@ -85,9 +86,10 @@ func (r *DockerTaskRunner) run(ctx context.Context, dir string, opts RunOptions)
 		return ErrFailure
 	}
 
-	return err
+	return nil
 }
 
+// dockerBuild build a docker image
 func (r *DockerTaskRunner) dockerBuild(ctx context.Context, dir string, tag Tag) error {
 	tarball, err := createTarball(dir)
 	if err != nil {
@@ -105,8 +107,9 @@ func (r *DockerTaskRunner) dockerBuild(ctx context.Context, dir string, tag Tag)
 	return nil
 }
 
+// dockerRun run docker container
 func (r *DockerTaskRunner) dockerRun(ctx context.Context, dir string, opts RunOptions) (docker.ContainerID, error) {
-	dockerOpts, err := runtimeOpts(dir)
+	dockerOpts, err := runtimeOptions(dir)
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
