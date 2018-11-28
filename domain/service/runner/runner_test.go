@@ -2,9 +2,10 @@ package runner_test
 
 import (
 	"context"
-	"github.com/duck8823/duci/application/service/docker"
-	"github.com/duck8823/duci/application/service/docker/mock_docker"
-	"github.com/duck8823/duci/application/service/runner"
+	"github.com/duck8823/duci/domain/model/docker"
+	"github.com/duck8823/duci/domain/model/log/mock_log"
+	"github.com/duck8823/duci/domain/service/docker/mock_docker"
+	"github.com/duck8823/duci/domain/service/runner"
 	. "github.com/golang/mock/gomock"
 	"github.com/labstack/gommon/random"
 	"os"
@@ -22,14 +23,14 @@ func TestDockerTaskRunner_Run(t *testing.T) {
 	defer ctrl.Finish()
 
 	// and
-	mockDocker := mock_docker.NewMockService(ctrl)
+	mockDocker := mock_docker.NewMockDocker(ctrl)
 	mockDocker.EXPECT().
 		Build(Any(), Any(), Any(), Any()).
-		Return(&runner.MockBuildLog{}, nil).
+		Return(mock_log.NewMockLog(ctrl), nil).
 		Times(1)
 	mockDocker.EXPECT().
 		Run(Any(), Any(), Any(), Any()).
-		Return(docker.ContainerID(""), &runner.MockJobLog{}, nil).
+		Return(docker.ContainerID(""), mock_log.NewMockLog(ctrl), nil).
 		Times(1)
 	mockDocker.EXPECT().
 		ExitCode(Any(), Any()).
@@ -41,12 +42,12 @@ func TestDockerTaskRunner_Run(t *testing.T) {
 		Times(1)
 
 	// and
-	sut := &runner.DockerTaskRunner{
+	sut := &runner.DockerRunnerImpl{
 		Docker: mockDocker,
 	}
 
 	// when
-	err := sut.Run(context.Background(), dir, runner.RunOptions{})
+	err := sut.Run(context.Background(), dir, docker.Tag("duck8823/duci:test"), []string{})
 
 	// then
 	if err != nil {
