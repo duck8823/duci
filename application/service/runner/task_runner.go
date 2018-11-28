@@ -22,24 +22,21 @@ type RunOpts struct {
 
 // TaskRunner is a interface describes task runner.
 type TaskRunner interface {
-	Run(ctx context.Context, dir string, opts RunOpts) error
+	Run(ctx context.Context, dir string, opts RunOptions) error
 }
 
 // DockerTaskRunner is a implement of TaskRunner with Docker
 type DockerTaskRunner struct {
-	Docker      docker.Service
-	StartFunc   []func()
-	LogFunc     []func(docker.Log)
-	SuccessFunc []func()
-	ErrFunc     []func(error)
-	TimeoutFunc []func()
-	FailureFunc []func(error)
+	Docker    docker.Service
+	StartFunc []func(context.Context)
+	LogFunc   []func(context.Context, docker.Log)
+	EndFunc   []func(context.Context, error)
 }
 
 // Run task in docker container.
-func (r *DockerTaskRunner) Run(ctx context.Context, dir string, opts RunOpts) error {
+func (r *DockerTaskRunner) Run(ctx context.Context, dir string, opts RunOptions) error {
 	for _, f := range r.StartFunc {
-		go f()
+		go f(ctx)
 	}
 
 	errs := make(chan error, 1)
@@ -55,23 +52,13 @@ func (r *DockerTaskRunner) Run(ctx context.Context, dir string, opts RunOpts) er
 
 	select {
 	case <-timeout.Done():
-		for _, f := range r.TimeoutFunc {
-			go f()
+		for _, f := range r.EndFunc {
+			go f(ctx, timeout.Err())
 		}
 		return timeout.Err()
 	case err := <-errs:
-		if err == ErrFailure {
-			for _, f := range r.FailureFunc {
-				go f(err)
-			}
-		} else if err != nil {
-			for _, f := range r.ErrFunc {
-				go f(err)
-			}
-		} else {
-			for _, f := range r.SuccessFunc {
-				go f()
-			}
+		for _, f := range r.EndFunc {
+			go f(ctx, err)
 		}
 		return err
 	}
@@ -113,12 +100,12 @@ func (r *DockerTaskRunner) dockerBuild(ctx context.Context, dir string, tag Tag)
 		return errors.WithStack(err)
 	}
 	for _, f := range r.LogFunc {
-		go f(buildLog)
+		go f(ctx, buildLog)
 	}
 	return nil
 }
 
-func (r *DockerTaskRunner) dockerRun(ctx context.Context, dir string, opts RunOpts) (docker.ContainerID, error) {
+func (r *DockerTaskRunner) dockerRun(ctx context.Context, dir string, opts RunOptions) (docker.ContainerID, error) {
 	dockerOpts, err := runtimeOpts(dir)
 	if err != nil {
 		return "", errors.WithStack(err)
@@ -129,7 +116,7 @@ func (r *DockerTaskRunner) dockerRun(ctx context.Context, dir string, opts RunOp
 		return conID, errors.WithStack(err)
 	}
 	for _, f := range r.LogFunc {
-		go f(runLog)
+		go f(ctx, runLog)
 	}
 	return conID, nil
 }
