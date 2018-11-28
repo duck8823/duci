@@ -46,7 +46,7 @@ func TestDockerTaskRunner_Run(t *testing.T) {
 	}
 
 	// when
-	err := sut.Run(context.Background(), dir, runner.RunOpts{})
+	err := sut.Run(context.Background(), dir, runner.RunOptions{})
 
 	// then
 	if err != nil {

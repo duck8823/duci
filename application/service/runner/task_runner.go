@@ -14,8 +14,8 @@ type Tag string
 // Command is docker command.
 type Command []string
 
-// RunOpts is options for docker.
-type RunOpts struct {
+// RunOptions is options for docker.
+type RunOptions struct {
 	Tag
 	Command
 }
@@ -64,7 +64,7 @@ func (r *DockerTaskRunner) Run(ctx context.Context, dir string, opts RunOptions)
 	}
 }
 
-func (r *DockerTaskRunner) run(ctx context.Context, dir string, opts RunOpts) error {
+func (r *DockerTaskRunner) run(ctx context.Context, dir string, opts RunOptions) error {
 	if err := r.dockerBuild(ctx, dir, opts.Tag); err != nil {
 		return errors.WithStack(err)
 	}
