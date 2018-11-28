@@ -768,6 +768,9 @@ func TestRunnerImpl_Run_NonNormal(t *testing.T) {
 
 		// and
 		application.Config.Job.Timeout = 1
+		defer func() {
+			application.Config.Job.Timeout = 600
+		}()
 
 		mockDocker := mock_docker.NewMockService(ctrl)
 		mockDocker.EXPECT().
