@@ -48,6 +48,6 @@ require (
 	gopkg.in/h2non/gock.v1 v1.0.12
 	gopkg.in/src-d/go-git.v4 v4.8.1
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	gopkg.in/yaml.v2 v2.2.1
+	gopkg.in/yaml.v2 v2.2.2
 	gotest.tools v2.1.0+incompatible // indirect
 )
