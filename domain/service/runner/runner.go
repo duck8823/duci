@@ -34,7 +34,7 @@ func (r *dockerRunnerImpl) Run(ctx context.Context, dir string, tag docker.Tag, 
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := r.Docker.Rm(ctx, conID); err != nil {
+	if err := r.Docker.RemoveContainer(ctx, conID); err != nil {
 		return errors.WithStack(err)
 	}
 	if code != 0 {

@@ -2,9 +2,11 @@ package docker
 
 import (
 	"context"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	moby "github.com/docker/docker/client"
 	. "github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/domain/model/log"
-	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/pkg/errors"
 	"io"
 )
@@ -12,20 +14,20 @@ import (
 // Docker is a interface describe docker service.
 type Docker interface {
 	Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (log.Log, error)
-	Run(ctx context.Context, opts docker.RuntimeOptions, tag Tag, cmd Command) (ContainerID, log.Log, error)
-	Rm(ctx context.Context, containerID ContainerID) error
-	Rmi(ctx context.Context, tag Tag) error
+	Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, log.Log, error)
+	RemoveContainer(ctx context.Context, containerID ContainerID) error
+	RemoveImage(ctx context.Context, tag Tag) error
 	ExitCode(ctx context.Context, containerID ContainerID) (ExitCode, error)
 	Status() error
 }
 
 type dockerService struct {
-	moby docker.Client
+	moby Moby
 }
 
 // New returns instance of docker service
 func New() (Docker, error) {
-	cli, err := docker.New()
+	cli, err := moby.NewClientWithOpts(moby.FromEnv)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -34,33 +36,60 @@ func New() (Docker, error) {
 
 // Build a docker image.
 func (s *dockerService) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (log.Log, error) {
-	buildLog, err := s.moby.Build(ctx, file, string(tag), string(dockerfile))
+	opts := types.ImageBuildOptions{
+		Tags:       []string{tag.ToString()},
+		Dockerfile: dockerfile.ToString(),
+		Remove:     true,
+	}
+	resp, err := s.moby.ImageBuild(ctx, file, opts)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return buildLog.(log.Log), nil
+
+	return NewBuildLog(resp.Body), nil
 }
 
 // Run docker container with command.
-func (s *dockerService) Run(ctx context.Context, opts docker.RuntimeOptions, tag Tag, cmd Command) (ContainerID, log.Log, error) {
-	conID, runLog, err := s.moby.Run(ctx, opts, string(tag), cmd...)
+func (s *dockerService) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, log.Log, error) {
+	con, err := s.moby.ContainerCreate(ctx, &container.Config{
+		Image:   tag.ToString(),
+		Env:     opts.Environments.ToArray(),
+		Volumes: opts.Volumes.ToMap(),
+		Cmd:     cmd.ToSlice(),
+	}, &container.HostConfig{
+		Binds: opts.Volumes,
+	}, nil, "")
 	if err != nil {
-		return ContainerID(conID), nil, errors.WithStack(err)
+		return "", nil, errors.WithStack(err)
 	}
-	return ContainerID(conID), runLog.(log.Log), nil
+
+	if err := s.moby.ContainerStart(ctx, con.ID, types.ContainerStartOptions{}); err != nil {
+		return ContainerID(con.ID), nil, errors.WithStack(err)
+	}
+
+	logs, err := s.moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+	})
+	if err != nil {
+		return ContainerID(con.ID), nil, errors.WithStack(err)
+	}
+
+	return ContainerID(con.ID), NewRunLog(logs), nil
 }
 
-// Rm remove docker container.
-func (s *dockerService) Rm(ctx context.Context, conID ContainerID) error {
-	if err := s.moby.Rm(ctx, string(conID)); err != nil {
+// RemoveContainer remove docker container.
+func (s *dockerService) RemoveContainer(ctx context.Context, conID ContainerID) error {
+	if err := s.moby.ContainerRemove(ctx, conID.ToString(), types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-// Rmi remove docker image.
-func (s *dockerService) Rmi(ctx context.Context, tag Tag) error {
-	if err := s.moby.Rmi(ctx, string(tag)); err != nil {
+// RemoveImage remove docker image.
+func (s *dockerService) RemoveImage(ctx context.Context, tag Tag) error {
+	if _, err := s.moby.ImageRemove(ctx, tag.ToString(), types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -68,11 +97,13 @@ func (s *dockerService) Rmi(ctx context.Context, tag Tag) error {
 
 // ExitCode returns exit code specific container id.
 func (s *dockerService) ExitCode(ctx context.Context, conID ContainerID) (ExitCode, error) {
-	code, err := s.moby.ExitCode(ctx, string(conID))
-	if err != nil {
-		return ExitCode(code), errors.WithStack(err)
+	body, err := s.moby.ContainerWait(ctx, conID.ToString(), container.WaitConditionNotRunning)
+	select {
+	case b := <-body:
+		return ExitCode(b.StatusCode), nil
+	case e := <-err:
+		return -1, errors.WithStack(e)
 	}
-	return ExitCode(code), nil
 }
 
 // Status returns error of docker daemon status.

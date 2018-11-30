@@ -4,7 +4,6 @@ import (
 	"bytes"
 	. "github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/infrastructure/archive/tar"
-	"github.com/duck8823/duci/infrastructure/docker"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -45,8 +44,8 @@ func exists(name string) bool {
 }
 
 // runtimeOptions parses a config.yml and returns a docker runtime options
-func runtimeOptions(workDir string) (docker.RuntimeOptions, error) {
-	var opts docker.RuntimeOptions
+func runtimeOptions(workDir string) (RuntimeOptions, error) {
+	var opts RuntimeOptions
 
 	if !exists(filepath.Join(workDir, ".duci/config.yml")) {
 		return opts, nil
