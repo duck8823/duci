@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"github.com/duck8823/duci/domain/service/docker"
+	"github.com/duck8823/duci/domain/model/docker"
 )
 
 // DefaultDockerRunnerBuilder create new builder of docker runner

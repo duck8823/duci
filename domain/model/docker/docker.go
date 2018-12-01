@@ -5,7 +5,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	moby "github.com/docker/docker/client"
-	. "github.com/duck8823/duci/domain/model/docker"
 	. "github.com/duck8823/duci/domain/model/job"
 	"github.com/pkg/errors"
 	"io"

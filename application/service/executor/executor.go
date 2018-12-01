@@ -6,7 +6,7 @@ import (
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/domain/model/job"
-	"github.com/duck8823/duci/domain/service/runner"
+	"github.com/duck8823/duci/domain/model/runner"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
 )

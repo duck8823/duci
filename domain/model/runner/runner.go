@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/domain/model/job"
-	. "github.com/duck8823/duci/domain/service/docker"
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +14,7 @@ type DockerRunner interface {
 
 // dockerRunnerImpl is a implement of DockerRunner
 type dockerRunnerImpl struct {
-	Docker
+	docker.Docker
 	LogFunc
 }
 
