@@ -20,27 +20,27 @@ type Docker interface {
 	Status() error
 }
 
-type dockerService struct {
+type client struct {
 	moby Moby
 }
 
-// New returns instance of docker service
+// New returns instance of docker client
 func New() (Docker, error) {
 	cli, err := moby.NewClientWithOpts(moby.FromEnv)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &dockerService{moby: cli}, nil
+	return &client{moby: cli}, nil
 }
 
 // Build a docker image.
-func (s *dockerService) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error) {
+func (c *client) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error) {
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag.ToString()},
 		Dockerfile: dockerfile.ToString(),
 		Remove:     true,
 	}
-	resp, err := s.moby.ImageBuild(ctx, file, opts)
+	resp, err := c.moby.ImageBuild(ctx, file, opts)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -49,8 +49,8 @@ func (s *dockerService) Build(ctx context.Context, file io.Reader, tag Tag, dock
 }
 
 // Run docker container with command.
-func (s *dockerService) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
-	con, err := s.moby.ContainerCreate(ctx, &container.Config{
+func (c *client) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
+	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag.ToString(),
 		Env:     opts.Environments.ToArray(),
 		Volumes: opts.Volumes.ToMap(),
@@ -62,11 +62,11 @@ func (s *dockerService) Run(ctx context.Context, opts RuntimeOptions, tag Tag, c
 		return "", nil, errors.WithStack(err)
 	}
 
-	if err := s.moby.ContainerStart(ctx, con.ID, types.ContainerStartOptions{}); err != nil {
+	if err := c.moby.ContainerStart(ctx, con.ID, types.ContainerStartOptions{}); err != nil {
 		return ContainerID(con.ID), nil, errors.WithStack(err)
 	}
 
-	logs, err := s.moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
+	logs, err := c.moby.ContainerLogs(ctx, con.ID, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Follow:     true,
@@ -79,24 +79,24 @@ func (s *dockerService) Run(ctx context.Context, opts RuntimeOptions, tag Tag, c
 }
 
 // RemoveContainer remove docker container.
-func (s *dockerService) RemoveContainer(ctx context.Context, conID ContainerID) error {
-	if err := s.moby.ContainerRemove(ctx, conID.ToString(), types.ContainerRemoveOptions{}); err != nil {
+func (c *client) RemoveContainer(ctx context.Context, conID ContainerID) error {
+	if err := c.moby.ContainerRemove(ctx, conID.ToString(), types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
 // RemoveImage remove docker image.
-func (s *dockerService) RemoveImage(ctx context.Context, tag Tag) error {
-	if _, err := s.moby.ImageRemove(ctx, tag.ToString(), types.ImageRemoveOptions{}); err != nil {
+func (c *client) RemoveImage(ctx context.Context, tag Tag) error {
+	if _, err := c.moby.ImageRemove(ctx, tag.ToString(), types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
 // ExitCode returns exit code specific container id.
-func (s *dockerService) ExitCode(ctx context.Context, conID ContainerID) (ExitCode, error) {
-	body, err := s.moby.ContainerWait(ctx, conID.ToString(), container.WaitConditionNotRunning)
+func (c *client) ExitCode(ctx context.Context, conID ContainerID) (ExitCode, error) {
+	body, err := c.moby.ContainerWait(ctx, conID.ToString(), container.WaitConditionNotRunning)
 	select {
 	case b := <-body:
 		return ExitCode(b.StatusCode), nil
@@ -106,8 +106,8 @@ func (s *dockerService) ExitCode(ctx context.Context, conID ContainerID) (ExitCo
 }
 
 // Status returns error of docker daemon status.
-func (s *dockerService) Status() error {
-	if _, err := s.moby.Info(context.Background()); err != nil {
+func (c *client) Status() error {
+	if _, err := c.moby.Info(context.Background()); err != nil {
 		return errors.Wrap(err, "Couldn't connect to Docker daemon.")
 	}
 	return nil
