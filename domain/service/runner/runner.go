@@ -3,13 +3,14 @@ package runner
 import (
 	"context"
 	"github.com/duck8823/duci/domain/model/docker"
+	"github.com/duck8823/duci/domain/model/job"
 	. "github.com/duck8823/duci/domain/service/docker"
 	"github.com/pkg/errors"
 )
 
 // DockerRunner is a interface describes task runner.
 type DockerRunner interface {
-	Run(ctx context.Context, dir string, tag docker.Tag, cmd docker.Command) error
+	Run(ctx context.Context, dir job.WorkDir, tag docker.Tag, cmd docker.Command) error
 }
 
 // dockerRunnerImpl is a implement of DockerRunner
@@ -19,7 +20,7 @@ type dockerRunnerImpl struct {
 }
 
 // Run task in docker container
-func (r *dockerRunnerImpl) Run(ctx context.Context, dir string, tag docker.Tag, cmd docker.Command) error {
+func (r *dockerRunnerImpl) Run(ctx context.Context, dir job.WorkDir, tag docker.Tag, cmd docker.Command) error {
 	if err := r.dockerBuild(ctx, dir, tag); err != nil {
 		return errors.WithStack(err)
 	}
@@ -44,7 +45,7 @@ func (r *dockerRunnerImpl) Run(ctx context.Context, dir string, tag docker.Tag, 
 }
 
 // dockerBuild build a docker image
-func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir string, tag docker.Tag) error {
+func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir job.WorkDir, tag docker.Tag) error {
 	tarball, err := createTarball(dir)
 	if err != nil {
 		return errors.WithStack(err)
@@ -60,7 +61,7 @@ func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir string, tag dock
 }
 
 // dockerRun run docker container
-func (r *dockerRunnerImpl) dockerRun(ctx context.Context, dir string, tag docker.Tag, cmd docker.Command) (docker.ContainerID, error) {
+func (r *dockerRunnerImpl) dockerRun(ctx context.Context, dir job.WorkDir, tag docker.Tag, cmd docker.Command) (docker.ContainerID, error) {
 	opts, err := runtimeOptions(dir)
 	if err != nil {
 		return "", errors.WithStack(err)

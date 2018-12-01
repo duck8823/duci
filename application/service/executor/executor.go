@@ -5,8 +5,10 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/domain/model/docker"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/service/runner"
 	"github.com/labstack/gommon/random"
+	"github.com/pkg/errors"
 )
 
 type JobExecutor struct {
@@ -16,8 +18,14 @@ type JobExecutor struct {
 }
 
 // Execute job
-func (r *JobExecutor) Execute(ctx context.Context, dir string, cmd ...string) error {
+func (r *JobExecutor) Execute(ctx context.Context, target job.Target, cmd ...string) error {
 	r.StartFunc(ctx)
+
+	workDir, cleanup, err := target.Prepare()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer cleanup()
 
 	errs := make(chan error, 1)
 
@@ -26,7 +34,7 @@ func (r *JobExecutor) Execute(ctx context.Context, dir string, cmd ...string) er
 
 	go func() {
 		semaphore.Acquire()
-		errs <- r.DockerRunner.Run(timeout, dir, docker.Tag(random.String(16, random.Lowercase)), cmd)
+		errs <- r.DockerRunner.Run(timeout, workDir, docker.Tag(random.String(16, random.Lowercase)), cmd)
 		semaphore.Release()
 	}()
 
