@@ -6,15 +6,15 @@ import (
 	"github.com/docker/docker/api/types/container"
 	moby "github.com/docker/docker/client"
 	. "github.com/duck8823/duci/domain/model/docker"
-	"github.com/duck8823/duci/domain/model/log"
+	. "github.com/duck8823/duci/domain/model/job"
 	"github.com/pkg/errors"
 	"io"
 )
 
 // Docker is a interface describe docker service.
 type Docker interface {
-	Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (log.Log, error)
-	Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, log.Log, error)
+	Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error)
+	Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error)
 	RemoveContainer(ctx context.Context, containerID ContainerID) error
 	RemoveImage(ctx context.Context, tag Tag) error
 	ExitCode(ctx context.Context, containerID ContainerID) (ExitCode, error)
@@ -35,7 +35,7 @@ func New() (Docker, error) {
 }
 
 // Build a docker image.
-func (s *dockerService) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (log.Log, error) {
+func (s *dockerService) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error) {
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag.ToString()},
 		Dockerfile: dockerfile.ToString(),
@@ -50,7 +50,7 @@ func (s *dockerService) Build(ctx context.Context, file io.Reader, tag Tag, dock
 }
 
 // Run docker container with command.
-func (s *dockerService) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, log.Log, error) {
+func (s *dockerService) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
 	con, err := s.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag.ToString(),
 		Env:     opts.Environments.ToArray(),

@@ -2,7 +2,7 @@ package runner
 
 import (
 	"context"
-	. "github.com/duck8823/duci/domain/model/log"
+	. "github.com/duck8823/duci/domain/model/job"
 )
 
 // LogFunc is function of Log
