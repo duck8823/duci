@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/domain/model/job"
+	. "github.com/duck8823/duci/domain/model/job"
 	"github.com/pkg/errors"
 	"io"
 	"time"
@@ -23,12 +23,12 @@ func NewBuildLog(r io.Reader) *buildLogger {
 }
 
 // ReadLine returns LogLine.
-func (l *buildLogger) ReadLine() (*job.LogLine, error) {
+func (l *buildLogger) ReadLine() (*LogLine, error) {
 	for {
 		line, _, readErr := l.reader.ReadLine()
 		msg := extractMessage(line)
 		if readErr == io.EOF {
-			return &job.LogLine{Timestamp: now(), Message: msg}, readErr
+			return &LogLine{Timestamp: now(), Message: msg}, readErr
 		}
 		if readErr != nil {
 			return nil, errors.WithStack(readErr)
@@ -38,7 +38,7 @@ func (l *buildLogger) ReadLine() (*job.LogLine, error) {
 			continue
 		}
 
-		return &job.LogLine{Timestamp: now(), Message: msg}, readErr
+		return &LogLine{Timestamp: now(), Message: msg}, readErr
 	}
 }
 
@@ -52,7 +52,7 @@ func NewRunLog(r io.Reader) *runLogger {
 }
 
 // ReadLine returns LogLine.
-func (l *runLogger) ReadLine() (*job.LogLine, error) {
+func (l *runLogger) ReadLine() (*LogLine, error) {
 	for {
 		line, _, readErr := l.reader.ReadLine()
 		if readErr != nil && readErr != io.EOF {
@@ -66,7 +66,7 @@ func (l *runLogger) ReadLine() (*job.LogLine, error) {
 
 		// prevent to CR
 		progress := bytes.Split(messages, []byte{'\r'})
-		return &job.LogLine{Timestamp: now(), Message: string(progress[0])}, readErr
+		return &LogLine{Timestamp: now(), Message: string(progress[0])}, readErr
 	}
 }
 
