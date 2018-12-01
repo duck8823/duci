@@ -15,7 +15,7 @@ type DockerRunner interface {
 // dockerRunnerImpl is a implement of DockerRunner
 type dockerRunnerImpl struct {
 	Docker
-	LogFuncs
+	LogFunc
 }
 
 // Run task in docker container
@@ -55,7 +55,7 @@ func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir string, tag dock
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	r.LogFuncs.Exec(ctx, buildLog)
+	r.LogFunc(ctx, buildLog)
 	return nil
 }
 
@@ -70,6 +70,6 @@ func (r *dockerRunnerImpl) dockerRun(ctx context.Context, dir string, tag docker
 	if err != nil {
 		return conID, errors.WithStack(err)
 	}
-	r.LogFuncs.Exec(ctx, runLog)
+	r.LogFunc(ctx, runLog)
 	return conID, nil
 }

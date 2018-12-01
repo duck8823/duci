@@ -11,20 +11,20 @@ func DefaultDockerRunnerBuilder() *builder {
 }
 
 type builder struct {
-	docker   docker.Docker
-	logFuncs LogFuncs
+	docker  docker.Docker
+	logFunc LogFunc
 }
 
 // LogFunc append a LogFunc
 func (b *builder) LogFunc(f LogFunc) *builder {
-	b.logFuncs = append(b.logFuncs, f)
+	b.logFunc = f
 	return b
 }
 
 // Build returns a docker runner
 func (b *builder) Build() *dockerRunnerImpl {
 	return &dockerRunnerImpl{
-		Docker:   b.docker,
-		LogFuncs: b.logFuncs,
+		Docker:  b.docker,
+		LogFunc: b.logFunc,
 	}
 }

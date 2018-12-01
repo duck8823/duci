@@ -11,15 +11,13 @@ import (
 
 type JobExecutor struct {
 	runner.DockerRunner
-	StartFunc []func(context.Context)
-	EndFunc   []func(context.Context, error)
+	StartFunc func(context.Context)
+	EndFunc   func(context.Context, error)
 }
 
 // Execute job
 func (r *JobExecutor) Execute(ctx context.Context, dir string, cmd ...string) error {
-	for _, f := range r.StartFunc {
-		go f(ctx)
-	}
+	r.StartFunc(ctx)
 
 	errs := make(chan error, 1)
 
@@ -28,23 +26,16 @@ func (r *JobExecutor) Execute(ctx context.Context, dir string, cmd ...string) er
 
 	go func() {
 		semaphore.Acquire()
-		errs <- r.DockerRunner.Run(timeout, dir, docker.Tag(random.String(16, random.Alphanumeric)), cmd)
+		errs <- r.DockerRunner.Run(timeout, dir, docker.Tag(random.String(16, random.Lowercase)), cmd)
 		semaphore.Release()
 	}()
 
 	select {
 	case <-timeout.Done():
-		r.executeEndFunc(ctx, timeout.Err())
+		r.EndFunc(ctx, timeout.Err())
 		return timeout.Err()
 	case err := <-errs:
-		r.executeEndFunc(ctx, err)
+		r.EndFunc(ctx, err)
 		return err
-	}
-}
-
-// executeEndFunc execute functions
-func (r *JobExecutor) executeEndFunc(ctx context.Context, err error) {
-	for _, f := range r.EndFunc {
-		go f(ctx, err)
 	}
 }
