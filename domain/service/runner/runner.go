@@ -55,9 +55,7 @@ func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir string, tag dock
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	for _, f := range r.LogFuncs {
-		go f(ctx, buildLog)
-	}
+	r.LogFuncs.Exec(ctx, buildLog)
 	return nil
 }
 
@@ -72,8 +70,6 @@ func (r *dockerRunnerImpl) dockerRun(ctx context.Context, dir string, tag docker
 	if err != nil {
 		return conID, errors.WithStack(err)
 	}
-	for _, f := range r.LogFuncs {
-		go f(ctx, runLog)
-	}
+	r.LogFuncs.Exec(ctx, runLog)
 	return conID, nil
 }

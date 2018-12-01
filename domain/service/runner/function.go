@@ -14,6 +14,6 @@ type LogFuncs []LogFunc
 // Exec execute in goroutine
 func (l LogFuncs) Exec(ctx context.Context, log Log) {
 	for _, f := range l {
-		f(ctx, log)
+		go f(ctx, log)
 	}
 }
