@@ -3,7 +3,6 @@ package runner
 import (
 	"context"
 	"github.com/duck8823/duci/domain/model/docker"
-	"github.com/duck8823/duci/domain/model/log"
 	. "github.com/duck8823/duci/domain/service/docker"
 	"github.com/pkg/errors"
 )
@@ -16,7 +15,7 @@ type DockerRunner interface {
 // dockerRunnerImpl is a implement of DockerRunner
 type dockerRunnerImpl struct {
 	Docker
-	LogFunc []func(context.Context, log.Log)
+	LogFuncs
 }
 
 // Run task in docker container
@@ -56,7 +55,7 @@ func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir string, tag dock
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	for _, f := range r.LogFunc {
+	for _, f := range r.LogFuncs {
 		go f(ctx, buildLog)
 	}
 	return nil
@@ -73,7 +72,7 @@ func (r *dockerRunnerImpl) dockerRun(ctx context.Context, dir string, tag docker
 	if err != nil {
 		return conID, errors.WithStack(err)
 	}
-	for _, f := range r.LogFunc {
+	for _, f := range r.LogFuncs {
 		go f(ctx, runLog)
 	}
 	return conID, nil
