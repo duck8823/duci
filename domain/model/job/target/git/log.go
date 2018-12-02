@@ -2,13 +2,13 @@ package git
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/runner"
 	"github.com/pkg/errors"
 	"io"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -23,6 +23,7 @@ func (l *cloneLogger) ReadLine() (*job.LogLine, error) {
 	for {
 		line, _, readErr := l.reader.ReadLine()
 		msg := string(line)
+
 		if readErr == io.EOF {
 			return &job.LogLine{Timestamp: now(), Message: msg}, readErr
 		}
@@ -30,7 +31,7 @@ func (l *cloneLogger) ReadLine() (*job.LogLine, error) {
 			return nil, errors.WithStack(readErr)
 		}
 
-		if len(line) == 0 {
+		if len(line) == 0 || rep.Match(line) {
 			continue
 		}
 
@@ -49,9 +50,8 @@ type ProgressLogger struct {
 
 // Write a log without CR or later.
 func (l *ProgressLogger) Write(p []byte) (n int, err error) {
-	msg := rep.ReplaceAllString(string(p), "")
 	log := &cloneLogger{
-		reader: bufio.NewReader(strings.NewReader(msg)),
+		reader: bufio.NewReader(bytes.NewReader(p)),
 	}
 	l.LogFunc(l.ctx, log)
 	return 0, nil
