@@ -11,14 +11,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-type JobExecutor struct {
+// Executor is job executor
+type Executor interface {
+	Execute(ctx context.Context, target job.Target, cmd ...string) error
+}
+
+type jobExecutor struct {
 	runner.DockerRunner
 	StartFunc func(context.Context)
 	EndFunc   func(context.Context, error)
 }
 
 // Execute job
-func (r *JobExecutor) Execute(ctx context.Context, target job.Target, cmd ...string) error {
+func (r *jobExecutor) Execute(ctx context.Context, target job.Target, cmd ...string) error {
 	r.StartFunc(ctx)
 
 	workDir, cleanup, err := target.Prepare()
