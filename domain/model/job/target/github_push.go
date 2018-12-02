@@ -25,12 +25,11 @@ func (g *GitHubPush) Prepare() (job.WorkDir, job.Cleanup, error) {
 		return "", nil, errors.WithStack(err)
 	}
 
-	// FIXME: switch client
-	cli := git.NewWithHTTP(func(_ context.Context, log job.Log) {
-		for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
-			println(line.Message)
-		}
-	})
+	cli, err := git.GetInstance()
+	if err != nil {
+		return "", nil, errors.WithStack(err)
+	}
+
 	if err := cli.Clone(context.Background(), tmpDir, &github.TargetSource{
 		Repository: g.Repo,
 		Ref:        g.Point.GetRef(),

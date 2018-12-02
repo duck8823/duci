@@ -7,6 +7,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
+var instance Git
+
 // TargetSource is a interface returns clone URLs, Ref and SHA for target
 type TargetSource interface {
 	GetSSHURL() string
@@ -18,6 +20,15 @@ type TargetSource interface {
 // Git describes a git service.
 type Git interface {
 	Clone(ctx context.Context, dir string, src TargetSource) error
+}
+
+// GetInstance returns a git client
+func GetInstance() (Git, error) {
+	if instance == nil {
+		return nil, errors.New("instance still not initialized.")
+	}
+
+	return instance, nil
 }
 
 func checkout(repo *git.Repository, sha plumbing.Hash) error {

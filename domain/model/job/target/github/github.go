@@ -8,6 +8,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var instance GitHub
+
 // GitHub describes a github client.
 type GitHub interface {
 	GetPullRequest(ctx context.Context, repo github.Repository, num int) (*go_github.PullRequest, error)
@@ -17,18 +19,17 @@ type client struct {
 	cli *go_github.Client
 }
 
-var instance GitHub
-
 // Initialize create a github client.
-func Initialize(token string) (GitHub, error) {
+func Initialize(token string) error {
 	if instance != nil {
-		return nil, errors.New("instance already initialized.")
+		return errors.New("instance already initialized.")
 	}
 
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(context.Background(), ts)
 
-	return &client{go_github.NewClient(tc)}, nil
+	instance = &client{go_github.NewClient(tc)}
+	return nil
 }
 
 // GetInstance returns a github client

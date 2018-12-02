@@ -15,13 +15,19 @@ type sshGitClient struct {
 	runner.LogFunc
 }
 
-// NewWithSSH returns git client with ssh protocol
-func NewWithSSH(path string, logFunc runner.LogFunc) (*sshGitClient, error) {
+// InitializeWithSSH returns git client with ssh protocol
+func InitializeWithSSH(path string, logFunc runner.LogFunc) error {
+	if instance != nil {
+		return errors.New("instance already initialized.")
+	}
+
 	auth, err := ssh.NewPublicKeysFromFile("git", path, "")
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &sshGitClient{auth: auth, LogFunc: logFunc}, nil
+
+	instance = &sshGitClient{auth: auth, LogFunc: logFunc}
+	return nil
 }
 
 // Clone a repository into the path with target source.

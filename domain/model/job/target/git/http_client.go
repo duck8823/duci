@@ -12,9 +12,14 @@ type httpGitClient struct {
 	runner.LogFunc
 }
 
-// NewWithHTTP returns git client with http protocol
-func NewWithHTTP(logFunc runner.LogFunc) *httpGitClient {
-	return &httpGitClient{LogFunc: logFunc}
+// InitializeWithHTTP initialize git client with http protocol
+func InitializeWithHTTP(logFunc runner.LogFunc) error {
+	if instance != nil {
+		return errors.New("instance already initialized.")
+	}
+
+	instance = &httpGitClient{LogFunc: logFunc}
+	return nil
 }
 
 // Clone a repository into the path with target source.
