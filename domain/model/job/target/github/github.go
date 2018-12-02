@@ -2,17 +2,20 @@ package github
 
 import (
 	"context"
-	"github.com/duck8823/duci/application/service/github"
 	go_github "github.com/google/go-github/github"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
+	"net/url"
+	"path"
 )
 
 var instance GitHub
 
 // GitHub describes a github client.
 type GitHub interface {
-	GetPullRequest(ctx context.Context, repo github.Repository, num int) (*go_github.PullRequest, error)
+	GetPullRequest(ctx context.Context, repo Repository, num int) (*go_github.PullRequest, error)
+	CreateCommitStatus(ctx context.Context, src *TargetSource, state State, description string) error
 }
 
 type client struct {
@@ -42,7 +45,7 @@ func GetInstance() (GitHub, error) {
 }
 
 // GetPullRequest returns a pull request with specific repository and number.
-func (c *client) GetPullRequest(ctx context.Context, repo github.Repository, num int) (*go_github.PullRequest, error) {
+func (c *client) GetPullRequest(ctx context.Context, repo Repository, num int) (*go_github.PullRequest, error) {
 	ownerName, repoName, err := RepositoryName(repo.GetFullName()).Split()
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -58,4 +61,44 @@ func (c *client) GetPullRequest(ctx context.Context, repo github.Repository, num
 		return nil, errors.WithStack(err)
 	}
 	return pr, nil
+}
+
+// CreateCommitStatus create commit status to github.
+func (c *client) CreateCommitStatus(ctx context.Context, src *TargetSource, state State, description string) error {
+	// TODO: key must be const
+	taskName := ctx.Value("TaskName").(string)
+	if len(description) >= 50 {
+		description = string([]rune(description)[:46]) + "..."
+	}
+
+	status := &go_github.RepoStatus{
+		Context:     &taskName,
+		Description: &description,
+		State:       &state,
+		TargetURL:   go_github.String(targetURL(ctx)),
+	}
+
+	ownerName, repoName, err := RepositoryName(src.GetFullName()).Split()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if _, _, err := c.cli.Repositories.CreateStatus(
+		ctx,
+		ownerName,
+		repoName,
+		src.GetSHA().String(),
+		status,
+	); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func targetURL(ctx context.Context) string {
+	// TODO: key must be const
+	jobID := ctx.Value("uuid").(uuid.UUID)
+	targetURL := ctx.Value("targetURL").(url.URL)
+	targetURL.Path = path.Join(targetURL.Path, "logs", jobID.String())
+	return targetURL.String()
 }
