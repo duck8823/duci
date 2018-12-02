@@ -24,6 +24,7 @@ func (r *dockerRunnerImpl) Run(ctx context.Context, dir job.WorkDir, tag docker.
 		return errors.WithStack(err)
 	}
 
+	// TODO: wait building container
 	conID, err := r.dockerRun(ctx, dir, tag, cmd)
 	if err != nil {
 		return errors.WithStack(err)

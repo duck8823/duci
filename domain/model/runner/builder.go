@@ -4,15 +4,15 @@ import (
 	"github.com/duck8823/duci/domain/model/docker"
 )
 
-// DefaultDockerRunnerBuilder create new builder of docker runner
-func DefaultDockerRunnerBuilder() *builder {
-	cli, _ := docker.New()
-	return &builder{docker: cli}
-}
-
 type builder struct {
 	docker  docker.Docker
 	logFunc LogFunc
+}
+
+// DefaultDockerRunnerBuilder create new builder of docker runner
+func DefaultDockerRunnerBuilder() *builder {
+	cli, _ := docker.New()
+	return &builder{docker: cli, logFunc: NothingToDo}
 }
 
 // LogFunc append a LogFunc
