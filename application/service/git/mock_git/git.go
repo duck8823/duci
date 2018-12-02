@@ -11,7 +11,7 @@ import (
 	reflect "reflect"
 )
 
-// MockService is a mock of Service interface
+// MockService is a mock of Git interface
 type MockService struct {
 	ctrl     *gomock.Controller
 	recorder *MockServiceMockRecorder
