@@ -98,7 +98,7 @@ func (c *client) CreateCommitStatus(ctx context.Context, src *TargetSource, stat
 func targetURL(ctx context.Context) string {
 	// TODO: key must be const
 	jobID := ctx.Value("uuid").(uuid.UUID)
-	targetURL := ctx.Value("targetURL").(url.URL)
+	targetURL := ctx.Value("targetURL").(*url.URL)
 	targetURL.Path = path.Join(targetURL.Path, "logs", jobID.String())
 	return targetURL.String()
 }
