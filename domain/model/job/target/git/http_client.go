@@ -23,7 +23,6 @@ func (s *httpGitClient) Clone(ctx context.Context, dir string, src TargetSource)
 		URL:           src.GetCloneURL(),
 		Progress:      &ProgressLogger{ctx: ctx, LogFunc: s.LogFunc},
 		ReferenceName: plumbing.ReferenceName(src.GetRef()),
-		Depth:         1,
 	})
 	if err != nil {
 		return errors.WithStack(err)

@@ -31,7 +31,6 @@ func (s *sshGitClient) Clone(ctx context.Context, dir string, src TargetSource) 
 		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx: ctx, LogFunc: s.LogFunc},
 		ReferenceName: plumbing.ReferenceName(src.GetRef()),
-		Depth:         1,
 	})
 	if err != nil {
 		return errors.WithStack(err)
