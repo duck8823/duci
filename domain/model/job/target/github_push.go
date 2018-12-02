@@ -12,7 +12,7 @@ import (
 	"path"
 )
 
-// GitHub is target with github repository
+// GitHubPush is target with github repository
 type GitHubPush struct {
 	Repo  github.Repository
 	Point github.TargetPoint
