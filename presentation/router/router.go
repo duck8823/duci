@@ -1,16 +1,22 @@
 package router
 
 import (
+	"context"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/docker"
+	"github.com/duck8823/duci/application/service/executor"
 	"github.com/duck8823/duci/application/service/git"
 	"github.com/duck8823/duci/application/service/github"
 	"github.com/duck8823/duci/application/service/logstore"
 	"github.com/duck8823/duci/application/service/runner"
+	"github.com/duck8823/duci/domain/model/job"
+	git2 "github.com/duck8823/duci/domain/model/job/target/git"
+	github2 "github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/duck8823/duci/presentation/controller"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
 	"net/http"
+	"os"
 )
 
 // New returns handler of application.
@@ -33,6 +39,32 @@ func New() (http.Handler, error) {
 	rtr.Post("/", webhooksCtrl.ServeHTTP)
 	rtr.Get("/logs/{uuid}", logCtrl.ServeHTTP)
 	rtr.Get("/health", healthCtrl.ServeHTTP)
+
+	// using new api
+	// FIXME: where initialize??
+	if err := git2.InitializeWithHTTP(func(ctx context.Context, log job.Log) {
+		for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
+			println(line.Message)
+		}
+	}); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	if err := github2.Initialize(os.Getenv("GITHUB_TOKEN")); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	webhook := &controller.WebhookHandler{
+		Executor: executor.DefaultExecutorBuilder().
+			LogFunc(func(ctx context.Context, log job.Log) {
+				for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
+					println(line.Message)
+				}
+			}).
+			Build(),
+	}
+
+	rtr.Post("/webhook", webhook.ServeHTTP)
 
 	return rtr, nil
 }
