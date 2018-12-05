@@ -13,6 +13,7 @@ import (
 	git2 "github.com/duck8823/duci/domain/model/job/target/git"
 	github2 "github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/duck8823/duci/presentation/controller"
+	webhook2 "github.com/duck8823/duci/presentation/controller/webhook"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
 	"net/http"
@@ -54,7 +55,7 @@ func New() (http.Handler, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	webhook := &controller.WebhookHandler{
+	webhook := &webhook2.Handler{
 		Executor: executor.DefaultExecutorBuilder().
 			LogFunc(func(ctx context.Context, log job.Log) {
 				for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
