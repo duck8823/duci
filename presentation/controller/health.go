@@ -13,7 +13,7 @@ type HealthController struct {
 // ServeHTTP responses a server status
 func (c *HealthController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := c.Docker.Status(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)

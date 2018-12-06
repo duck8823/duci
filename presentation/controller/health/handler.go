@@ -13,7 +13,7 @@ type Handler struct {
 // ServeHTTP responses a server status
 func (c *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := c.Docker.Status(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
