@@ -46,5 +46,5 @@ type ID uuid.UUID
 
 // ToSlice returns slice value
 func (i ID) ToSlice() []byte {
-	return []byte(i[:])
+	return []byte(uuid.UUID(i).String())
 }
