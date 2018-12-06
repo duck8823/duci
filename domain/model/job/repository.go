@@ -4,6 +4,6 @@ package job
 type Repository interface {
 	Get(ID) (*Job, error)
 	Start(ID) error
-	Append(ID, *LogLine) error
+	Append(ID, LogLine) error
 	Finish(ID) error
 }

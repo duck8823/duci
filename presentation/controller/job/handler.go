@@ -12,7 +12,7 @@ import (
 )
 
 type Handler struct {
-	service job_service.Service
+	Service job_service.Service
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +40,7 @@ func (h *Handler) logs(w http.ResponseWriter, id ID) error {
 	var job *Job
 	var err error
 	for {
-		job, err = h.service.FindBy(id)
+		job, err = h.Service.FindBy(id)
 		if err != nil {
 			return errors.WithStack(err)
 		}
