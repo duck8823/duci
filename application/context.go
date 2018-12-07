@@ -3,15 +3,15 @@ package application
 import (
 	"context"
 	"fmt"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
-	"github.com/google/uuid"
 	"net/url"
 )
 
 var ctxKey = "duci_job"
 
 type BuildJob struct {
-	ID           uuid.UUID
+	ID           job.ID
 	TargetSource *github.TargetSource
 	TaskName     string
 	TargetURL    *url.URL
@@ -24,9 +24,9 @@ func ContextWithJob(parent context.Context, job *BuildJob) context.Context {
 
 // BuildJobFromContext extract BuildJob from context
 func BuildJobFromContext(ctx context.Context) (*BuildJob, error) {
-	job := ctx.Value(ctxKey)
-	if job == nil {
+	val := ctx.Value(ctxKey)
+	if val == nil {
 		return nil, fmt.Errorf("context value '%s' should not be null", ctxKey)
 	}
-	return ctx.Value(ctxKey).(*BuildJob), nil
+	return val.(*BuildJob), nil
 }

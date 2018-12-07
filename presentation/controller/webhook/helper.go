@@ -3,6 +3,7 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
@@ -11,14 +12,14 @@ import (
 	"net/url"
 )
 
-func reqID(r *http.Request) (uuid.UUID, error) {
+func reqID(r *http.Request) (job.ID, error) {
 	deliveryID := go_github.DeliveryID(r)
 	requestID, err := uuid.Parse(deliveryID)
 	if err != nil {
 		msg := fmt.Sprintf("Error: invalid request header `X-GitHub-Delivery`: %+v", deliveryID)
-		return uuid.New(), errors.Wrap(err, msg)
+		return job.ID{}, errors.Wrap(err, msg)
 	}
-	return requestID, nil
+	return job.ID(requestID), nil
 }
 
 func targetURL(r *http.Request) *url.URL {

@@ -50,13 +50,12 @@ func New() (http.Handler, error) {
 		Executor: executor.DefaultExecutorBuilder().
 			StartFunc(func(ctx context.Context) {
 				buildJob, err := application.BuildJobFromContext(ctx)
-				id := job.ID(buildJob.ID)
 				if err != nil {
-					_ = jobService.Append(id, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+					_ = jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
 					return
 				}
-				if err := jobService.Start(id); err != nil {
-					_ = jobService.Append(id, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+				if err := jobService.Start(buildJob.ID); err != nil {
+					_ = jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
 					return
 				}
 				_ = gh.CreateCommitStatus(ctx, github.CommitStatus{
@@ -69,24 +68,22 @@ func New() (http.Handler, error) {
 			}).
 			LogFunc(func(ctx context.Context, log job.Log) {
 				buildJob, err := application.BuildJobFromContext(ctx)
-				id := job.ID(buildJob.ID)
 				if err != nil {
-					_ = jobService.Append(id, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+					_ = jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
 					return
 				}
 				for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
 					println(line.Message)
-					_ = jobService.Append(id, *line)
+					_ = jobService.Append(buildJob.ID, *line)
 				}
 			}).
 			EndFunc(func(ctx context.Context, e error) {
 				buildJob, err := application.BuildJobFromContext(ctx)
-				id := job.ID(buildJob.ID)
 				if err != nil {
-					_ = jobService.Append(id, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+					_ = jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
 					return
 				}
-				if err := jobService.Finish(id); err != nil {
+				if err := jobService.Finish(buildJob.ID); err != nil {
 					println(fmt.Sprintf("%+v", err))
 					return
 				}
