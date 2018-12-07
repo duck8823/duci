@@ -3,8 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/duck8823/duci/application"
-	"github.com/duck8823/duci/infrastructure/logger"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -42,7 +40,7 @@ func readConfiguration(cmd *cobra.Command) {
 	}
 
 	if err := application.Config.Set(configFilePath); err != nil {
-		logger.Errorf(uuid.New(), "Failed to set configuration.\n%+v", err)
+		println(fmt.Sprintf("Failed to set configuration.\n%+v", err))
 		os.Exit(1)
 	}
 }
