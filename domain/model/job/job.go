@@ -1,7 +1,6 @@
 package job
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -9,6 +8,7 @@ import (
 
 // Job represents a task
 type Job struct {
+	ID       ID
 	Finished bool      `json:"finished"`
 	Stream   []LogLine `json:"stream"`
 }
@@ -30,15 +30,6 @@ func (j *Job) ToBytes() ([]byte, error) {
 		return nil, errors.WithStack(err)
 	}
 	return data, nil
-}
-
-// NewJob returns unmarshal Job instance
-func NewJob(data []byte) (*Job, error) {
-	job := &Job{}
-	if err := json.NewDecoder(bytes.NewReader(data)).Decode(job); err != nil {
-		return nil, errors.WithStack(err)
-	}
-	return job, nil
 }
 
 // ID is the identifier of job

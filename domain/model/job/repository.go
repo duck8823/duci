@@ -1,9 +1,11 @@
 package job
 
+import "errors"
+
+var NotFound = errors.New("job not found")
+
 // Repository is Job Repository
 type Repository interface {
-	Get(ID) (*Job, error)
-	Start(ID) error
-	Append(ID, LogLine) error
-	Finish(ID) error
+	FindBy(ID) (*Job, error)
+	Save(Job) error
 }
