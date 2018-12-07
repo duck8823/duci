@@ -9,6 +9,9 @@ import (
 
 type Service interface {
 	FindBy(id ID) (*Job, error)
+	Start(id ID) error
+	Append(id ID, line LogLine) error
+	Finish(id ID) error
 }
 
 type serviceImpl struct {
@@ -30,4 +33,25 @@ func (s *serviceImpl) FindBy(id ID) (*Job, error) {
 		return nil, errors.WithStack(err)
 	}
 	return job, nil
+}
+
+func (s *serviceImpl) Start(id ID) error {
+	if err := s.repo.Start(id); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (s *serviceImpl) Append(id ID, line LogLine) error {
+	if err := s.repo.Append(id, line); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (s *serviceImpl) Finish(id ID) error {
+	if err := s.repo.Finish(id); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
