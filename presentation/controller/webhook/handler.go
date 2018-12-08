@@ -111,13 +111,10 @@ func (h *Handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	if err := h.Executor.Execute(ctx, &target.GitHubPush{
+	go h.Executor.Execute(ctx, &target.GitHubPush{
 		Repo:  event.GetRepo(),
 		Point: pnt,
-	}, phrase.Command()...); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	}, phrase.Command()...)
 
 	w.WriteHeader(http.StatusOK)
 }
