@@ -11,8 +11,8 @@ func (t Tag) String() string {
 // Command describes a docker CMD
 type Command []string
 
-// ToSlice returns slice values
-func (c Command) ToSlice() []string {
+// Slice returns slice values
+func (c Command) Slice() []string {
 	return []string(c)
 }
 

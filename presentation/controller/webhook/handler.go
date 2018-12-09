@@ -126,7 +126,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 			Ref:        pnt.GetRef(),
 			SHA:        plumbing.NewHash(pnt.GetHead()),
 		},
-		TaskName:  fmt.Sprintf("%s/pr/%s", application.Name, phrase.Command().ToSlice()[0]),
+		TaskName:  fmt.Sprintf("%s/pr/%s", application.Name, phrase.Command().Slice()[0]),
 		TargetURL: targetURL(r),
 	})
 

@@ -52,9 +52,9 @@ func (c *client) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile 
 func (c *client) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag.String(),
-		Env:     opts.Environments.ToArray(),
-		Volumes: opts.Volumes.ToMap(),
-		Cmd:     cmd.ToSlice(),
+		Env:     opts.Environments.Array(),
+		Volumes: opts.Volumes.Map(),
+		Cmd:     cmd.Slice(),
 	}, &container.HostConfig{
 		Binds: opts.Volumes,
 	}, nil, "")
