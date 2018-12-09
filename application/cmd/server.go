@@ -33,21 +33,21 @@ func runServer(cmd *cobra.Command, _ []string) {
 	}
 
 	if err := semaphore.Make(); err != nil {
-		println("Failed to initialize a semaphore.\n%+v", err)
+		println(fmt.Sprintf("Failed to initialize a semaphore.\n%+v", err))
 		os.Exit(1)
 		return
 	}
 
 	rtr, err := router.New()
 	if err != nil {
-		println("Failed to initialize controllers.\n%+v", err)
+		println(fmt.Sprintf("Failed to initialize controllers.\n%+v", err))
 		os.Exit(1)
 		return
 	}
 
 	println(logo)
 	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
-		println("Failed to run server.\n%+v", err)
+		println(fmt.Sprintf("Failed to run server.\n%+v", err))
 		os.Exit(1)
 		return
 	}
