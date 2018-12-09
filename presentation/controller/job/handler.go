@@ -11,11 +11,19 @@ import (
 	"net/http"
 )
 
-type Handler struct {
-	Service job_service.Service
+type handler struct {
+	service job_service.Service
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func NewHandler() (*handler, error) {
+	service, err := job_service.GetInstance()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return &handler{service: service}, nil
+}
+
+func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	id, err := uuid.Parse(chi.URLParam(r, "uuid"))
@@ -30,17 +38,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) logs(w http.ResponseWriter, id ID) error {
+func (h *handler) logs(w http.ResponseWriter, id ID) error {
 	f, ok := w.(http.Flusher)
 	if !ok {
 		return errors.New("Streaming unsupported!")
 	}
 
+	// TODO: add timeout
 	var read int
-	var job *Job
-	var err error
 	for {
-		job, err = h.Service.FindBy(id)
+		job, err := h.service.FindBy(id)
 		if err != nil {
 			return errors.WithStack(err)
 		}

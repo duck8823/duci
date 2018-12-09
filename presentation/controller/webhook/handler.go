@@ -5,21 +5,32 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/duck8823/duci/application"
+	"github.com/duck8823/duci/application/duci"
 	"github.com/duck8823/duci/application/service/executor"
 	"github.com/duck8823/duci/domain/model/job/target"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	go_github "github.com/google/go-github/github"
+	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 )
 
 type SkipBuild error
 
-type Handler struct {
-	Executor executor.Executor
+type handler struct {
+	executor executor.Executor
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func NewHandler() (*handler, error) {
+	executor, err := duci.New()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &handler{executor: executor}, nil
+}
+
+func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	event := r.Header.Get("X-GitHub-Event")
 	switch event {
 	case "push":
@@ -33,7 +44,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) PushEvent(w http.ResponseWriter, r *http.Request) {
+func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 	event := &go_github.PushEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -57,7 +68,7 @@ func (h *Handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	if err := h.Executor.Execute(ctx, &target.GitHubPush{
+	if err := h.executor.Execute(ctx, &target.GitHubPush{
 		Repo:  event.GetRepo(),
 		Point: event,
 	}); err != nil {
@@ -68,7 +79,7 @@ func (h *Handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *Handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
+func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 	event := &go_github.IssueCommentEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -111,7 +122,7 @@ func (h *Handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	go h.Executor.Execute(ctx, &target.GitHubPush{
+	go h.executor.Execute(ctx, &target.GitHubPush{
 		Repo:  event.GetRepo(),
 		Point: pnt,
 	}, phrase.Command()...)

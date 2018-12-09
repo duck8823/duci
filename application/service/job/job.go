@@ -1,7 +1,6 @@
 package job_service
 
 import (
-	"github.com/duck8823/duci/application"
 	. "github.com/duck8823/duci/domain/model/job"
 	. "github.com/duck8823/duci/infrastructure/job"
 	"github.com/pkg/errors"
@@ -14,17 +13,31 @@ type Service interface {
 	Finish(id ID) error
 }
 
+var instance *serviceImpl
+
 type serviceImpl struct {
 	repo Repository
 }
 
-func New() (Service, error) {
-	dataSource, err := NewDataSource(application.Config.Server.DatabasePath)
-	if err != nil {
-		return nil, errors.WithStack(err)
+func Initialize(path string) error {
+	if instance != nil {
+		return errors.New("instance already initialized.")
 	}
 
-	return &serviceImpl{repo: dataSource}, nil
+	dataSource, err := NewDataSource(path)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	instance = &serviceImpl{repo: dataSource}
+	return nil
+}
+
+func GetInstance() (Service, error) {
+	if instance == nil {
+		return nil, errors.New("instance still not initialized.")
+	}
+	return instance, nil
 }
 
 func (s *serviceImpl) FindBy(id ID) (*Job, error) {
