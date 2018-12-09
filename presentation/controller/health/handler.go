@@ -6,11 +6,11 @@ import (
 	"net/http"
 )
 
-// handler of health check.
 type handler struct {
 	docker docker.Docker
 }
 
+// NewHandler returns implement of health check handler
 func NewHandler() (*handler, error) {
 	docker, err := docker.New()
 	if err != nil {

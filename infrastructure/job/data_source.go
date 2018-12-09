@@ -12,6 +12,7 @@ type dataSource struct {
 	db LevelDB
 }
 
+// NewDataSource returns job data source
 func NewDataSource(path string) (*dataSource, error) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
@@ -20,6 +21,7 @@ func NewDataSource(path string) (*dataSource, error) {
 	return &dataSource{db}, nil
 }
 
+// FindBy returns job found by ID
 func (d *dataSource) FindBy(id ID) (*Job, error) {
 	data, err := d.db.Get(id.ToSlice(), nil)
 	if err == leveldb.ErrNotFound {
@@ -36,6 +38,7 @@ func (d *dataSource) FindBy(id ID) (*Job, error) {
 	return job, nil
 }
 
+// Save store job to data source
 func (d *dataSource) Save(job Job) error {
 	data, err := job.ToBytes()
 	if err != nil {

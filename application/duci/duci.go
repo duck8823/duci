@@ -19,6 +19,7 @@ type duci struct {
 	github     github.GitHub
 }
 
+// New returns duci instance
 func New() (*duci, error) {
 	jobService, err := job_service.GetInstance()
 	if err != nil {
@@ -41,6 +42,7 @@ func New() (*duci, error) {
 	return duci, nil
 }
 
+// Start represents a function of start job
 func (d *duci) Start(ctx context.Context) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
@@ -60,6 +62,7 @@ func (d *duci) Start(ctx context.Context) {
 	})
 }
 
+// AppendLog is a function that print and store log
 func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
@@ -72,6 +75,7 @@ func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 	}
 }
 
+// End represents a function
 func (d *duci) End(ctx context.Context, e error) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {

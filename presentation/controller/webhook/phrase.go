@@ -8,6 +8,7 @@ import (
 
 type phrase string
 
+// Command returns command of docker
 func (p phrase) Command() docker.Command {
 	return strings.Split(string(p), " ")
 }

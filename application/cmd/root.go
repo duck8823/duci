@@ -13,6 +13,7 @@ func init() {
 	rootCmd.AddCommand(serverCmd, configCmd, healthCmd, versionCmd)
 }
 
+// Execute command
 func Execute(args []string) {
 	rootCmd.SetArgs(args)
 	if err := rootCmd.Execute(); err != nil {

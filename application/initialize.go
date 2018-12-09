@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Initialize singleton instances that are needed by application
 func Initialize() error {
 	if err := git.InitializeWithHTTP(func(ctx context.Context, log job.Log) {
 		for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {

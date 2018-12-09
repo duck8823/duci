@@ -15,6 +15,7 @@ type handler struct {
 	service job_service.Service
 }
 
+// NewHandler returns implement of job
 func NewHandler() (*handler, error) {
 	service, err := job_service.GetInstance()
 	if err != nil {
@@ -23,6 +24,7 @@ func NewHandler() (*handler, error) {
 	return &handler{service: service}, nil
 }
 
+// ServeHTTP responses log stream
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 

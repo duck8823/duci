@@ -10,6 +10,7 @@ import (
 
 var ctxKey = "duci_job"
 
+// BuildJob represents once of job
 type BuildJob struct {
 	ID           job.ID
 	TargetSource *github.TargetSource

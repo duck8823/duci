@@ -15,12 +15,14 @@ import (
 	"net/http"
 )
 
+// SkipBuild represents error of skip build
 var SkipBuild = errors.New("Skip build")
 
 type handler struct {
 	executor executor.Executor
 }
 
+// NewHandler returns a implement of webhook handler
 func NewHandler() (*handler, error) {
 	executor, err := duci.New()
 	if err != nil {
@@ -30,6 +32,7 @@ func NewHandler() (*handler, error) {
 	return &handler{executor: executor}, nil
 }
 
+// ServeHTTP receives github event
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	event := r.Header.Get("X-GitHub-Event")
 	switch event {
@@ -44,6 +47,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// PushEvent receives github push event
 func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 	event := &go_github.PushEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
@@ -79,6 +83,7 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// IssueCommentEvent receives github issue comment event
 func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 	event := &go_github.IssueCommentEvent{}
 	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
