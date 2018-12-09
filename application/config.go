@@ -32,7 +32,7 @@ func (s maskString) MarshalJSON() ([]byte, error) {
 }
 
 // ToString returns unmasked string.
-func (s maskString) ToString() string {
+func (s maskString) String() string {
 	return string(s)
 }
 

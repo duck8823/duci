@@ -5,7 +5,7 @@ import "net/url"
 // State represents state of commit status
 type State string
 
-func (s State) ToString() string {
+func (s State) String() string {
 	return string(s)
 }
 

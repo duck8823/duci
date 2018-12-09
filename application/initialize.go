@@ -19,7 +19,7 @@ func Initialize() error {
 		return errors.WithStack(err)
 	}
 
-	if err := github.Initialize(Config.GitHub.APIToken.ToString()); err != nil {
+	if err := github.Initialize(Config.GitHub.APIToken.String()); err != nil {
 		return errors.WithStack(err)
 	}
 

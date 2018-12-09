@@ -65,7 +65,7 @@ func (c *client) CreateCommitStatus(ctx context.Context, status CommitStatus) er
 	repoStatus := &go_github.RepoStatus{
 		Context:     go_github.String(status.Context),
 		Description: go_github.String(status.Description.TrimmedString()),
-		State:       go_github.String(status.State.ToString()),
+		State:       go_github.String(status.State.String()),
 		TargetURL:   go_github.String(status.TargetURL.String()),
 	}
 

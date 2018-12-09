@@ -36,8 +36,8 @@ func New() (Docker, error) {
 // Build a docker image.
 func (c *client) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error) {
 	opts := types.ImageBuildOptions{
-		Tags:       []string{tag.ToString()},
-		Dockerfile: dockerfile.ToString(),
+		Tags:       []string{tag.String()},
+		Dockerfile: dockerfile.String(),
 		Remove:     true,
 	}
 	resp, err := c.moby.ImageBuild(ctx, file, opts)
@@ -51,7 +51,7 @@ func (c *client) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile 
 // Run docker container with command.
 func (c *client) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
-		Image:   tag.ToString(),
+		Image:   tag.String(),
 		Env:     opts.Environments.ToArray(),
 		Volumes: opts.Volumes.ToMap(),
 		Cmd:     cmd.ToSlice(),
@@ -80,7 +80,7 @@ func (c *client) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Comm
 
 // RemoveContainer remove docker container.
 func (c *client) RemoveContainer(ctx context.Context, conID ContainerID) error {
-	if err := c.moby.ContainerRemove(ctx, conID.ToString(), types.ContainerRemoveOptions{}); err != nil {
+	if err := c.moby.ContainerRemove(ctx, conID.String(), types.ContainerRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -88,7 +88,7 @@ func (c *client) RemoveContainer(ctx context.Context, conID ContainerID) error {
 
 // RemoveImage remove docker image.
 func (c *client) RemoveImage(ctx context.Context, tag Tag) error {
-	if _, err := c.moby.ImageRemove(ctx, tag.ToString(), types.ImageRemoveOptions{}); err != nil {
+	if _, err := c.moby.ImageRemove(ctx, tag.String(), types.ImageRemoveOptions{}); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -96,7 +96,7 @@ func (c *client) RemoveImage(ctx context.Context, tag Tag) error {
 
 // ExitCode returns exit code specific container id.
 func (c *client) ExitCode(ctx context.Context, conID ContainerID) (ExitCode, error) {
-	body, err := c.moby.ContainerWait(ctx, conID.ToString(), container.WaitConditionNotRunning)
+	body, err := c.moby.ContainerWait(ctx, conID.String(), container.WaitConditionNotRunning)
 	select {
 	case b := <-body:
 		return ExitCode(b.StatusCode), nil

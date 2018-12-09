@@ -4,7 +4,7 @@ package docker
 type Tag string
 
 // ToString return string value
-func (t Tag) ToString() string {
+func (t Tag) String() string {
 	return string(t)
 }
 
@@ -20,7 +20,7 @@ func (c Command) ToSlice() []string {
 type Dockerfile string
 
 // ToString returns string value
-func (d Dockerfile) ToString() string {
+func (d Dockerfile) String() string {
 	return string(d)
 }
 
@@ -28,7 +28,7 @@ func (d Dockerfile) ToString() string {
 type ContainerID string
 
 // ToString returns string value
-func (c ContainerID) ToString() string {
+func (c ContainerID) String() string {
 	return string(c)
 }
 

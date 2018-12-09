@@ -6,7 +6,7 @@ type Target interface {
 
 type WorkDir string
 
-func (w WorkDir) ToString() string {
+func (w WorkDir) String() string {
 	return string(w)
 }
 
