@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/presentation/router"
@@ -24,6 +25,12 @@ var (
 
 func runServer(cmd *cobra.Command, _ []string) {
 	readConfiguration(cmd)
+
+	if err := application.Initialize(); err != nil {
+		println(fmt.Sprintf("Failed to initialize a semaphore.\n%+v", err))
+		os.Exit(1)
+		return
+	}
 
 	if err := semaphore.Make(); err != nil {
 		println("Failed to initialize a semaphore.\n%+v", err)
