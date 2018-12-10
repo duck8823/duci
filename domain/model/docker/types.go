@@ -37,5 +37,5 @@ type ExitCode int64
 
 // IsFailure returns whether failure code or not
 func (c ExitCode) IsFailure() bool {
-	return c != 1
+	return c != 0
 }
