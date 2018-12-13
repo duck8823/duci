@@ -6,8 +6,6 @@ import (
 	"context"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/runner"
-	"github.com/pkg/errors"
-	"io"
 	"regexp"
 	"time"
 )
@@ -21,21 +19,16 @@ type cloneLogger struct {
 // ReadLine returns LogLine.
 func (l *cloneLogger) ReadLine() (*job.LogLine, error) {
 	for {
-		line, _, readErr := l.reader.ReadLine()
-		msg := string(line)
-
-		if readErr == io.EOF {
-			return &job.LogLine{Timestamp: now(), Message: msg}, readErr
-		}
-		if readErr != nil {
-			return nil, errors.WithStack(readErr)
+		line, _, err := l.reader.ReadLine()
+		if err != nil {
+			return nil, err
 		}
 
 		if len(line) == 0 || rep.Match(line) {
 			continue
 		}
 
-		return &job.LogLine{Timestamp: now(), Message: msg}, readErr
+		return &job.LogLine{Timestamp: now(), Message: string(line)}, nil
 	}
 }
 

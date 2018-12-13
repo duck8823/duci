@@ -32,7 +32,7 @@ func InitializeWithSSH(path string, logFunc runner.LogFunc) error {
 
 // Clone a repository into the path with target source.
 func (s *sshGitClient) Clone(ctx context.Context, dir string, src TargetSource) error {
-	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
+	gitRepository, err := plainClone(dir, false, &git.CloneOptions{
 		URL:           src.GetSSHURL(),
 		Auth:          s.auth,
 		Progress:      &ProgressLogger{ctx: ctx, LogFunc: s.LogFunc},

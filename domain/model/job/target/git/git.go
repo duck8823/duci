@@ -9,6 +9,8 @@ import (
 
 var instance Git
 
+var plainClone = git.PlainClone
+
 // TargetSource is a interface returns clone URLs, Ref and SHA for target
 type TargetSource interface {
 	GetSSHURL() string

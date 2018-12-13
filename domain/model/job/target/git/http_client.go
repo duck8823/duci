@@ -24,7 +24,7 @@ func InitializeWithHTTP(logFunc runner.LogFunc) error {
 
 // Clone a repository into the path with target source.
 func (s *httpGitClient) Clone(ctx context.Context, dir string, src TargetSource) error {
-	gitRepository, err := git.PlainClone(dir, false, &git.CloneOptions{
+	gitRepository, err := plainClone(dir, false, &git.CloneOptions{
 		URL:           src.GetCloneURL(),
 		Progress:      &ProgressLogger{ctx: ctx, LogFunc: s.LogFunc},
 		ReferenceName: plumbing.ReferenceName(src.GetRef()),
