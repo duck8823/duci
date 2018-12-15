@@ -12,8 +12,8 @@ func (s State) String() string {
 type Description string
 
 func (d Description) TrimmedString() string {
-	if len(d) >= 50 {
-		return string([]rune(d)[:46]) + "..."
+	if len(d) > 50 {
+		return string([]rune(d)[:47]) + "..."
 	}
 	return string(d)
 }
