@@ -13,30 +13,40 @@ import (
 	"path"
 )
 
-// GitHubPush is target with github repository
-type GitHubPush struct {
+// githubPush is target with github repository
+type githubPush struct {
+	git   git.Git
 	Repo  github.Repository
 	Point github.TargetPoint
 }
 
-// Prepare working directory
-func (g *GitHubPush) Prepare() (job.WorkDir, job.Cleanup, error) {
-	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
-	if err := os.MkdirAll(tmpDir, 0700); err != nil {
-		return "", nil, errors.WithStack(err)
-	}
-
+// NewGitHubPush returns target for github push event
+func NewGithubPush(repo github.Repository, point github.TargetPoint) (*githubPush, error) {
 	cli, err := git.GetInstance()
 	if err != nil {
-		return "", nil, errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
-	if err := cli.Clone(context.Background(), tmpDir, &github.TargetSource{
+	return &githubPush{
+		git:   cli,
+		Repo:  repo,
+		Point: point,
+	}, nil
+}
+
+// Prepare working directory
+func (g *githubPush) Prepare() (job.WorkDir, job.Cleanup, error) {
+	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
+	if err := os.MkdirAll(tmpDir, 0700); err != nil {
+		return "", cleanupFunc(tmpDir), errors.WithStack(err)
+	}
+
+	if err := g.git.Clone(context.Background(), tmpDir, &github.TargetSource{
 		Repository: g.Repo,
 		Ref:        fmt.Sprintf("refs/heads/%s", g.Point.GetRef()),
 		SHA:        plumbing.NewHash(g.Point.GetHead()),
 	}); err != nil {
-		return "", nil, errors.WithStack(err)
+		return "", cleanupFunc(tmpDir), errors.WithStack(err)
 	}
 
 	return job.WorkDir(tmpDir), cleanupFunc(tmpDir), nil

@@ -10,19 +10,24 @@ import (
 	"path"
 )
 
-// Local is target with local directory
-type Local struct {
-	Path string
+// local is target with local directory
+type local struct {
+	path string
+}
+
+// NewLocal returns target for local
+func NewLocal(path string) job.Target {
+	return &local{path: path}
 }
 
 // Prepare working directory
-func (l *Local) Prepare() (job.WorkDir, job.Cleanup, error) {
+func (l *local) Prepare() (job.WorkDir, job.Cleanup, error) {
 	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
 	if err := os.MkdirAll(tmpDir, 0700); err != nil {
 		return "", nil, errors.WithStack(err)
 	}
 
-	if err := copyDir(tmpDir, l.Path); err != nil {
+	if err := copyDir(tmpDir, l.path); err != nil {
 		return "", nil, errors.WithStack(err)
 	}
 
