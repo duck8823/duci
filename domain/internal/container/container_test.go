@@ -77,6 +77,29 @@ func TestSubmit(t *testing.T) {
 
 }
 
+func TestOverride(t *testing.T) {
+	// given
+	ins := &container.SingletonContainer{}
+	defer ins.SetValues(map[string]interface{}{
+		"string": "hoge",
+	})()
+	defer container.SetInstance(ins)()
+
+	// and
+	want := map[string]interface{}{
+		"string": "test",
+	}
+
+	// when
+	container.Override("test")
+
+	// then
+	if !cmp.Equal(ins.GetValues(), want) {
+		t.Errorf("must be equal, but %+v", cmp.Diff(ins.GetValues(), want))
+	}
+
+}
+
 func TestGet(t *testing.T) {
 	// given
 	ins := &container.SingletonContainer{}

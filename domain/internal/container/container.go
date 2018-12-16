@@ -34,6 +34,19 @@ func Submit(val interface{}) error {
 	return nil
 }
 
+// Override an instance to container
+func Override(val interface{}) {
+	var key string
+	if reflect.TypeOf(val).Kind() == reflect.Ptr {
+		key = reflect.Indirect(reflect.ValueOf(val)).Type().String()
+	} else {
+		key = reflect.ValueOf(val).Type().String()
+	}
+
+	instance.values[key] = val
+	return
+}
+
 // Get an instance from container
 func Get(ptr interface{}) error {
 	val := reflect.ValueOf(ptr)
