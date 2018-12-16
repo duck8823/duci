@@ -1,6 +1,7 @@
 package git_test
 
 import (
+	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/google/go-cmp/cmp"
 	"testing"
@@ -9,7 +10,7 @@ import (
 func TestGetInstance(t *testing.T) {
 	t.Run("when instance is nil", func(t *testing.T) {
 		// given
-		defer git.SetInstance(nil)()
+		container.Clear()
 
 		// when
 		got, err := git.GetInstance()
@@ -30,7 +31,8 @@ func TestGetInstance(t *testing.T) {
 		want := &git.HttpGitClient{}
 
 		// and
-		defer git.SetInstance(want)()
+		container.Override(want)
+		defer container.Clear()
 
 		// when
 		got, err := git.GetInstance()

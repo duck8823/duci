@@ -3,6 +3,7 @@ package git_test
 import (
 	"context"
 	"errors"
+	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/runner"
@@ -18,7 +19,7 @@ import (
 func TestInitializeWithHTTP(t *testing.T) {
 	t.Run("when instance is nil", func(t *testing.T) {
 		// given
-		defer git.SetInstance(nil)()
+		container.Clear()
 
 		// when
 		err := git.InitializeWithHTTP(func(_ context.Context, _ job.Log) {})
@@ -31,7 +32,8 @@ func TestInitializeWithHTTP(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		defer git.SetInstance(&git.HttpGitClient{})()
+		container.Override(&git.HttpGitClient{})
+		defer container.Clear()
 
 		// when
 		err := git.InitializeWithHTTP(func(_ context.Context, _ job.Log) {})

@@ -77,6 +77,74 @@ func TestSubmit(t *testing.T) {
 
 }
 
+func TestGet(t *testing.T) {
+	// given
+	ins := &container.SingletonContainer{}
+	defer ins.SetValues(map[string]interface{}{
+		"string":                  "value",
+		"int":                     1234,
+		"float64":                 12.34,
+		"container_test.testImpl": &testImpl{Name: "hoge"},
+	})()
+	defer container.SetInstance(ins)()
+
+	// where
+	for _, tt := range []struct {
+		in   interface{}
+		want interface{}
+		err  bool
+	}{
+		{
+			in:   new(string),
+			want: "value",
+		},
+		{
+			in:   new(int),
+			want: 1234,
+		},
+		{
+			in:   new(float64),
+			want: 12.34,
+		},
+		{
+			in:   new(hoge),
+			want: hoge(""),
+			err:  true,
+		},
+		{
+			in:   new(testImpl),
+			want: testImpl{Name: "hoge"},
+		},
+		{
+			in:   new(testInterface),
+			want: &testImpl{Name: "hoge"},
+		},
+		{
+			in:  new(testInterfaceNothing),
+			err: true,
+		},
+	} {
+		t.Run(fmt.Sprintf("type=%s", reflect.TypeOf(tt.in).String()), func(t *testing.T) {
+			// when
+			err := container.Get(tt.in)
+			got := Value(tt.in)
+
+			// then
+			if tt.err && err == nil {
+				t.Error("must not be nil")
+			}
+			if !tt.err && err != nil {
+				t.Errorf("must be nil, but got %+v", err)
+			}
+
+			// and
+			if !cmp.Equal(got, tt.want) {
+				t.Errorf("must be equal, but %+v", cmp.Diff(got, tt.want))
+			}
+		})
+	}
+}
+
 func TestOverride(t *testing.T) {
 	// given
 	ins := &container.SingletonContainer{}
@@ -100,71 +168,23 @@ func TestOverride(t *testing.T) {
 
 }
 
-func TestGet(t *testing.T) {
+func TestClear(t *testing.T) {
 	// given
+	want := make(map[string]interface{})
+
+	// and
 	ins := &container.SingletonContainer{}
 	defer ins.SetValues(map[string]interface{}{
-		"string":   "value",
-		"int":      1234,
-		"float64":  12.34,
-		"container_test.testImpl": &testImpl{Name: "hoge"},
+		"string": "hoge",
 	})()
 	defer container.SetInstance(ins)()
 
-	// where
-	for _, tt := range []struct {
-		in   interface{}
-		want interface{}
-		err  bool
-	}{
-		{
-			in: new(string),
-			want: "value",
-		},
-		{
-			in: new(int),
-			want: 1234,
-		},
-		{
-			in: new(float64),
-			want: 12.34,
-		},
-		{
-			in: new(hoge),
-			want: hoge(""),
-			err: true,
-		},
-		{
-			in: new(testImpl),
-			want: testImpl{Name: "hoge"},
-		},
-		{
-			in: new(testInterface),
-			want: &testImpl{Name: "hoge"},
-		},
-		{
-			in: new(testInterfaceNothing),
-			err: true,
-		},
-	} {
-		t.Run(fmt.Sprintf("type=%s", reflect.TypeOf(tt.in).String()), func(t *testing.T) {
-			// when
-			err := container.Get(tt.in)
-			got := Value(tt.in)
+	// when
+	container.Clear()
 
-			// then
-			if tt.err && err == nil {
-				t.Error("must not be nil")
-			}
-			if !tt.err && err != nil {
-				t.Errorf("must be nil, but got %+v", err)
-			}
-
-			// and
-			if !cmp.Equal(got, tt.want) {
-				t.Errorf("must be equal, but %+v", cmp.Diff(got, tt.want))
-			}
-		})
+	// then
+	if !cmp.Equal(ins.GetValues(), want) {
+		t.Errorf("must be equal, but %+v", cmp.Diff(ins.GetValues(), want))
 	}
 }
 

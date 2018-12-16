@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/runner"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
@@ -17,16 +18,14 @@ type sshGitClient struct {
 
 // InitializeWithSSH returns git client with ssh protocol
 func InitializeWithSSH(path string, logFunc runner.LogFunc) error {
-	if instance != nil {
-		return errors.New("instance already initialized.")
-	}
-
 	auth, err := ssh.NewPublicKeysFromFile("git", path, "")
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
-	instance = &sshGitClient{auth: auth, LogFunc: logFunc}
+	if err := container.Submit(&sshGitClient{auth: auth, LogFunc: logFunc}); err != nil {
+		return errors.WithStack(err)
+	}
 	return nil
 }
 

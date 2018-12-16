@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/runner"
@@ -23,7 +24,7 @@ func TestInitializeWithSSH(t *testing.T) {
 	t.Run("when instance is nil", func(t *testing.T) {
 		t.Run("with correct key path", func(t *testing.T) {
 			// given
-			defer git.SetInstance(nil)()
+			container.Clear()
 
 			// and
 			path, reset := createTemporaryKey(t)
@@ -40,7 +41,7 @@ func TestInitializeWithSSH(t *testing.T) {
 
 		t.Run("with wrong key path", func(t *testing.T) {
 			// given
-			defer git.SetInstance(nil)()
+			container.Clear()
 
 			// when
 			err := git.InitializeWithSSH("/path/to/nothing", func(_ context.Context, _ job.Log) {})
@@ -54,7 +55,8 @@ func TestInitializeWithSSH(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		defer git.SetInstance(&git.SshGitClient{})()
+		container.Override(&git.SshGitClient{})
+		defer container.Clear()
 
 		// and
 		path, reset := createTemporaryKey(t)

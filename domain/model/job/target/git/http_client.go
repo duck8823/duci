@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/runner"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
@@ -14,11 +15,9 @@ type httpGitClient struct {
 
 // InitializeWithHTTP initialize git client with http protocol
 func InitializeWithHTTP(logFunc runner.LogFunc) error {
-	if instance != nil {
-		return errors.New("instance already initialized.")
+	if err := container.Submit(&httpGitClient{LogFunc: logFunc}); err != nil {
+		return errors.WithStack(err)
 	}
-
-	instance = &httpGitClient{LogFunc: logFunc}
 	return nil
 }
 

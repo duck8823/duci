@@ -22,14 +22,6 @@ func (l *CloneLogger) SetReader(r *bufio.Reader) (reset func()) {
 	}
 }
 
-func SetInstance(git Git) (reset func()) {
-	tmp := instance
-	instance = git
-	return func() {
-		instance = tmp
-	}
-}
-
 func SetPlainCloneFunc(f func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)) (reset func()) {
 	tmp := plainClone
 	plainClone = f

@@ -1,6 +1,9 @@
 package target
 
-import "github.com/duck8823/duci/domain/model/job/target/git"
+import (
+	"context"
+	"github.com/duck8823/duci/domain/model/job/target/git"
+)
 
 type GithubPush = githubPush
 
@@ -10,6 +13,10 @@ func (g *GithubPush) SetGit(git git.Git) (reset func()) {
 	return func() {
 		g.git = tmp
 	}
+}
+
+func (g *GithubPush) GetGit() git.Git {
+	return g.git
 }
 
 type MockRepository struct {
@@ -27,4 +34,12 @@ func (r *MockRepository) GetSSHURL() string {
 
 func (r *MockRepository) GetCloneURL() string {
 	return r.URL
+}
+
+type StubGit struct {
+	Err error
+}
+
+func (g *StubGit) Clone(_ context.Context, _ string, _ git.TargetSource) error {
+	return g.Err
 }

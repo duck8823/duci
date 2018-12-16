@@ -2,12 +2,11 @@ package git
 
 import (
 	"context"
+	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
-
-var instance Git
 
 var plainClone = git.PlainClone
 
@@ -26,11 +25,11 @@ type Git interface {
 
 // GetInstance returns a git client
 func GetInstance() (Git, error) {
-	if instance == nil {
-		return nil, errors.New("instance still not initialized.")
+	git := new(Git)
+	if err := container.Get(git); err != nil {
+		return nil, errors.WithStack(err)
 	}
-
-	return instance, nil
+	return *git, nil
 }
 
 func checkout(repo *git.Repository, sha plumbing.Hash) error {
