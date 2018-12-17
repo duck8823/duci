@@ -37,7 +37,7 @@ func TestGithubPush_Prepare(t *testing.T) {
 		defer container.Clear()
 
 		// and
-		sut := &target.GithubPush{
+		sut := &target.GitHub{
 			Repo:  repo,
 			Point: point,
 		}
@@ -82,7 +82,42 @@ func TestGithubPush_Prepare(t *testing.T) {
 		defer container.Clear()
 
 		// and
-		sut := &target.GithubPush{
+		sut := &target.GitHub{
+			Repo:  repo,
+			Point: point,
+		}
+
+		// when
+		got, cleanup, err := sut.Prepare()
+		defer cleanup()
+
+		// then
+		if err == nil {
+			t.Error("error must not be nil")
+		}
+
+		// and
+		if len(got) != 0 {
+			t.Errorf("must be empty, but got %+v", got)
+		}
+	})
+
+	t.Run("when git have not be initialized", func(t *testing.T) {
+		// given
+		repo := &target.MockRepository{
+			FullName: "duck8823/duci",
+			URL:      "http://example.com",
+		}
+		point := &github.SimpleTargetPoint{
+			Ref: "test",
+			SHA: random.String(16, random.Alphanumeric),
+		}
+
+		// and
+		container.Clear()
+
+		// and
+		sut := &target.GitHub{
 			Repo:  repo,
 			Point: point,
 		}

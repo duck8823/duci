@@ -72,7 +72,7 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	tgt := &target.GitHubPush{
+	tgt := &target.GitHub{
 		Repo:  event.GetRepo(),
 		Point: event,
 	}
@@ -132,7 +132,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	tgt := &target.GitHubPush{
+	tgt := &target.GitHub{
 		Repo:  event.GetRepo(),
 		Point: pnt,
 	}

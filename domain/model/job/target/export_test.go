@@ -1,7 +1,5 @@
 package target
 
-type GithubPush = GitHubPush
-
 type MockRepository struct {
 	FullName string
 	URL      string

@@ -13,14 +13,14 @@ import (
 	"path"
 )
 
-// GitHubPush is target with github repository
-type GitHubPush struct {
+// GitHub is target with github repository
+type GitHub struct {
 	Repo  github.Repository
 	Point github.TargetPoint
 }
 
 // Prepare working directory
-func (g *GitHubPush) Prepare() (job.WorkDir, job.Cleanup, error) {
+func (g *GitHub) Prepare() (job.WorkDir, job.Cleanup, error) {
 	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
 	if err := os.MkdirAll(tmpDir, 0700); err != nil {
 		return "", cleanupFunc(tmpDir), errors.WithStack(err)
