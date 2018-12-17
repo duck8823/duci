@@ -131,3 +131,19 @@ func TestMaskString_MarshalJSON(t *testing.T) {
 		t.Errorf("wont masked string, but got '%s'", actual)
 	}
 }
+
+func TestMaskString_String(t *testing.T) {
+	// given
+	want := "hoge"
+
+	// and
+	sut := application.MaskString(want)
+
+	// when
+	got := sut.String()
+
+	// then
+	if !cmp.Equal(got, want) {
+		t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
+	}
+}
