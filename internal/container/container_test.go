@@ -2,7 +2,7 @@ package container_test
 
 import (
 	"fmt"
-	"github.com/duck8823/duci/domain/internal/container"
+	"github.com/duck8823/duci/internal/container"
 	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"testing"

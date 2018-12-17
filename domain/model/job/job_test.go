@@ -46,9 +46,9 @@ func TestJob_ToBytes(t *testing.T) {
 
 		// and
 		sut := job.Job{
-			ID: job.ID(uuid.Nil),
+			ID:       job.ID(uuid.Nil),
 			Finished: false,
-			Stream: []job.LogLine{},
+			Stream:   []job.LogLine{},
 		}
 
 		// when

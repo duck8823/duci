@@ -3,10 +3,10 @@ package git_test
 import (
 	"context"
 	"errors"
-	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/runner"
+	"github.com/duck8823/duci/internal/container"
 	"github.com/labstack/gommon/random"
 	go_git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"

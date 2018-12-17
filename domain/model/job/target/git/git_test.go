@@ -1,8 +1,8 @@
 package git_test
 
 import (
-	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/job/target/git"
+	"github.com/duck8823/duci/internal/container"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )

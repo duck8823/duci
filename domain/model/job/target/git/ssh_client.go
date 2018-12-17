@@ -2,8 +2,8 @@ package git
 
 import (
 	"context"
-	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/runner"
+	"github.com/duck8823/duci/internal/container"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"

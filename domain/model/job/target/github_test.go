@@ -2,10 +2,10 @@ package target_test
 
 import (
 	"errors"
-	"github.com/duck8823/duci/domain/internal/container"
 	"github.com/duck8823/duci/domain/model/job/target"
 	"github.com/duck8823/duci/domain/model/job/target/git/mock_git"
 	"github.com/duck8823/duci/domain/model/job/target/github"
+	"github.com/duck8823/duci/internal/container"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/gommon/random"
 	"testing"
