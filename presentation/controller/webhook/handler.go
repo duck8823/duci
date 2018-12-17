@@ -72,10 +72,9 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	tgt, err := target.NewGithubPush(event.GetRepo(), event)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	tgt := &target.GitHubPush{
+		Repo:  event.GetRepo(),
+		Point: event,
 	}
 
 	if err := h.executor.Execute(ctx, tgt); err != nil {
@@ -133,10 +132,9 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		TargetURL: targetURL(r),
 	})
 
-	tgt, err := target.NewGithubPush(event.GetRepo(), pnt)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	tgt := &target.GitHubPush{
+		Repo:  event.GetRepo(),
+		Point: pnt,
 	}
 
 	go h.executor.Execute(ctx, tgt, phrase.Command()...)
