@@ -27,3 +27,7 @@ func CheckLatestVersion() {
 func TrimSuffix(tag string) string {
 	return trimSuffix(tag)
 }
+
+func GetCtxKey() string {
+	return ctxKey
+}
