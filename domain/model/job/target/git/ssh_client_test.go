@@ -55,7 +55,7 @@ func TestInitializeWithSSH(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		container.Override(&git.SshGitClient{})
+		container.Override(new(git.Git))
 		defer container.Clear()
 
 		// and

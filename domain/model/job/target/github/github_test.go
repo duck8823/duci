@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/duck8823/duci/domain/model/job/target/github"
+	"github.com/duck8823/duci/internal/container"
 	"github.com/google/go-cmp/cmp"
 	go_github "github.com/google/go-github/github"
 	"github.com/labstack/gommon/random"
@@ -16,7 +17,7 @@ import (
 func TestInitialize(t *testing.T) {
 	t.Run("when instance is nil", func(t *testing.T) {
 		// given
-		defer github.SetInstance(nil)()
+		container.Clear()
 
 		// when
 		err := github.Initialize("github_api_token")
@@ -29,7 +30,8 @@ func TestInitialize(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		defer github.SetInstance(&github.StubClient{})()
+		container.Override(&github.StubClient{})
+		defer container.Clear()
 
 		// when
 		err := github.Initialize("github_api_token")
@@ -44,7 +46,7 @@ func TestInitialize(t *testing.T) {
 func TestGetInstance(t *testing.T) {
 	t.Run("when instance is nil", func(t *testing.T) {
 		// given
-		defer github.SetInstance(nil)()
+		container.Clear()
 
 		// when
 		got, err := github.GetInstance()
@@ -65,7 +67,8 @@ func TestGetInstance(t *testing.T) {
 		want := &github.StubClient{}
 
 		// and
-		defer github.SetInstance(want)()
+		container.Override(want)
+		defer container.Clear()
 
 		// when
 		got, err := github.GetInstance()

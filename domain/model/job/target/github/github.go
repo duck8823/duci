@@ -2,12 +2,11 @@ package github
 
 import (
 	"context"
+	"github.com/duck8823/duci/internal/container"
 	go_github "github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
-
-var instance GitHub
 
 // GitHub describes a github client.
 type GitHub interface {
@@ -21,24 +20,24 @@ type client struct {
 
 // Initialize create a github client.
 func Initialize(token string) error {
-	if instance != nil {
-		return errors.New("instance already initialized.")
-	}
-
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(context.Background(), ts)
 
-	instance = &client{go_github.NewClient(tc)}
+	github := new(GitHub)
+	*github = &client{go_github.NewClient(tc)}
+	if err := container.Submit(github); err != nil {
+		return errors.WithStack(err)
+	}
 	return nil
 }
 
 // GetInstance returns a github client
 func GetInstance() (GitHub, error) {
-	if instance == nil {
-		return nil, errors.New("instance still not initialized.")
+	github := new(GitHub)
+	if err := container.Get(github); err != nil {
+		return nil, errors.WithStack(err)
 	}
-
-	return instance, nil
+	return *github, nil
 }
 
 // GetPullRequest returns a pull request with specific repository and number.

@@ -26,7 +26,9 @@ func Initialize(path string) error {
 		return errors.WithStack(err)
 	}
 
-	if err := container.Submit(&serviceImpl{repo: dataSource}); err != nil {
+	service := new(Service)
+	*service = &serviceImpl{repo: dataSource}
+	if err := container.Submit(service); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

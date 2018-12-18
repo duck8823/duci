@@ -32,11 +32,3 @@ func (r *MockRepository) GetSSHURL() string {
 func (r *MockRepository) GetCloneURL() string {
 	return r.URL
 }
-
-func SetInstance(github GitHub) (reset func()) {
-	tmp := instance
-	instance = github
-	return func() {
-		instance = tmp
-	}
-}

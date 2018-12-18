@@ -15,7 +15,9 @@ type httpGitClient struct {
 
 // InitializeWithHTTP initialize git client with http protocol
 func InitializeWithHTTP(logFunc runner.LogFunc) error {
-	if err := container.Submit(&httpGitClient{LogFunc: logFunc}); err != nil {
+	git := new(Git)
+	*git = &httpGitClient{LogFunc: logFunc}
+	if err := container.Submit(git); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

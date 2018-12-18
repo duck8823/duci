@@ -23,7 +23,9 @@ func InitializeWithSSH(path string, logFunc runner.LogFunc) error {
 		return errors.WithStack(err)
 	}
 
-	if err := container.Submit(&sshGitClient{auth: auth, LogFunc: logFunc}); err != nil {
+	git := new(Git)
+	*git = &sshGitClient{auth: auth, LogFunc: logFunc}
+	if err := container.Submit(git); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
