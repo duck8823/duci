@@ -7,14 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Service represents job service
-type Service interface {
-	FindBy(id ID) (*Job, error)
-	Start(id ID) error
-	Append(id ID, line LogLine) error
-	Finish(id ID) error
-}
-
 type serviceImpl struct {
 	repo Repository
 }
