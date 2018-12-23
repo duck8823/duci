@@ -21,3 +21,13 @@ func (s *StubService) Append(_ job.ID, _ job.LogLine) error {
 func (s *StubService) Finish(_ job.ID) error {
 	return nil
 }
+
+type ServiceImpl = serviceImpl
+
+func (s *ServiceImpl) SetRepo(repo job.Repository) (reset func()) {
+	tmp := s.repo
+	s.repo = repo
+	return func() {
+		s.repo = tmp
+	}
+}
