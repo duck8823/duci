@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
+	"github.com/syndtr/goleveldb/leveldb"
 	"os"
 	"path"
 	"testing"
@@ -19,13 +20,13 @@ import (
 func TestNewDataSource(t *testing.T) {
 	t.Run("with temporary path", func(t *testing.T) {
 		// given
-		tmpPath := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
-			_ = os.RemoveAll(tmpPath)
+			_ = os.RemoveAll(tmpDir)
 		}()
 
 		// when
-		got, err := NewDataSource(tmpPath)
+		got, err := NewDataSource(tmpDir)
 
 		// then
 		if err != nil {
@@ -39,8 +40,21 @@ func TestNewDataSource(t *testing.T) {
 	})
 
 	t.Run("with wrong path", func(t *testing.T) {
+		// given
+		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		defer func() {
+			_ = os.RemoveAll(tmpDir)
+		}()
+
+		// and
+		db, err := leveldb.OpenFile(tmpDir, nil)
+		if err != nil {
+			t.Fatalf("error occurred: %+v", err)
+		}
+		defer db.Close()
+
 		// when
-		got, err := NewDataSource("/path/to/wrong/path")
+		got, err := NewDataSource(tmpDir)
 
 		// then
 		if err == nil {
