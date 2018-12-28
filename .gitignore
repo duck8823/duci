@@ -2,7 +2,6 @@
 .idea
 
 # golang
-go.sum
 cover.out
 cover.html
 
