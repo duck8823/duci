@@ -25,4 +25,4 @@ test-in-docker:
 	           duck8823/duci:test test
 
 clean:
-	rm -fr duci duci.exe go.sum cover.out cover.html dist
+	rm -fr duci duci.exe cover.out cover.html dist
