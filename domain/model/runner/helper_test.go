@@ -144,9 +144,10 @@ func TestDockerfilePath(t *testing.T) {
 func TestRuntimeOptions(t *testing.T) {
 	// where
 	for _, tt := range []struct {
-		name  string
-		given func(t *testing.T) (workDir job.WorkDir, cleanup func())
-		want  docker.RuntimeOptions
+		name    string
+		given   func(t *testing.T) (workDir job.WorkDir, cleanup func())
+		want    docker.RuntimeOptions
+		wantErr bool
 	}{
 		{
 			name: "when .duci/config.yml not found",
@@ -162,7 +163,8 @@ func TestRuntimeOptions(t *testing.T) {
 					_ = os.RemoveAll(tmpDir)
 				}
 			},
-			want: docker.RuntimeOptions{},
+			want:    docker.RuntimeOptions{},
+			wantErr: false,
 		},
 		{
 			name: "when .duci/config.yml found",
@@ -192,17 +194,67 @@ volumes:
 			want: docker.RuntimeOptions{
 				Volumes: docker.Volumes{"hoge:fuga"},
 			},
+			wantErr: false,
 		},
-		// TODO: error pattern
+		{
+			name: "when .duci/config.yml is directory",
+			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
+				t.Helper()
+
+				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(path.Join(tmpDir, ".duci", "config.yml"), 0700); err != nil {
+					t.Fatalf("error occur: %+v", err)
+				}
+
+				return job.WorkDir(tmpDir), func() {
+					_ = os.RemoveAll(tmpDir)
+				}
+			},
+			want:    docker.RuntimeOptions{},
+			wantErr: true,
+		},
+		{
+			name: "when .duci/config.yml is invalid format",
+			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
+				t.Helper()
+
+				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(path.Join(tmpDir, ".duci"), 0700); err != nil {
+					t.Fatalf("error occur: %+v", err)
+				}
+
+				file, err := os.OpenFile(path.Join(tmpDir, ".duci", "config.yml"), os.O_RDWR|os.O_CREATE, 0400)
+				if err != nil {
+					t.Fatalf("%+v", err)
+				}
+				defer file.Close()
+
+				file.WriteString("invalid format")
+
+				return job.WorkDir(tmpDir), func() {
+					_ = os.RemoveAll(tmpDir)
+				}
+			},
+			want:    docker.RuntimeOptions{},
+			wantErr: true,
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			// given
 			in, cleanup := tt.given(t)
 
 			// when
-			got, _ := runner.ExportedRuntimeOptions(in)
+			got, err := runner.ExportedRuntimeOptions(in)
 
 			// then
+			if tt.wantErr && err == nil {
+				t.Error("error must not be nil")
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("error must be nil, but got %+v", err)
+			}
+
+			// and
 			if !cmp.Equal(got, tt.want) {
 				t.Errorf("must be equal, but %+v", cmp.Diff(got, tt.want))
 			}
