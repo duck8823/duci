@@ -24,7 +24,7 @@ func (b *builder) LogFunc(f LogFunc) *builder {
 // Build returns a docker runner
 func (b *builder) Build() *dockerRunnerImpl {
 	return &dockerRunnerImpl{
-		Docker:  b.docker,
-		LogFunc: b.logFunc,
+		docker:  b.docker,
+		logFunc: b.logFunc,
 	}
 }

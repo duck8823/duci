@@ -14,8 +14,8 @@ type DockerRunner interface {
 
 // dockerRunnerImpl is a implement of DockerRunner
 type dockerRunnerImpl struct {
-	docker.Docker
-	LogFunc
+	docker  docker.Docker
+	logFunc LogFunc
 }
 
 // Run task in docker container
@@ -30,11 +30,11 @@ func (r *dockerRunnerImpl) Run(ctx context.Context, dir job.WorkDir, tag docker.
 		return errors.WithStack(err)
 	}
 
-	code, err := r.Docker.ExitCode(ctx, conID)
+	code, err := r.docker.ExitCode(ctx, conID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := r.Docker.RemoveContainer(ctx, conID); err != nil {
+	if err := r.docker.RemoveContainer(ctx, conID); err != nil {
 		return errors.WithStack(err)
 	}
 	if code != 0 {
@@ -52,11 +52,11 @@ func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir job.WorkDir, tag
 	}
 	defer tarball.Close()
 
-	buildLog, err := r.Docker.Build(ctx, tarball, docker.Tag(tag), dockerfilePath(dir))
+	buildLog, err := r.docker.Build(ctx, tarball, docker.Tag(tag), dockerfilePath(dir))
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	r.LogFunc(ctx, buildLog)
+	r.logFunc(ctx, buildLog)
 	return nil
 }
 
@@ -67,10 +67,10 @@ func (r *dockerRunnerImpl) dockerRun(ctx context.Context, dir job.WorkDir, tag d
 		return "", errors.WithStack(err)
 	}
 
-	conID, runLog, err := r.Docker.Run(ctx, opts, tag, cmd)
+	conID, runLog, err := r.docker.Run(ctx, opts, tag, cmd)
 	if err != nil {
 		return conID, errors.WithStack(err)
 	}
-	r.LogFunc(ctx, runLog)
+	r.logFunc(ctx, runLog)
 	return conID, nil
 }

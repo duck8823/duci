@@ -26,6 +26,26 @@ func (b *builder) SetLogFunc(logFunc LogFunc) (reset func()) {
 
 type DockerRunnerImpl = dockerRunnerImpl
 
+func (r *DockerRunnerImpl) SetDocker(docker docker.Docker) (reset func()) {
+	tmp := r.docker
+	r.docker = docker
+	return func() {
+		r.docker = tmp
+	}
+}
+
+func (r *DockerRunnerImpl) GetLogFunc() LogFunc {
+	return r.logFunc
+}
+
+func (r *DockerRunnerImpl) SetLogFunc(logFunc LogFunc) (reset func()) {
+	tmp := r.logFunc
+	r.logFunc = logFunc
+	return func() {
+		r.logFunc = tmp
+	}
+}
+
 var CreateTarball = createTarball
 
 var DockerfilePath = dockerfilePath

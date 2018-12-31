@@ -78,16 +78,15 @@ func TestBuilder_Build(t *testing.T) {
 		}),
 	}
 
-	//
-	want := &runner.DockerRunnerImpl{
-		LogFunc: func(context.Context, job.Log) {},
-	}
+	// and
+	want := &runner.DockerRunnerImpl{}
+	defer want.SetLogFunc(func(context.Context, job.Log) {})()
 
 	// and
 	sut := &runner.Builder{}
 
 	// when
-	got := sut.LogFunc(want.LogFunc).Build()
+	got := sut.LogFunc(want.GetLogFunc()).Build()
 
 	// then
 	if !cmp.Equal(want, got, opts...) {
