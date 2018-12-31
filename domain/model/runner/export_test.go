@@ -25,3 +25,9 @@ func (b *builder) SetLogFunc(logFunc LogFunc) (reset func()) {
 }
 
 type DockerRunnerImpl = dockerRunnerImpl
+
+var CreateTarball = createTarball
+
+var DockerfilePath = dockerfilePath
+
+var ExportedRuntimeOptions = runtimeOptions
