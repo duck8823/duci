@@ -73,6 +73,7 @@ func TestBuilder_LogFunc(t *testing.T) {
 func TestBuilder_Build(t *testing.T) {
 	// given
 	opts := []cmp.Option{
+		cmp.AllowUnexported(runner.DockerRunnerImpl{}),
 		cmp.Transformer("LogFunc", func(l runner.LogFunc) string {
 			return fmt.Sprint(l)
 		}),
