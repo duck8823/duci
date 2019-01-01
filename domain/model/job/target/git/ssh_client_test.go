@@ -9,8 +9,10 @@ import (
 	"errors"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/git"
+	"github.com/duck8823/duci/domain/model/job/target/git/mock_git"
 	"github.com/duck8823/duci/domain/model/runner"
 	"github.com/duck8823/duci/internal/container"
+	"github.com/golang/mock/gomock"
 	"github.com/labstack/gommon/random"
 	go_git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -81,13 +83,27 @@ func TestSshGitClient_Clone(t *testing.T) {
 		defer reset()
 
 		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		targetSrc := mock_git.NewMockTargetSource(ctrl)
+		targetSrc.EXPECT().
+			GetSSHURL().
+			Times(1).
+			Return("git@github.com:duck8823/duci.git")
+		targetSrc.EXPECT().
+			GetRef().
+			Times(1).
+			Return("HEAD")
+
+		// and
 		sut := &git.SshGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(
 			context.Background(),
 			"/path/to/dummy",
-			&git.MockTargetSource{},
+			targetSrc,
 		); err == nil {
 			t.Error("error must not nil.")
 		}
@@ -120,11 +136,28 @@ func TestSshGitClient_Clone(t *testing.T) {
 		tmpDir, reset := createTmpDir(t)
 		defer reset()
 
-		// amd
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		targetSrc := mock_git.NewMockTargetSource(ctrl)
+		targetSrc.EXPECT().
+			GetSSHURL().
+			Times(1)
+		targetSrc.EXPECT().
+			GetRef().
+			Times(1).
+			Return("HEAD")
+		targetSrc.EXPECT().
+			GetSHA().
+			Times(1).
+			Return(hash)
+
+		// and
 		sut := &git.SshGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
-		if err := sut.Clone(context.Background(), tmpDir, &git.MockTargetSource{Ref: "HEAD", SHA: hash}); err != nil {
+		if err := sut.Clone(context.Background(), tmpDir, targetSrc); err != nil {
 			t.Errorf("error must be nil, but got %+v", err)
 		}
 	})
@@ -145,10 +178,28 @@ func TestSshGitClient_Clone(t *testing.T) {
 		defer reset()
 
 		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		targetSrc := mock_git.NewMockTargetSource(ctrl)
+		targetSrc.EXPECT().
+			GetSSHURL().
+			Times(1).
+			Return("git@github.com:duck8823/duci.git")
+		targetSrc.EXPECT().
+			GetRef().
+			Times(1).
+			Return("HEAD")
+		targetSrc.EXPECT().
+			GetSHA().
+			Times(1).
+			Return(plumbing.ZeroHash)
+
+		// and
 		sut := &git.SshGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
-		if err := sut.Clone(context.Background(), tmpDir, &git.MockTargetSource{Ref: "HEAD"}); err == nil {
+		if err := sut.Clone(context.Background(), tmpDir, targetSrc); err == nil {
 			t.Error("error must not be nil")
 		}
 	})

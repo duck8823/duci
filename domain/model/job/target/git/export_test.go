@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
 	"time"
 )
 
@@ -36,28 +35,6 @@ func SetNowFunc(f func() time.Time) (reset func()) {
 	return func() {
 		now = tmp
 	}
-}
-
-type MockTargetSource struct {
-	URL string
-	Ref string
-	SHA plumbing.Hash
-}
-
-func (t *MockTargetSource) GetCloneURL() string {
-	return t.URL
-}
-
-func (t *MockTargetSource) GetSSHURL() string {
-	return t.URL
-}
-
-func (t *MockTargetSource) GetRef() string {
-	return t.Ref
-}
-
-func (t *MockTargetSource) GetSHA() plumbing.Hash {
-	return t.SHA
 }
 
 func (l *ProgressLogger) SetContext(ctx context.Context) (reset func()) {
