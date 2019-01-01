@@ -143,6 +143,70 @@ func TestDataSource_FindBy(t *testing.T) {
 			t.Errorf("must be nil, but got %+v", got)
 		}
 	})
+
+	t.Run("when leveldb.ErrNotFound", func(t *testing.T) {
+		// given
+		id := job.ID(uuid.New())
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		db := mock_job.NewMockLevelDB(ctrl)
+		db.EXPECT().
+			Get(gomock.Eq([]byte(uuid.UUID(id).String())), gomock.Nil()).
+			Times(1).
+			Return(nil, leveldb.ErrNotFound)
+
+		// and
+		sut := &DataSource{}
+		defer sut.SetDB(db)()
+
+		// when
+		got, err := sut.FindBy(id)
+
+		// then
+		if err == nil {
+			t.Error("error must not be nil")
+		}
+
+		// and
+		if got != nil {
+			t.Errorf("must be nil, but got %+v", got)
+		}
+	})
+
+	t.Run("when stored data is invalid format", func(t *testing.T) {
+		// given
+		id := job.ID(uuid.New())
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		db := mock_job.NewMockLevelDB(ctrl)
+		db.EXPECT().
+			Get(gomock.Eq([]byte(uuid.UUID(id).String())), gomock.Nil()).
+			Times(1).
+			Return([]byte("invalid format"), nil)
+
+		// and
+		sut := &DataSource{}
+		defer sut.SetDB(db)()
+
+		// when
+		got, err := sut.FindBy(id)
+
+		// then
+		if err == nil {
+			t.Error("error must not be nil")
+		}
+
+		// and
+		if got != nil {
+			t.Errorf("must be nil, but got %+v", got)
+		}
+	})
 }
 
 func TestDataSource_Save(t *testing.T) {
