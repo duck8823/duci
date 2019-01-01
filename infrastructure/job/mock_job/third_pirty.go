@@ -46,19 +46,6 @@ func (mr *MockLevelDBMockRecorder) Get(key, ro interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockLevelDB)(nil).Get), key, ro)
 }
 
-// Has mocks base method
-func (m *MockLevelDB) Has(key []byte, ro *opt.ReadOptions) (bool, error) {
-	ret := m.ctrl.Call(m, "Has", key, ro)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Has indicates an expected call of Has
-func (mr *MockLevelDBMockRecorder) Has(key, ro interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Has", reflect.TypeOf((*MockLevelDB)(nil).Has), key, ro)
-}
-
 // Put mocks base method
 func (m *MockLevelDB) Put(key, value []byte, wo *opt.WriteOptions) error {
 	ret := m.ctrl.Call(m, "Put", key, value, wo)
@@ -69,16 +56,4 @@ func (m *MockLevelDB) Put(key, value []byte, wo *opt.WriteOptions) error {
 // Put indicates an expected call of Put
 func (mr *MockLevelDBMockRecorder) Put(key, value, wo interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockLevelDB)(nil).Put), key, value, wo)
-}
-
-// Close mocks base method
-func (m *MockLevelDB) Close() error {
-	ret := m.ctrl.Call(m, "Close")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Close indicates an expected call of Close
-func (mr *MockLevelDBMockRecorder) Close() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockLevelDB)(nil).Close))
 }
