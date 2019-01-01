@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Client = client
+type Client = dockerImpl
 
 func (c *Client) SetMoby(moby Moby) (reset func()) {
 	tmp := c.moby
