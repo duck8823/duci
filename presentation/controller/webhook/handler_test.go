@@ -14,6 +14,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
+	"gopkg.in/h2non/gock.v1"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"net/http"
 	"net/http/httptest"
@@ -195,7 +196,7 @@ func TestHandler_PushEvent(t *testing.T) {
 		}
 	})
 
-	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+	t.Run("with invalid payload", func(t *testing.T) {
 		// given
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "/", nil)
@@ -229,6 +230,299 @@ func TestHandler_PushEvent(t *testing.T) {
 		// then
 		if rec.Code != http.StatusInternalServerError {
 			t.Errorf("response code must be %d, but got %d", http.StatusInternalServerError, rec.Code)
+		}
+	})
+}
+
+func TestHandler_IssueCommentEvent(t *testing.T) {
+	t.Run("with no error", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		f, err := os.Open("testdata/issue_comment.correct.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		if err := github.Initialize(""); err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		defer container.Clear()
+
+		gock.New("https://api.github.com").
+			Get("/repos/Codertocat/Hello-World/pulls/2").
+			Reply(200).
+			JSON(&go_github.PullRequest{
+				Head: &go_github.PullRequestBranch{
+					Ref: go_github.String("refs/test/dummy"),
+					SHA: go_github.String("aa218f56b14c9653891f9e74264a383fa43fefbd"),
+				},
+			})
+		defer func() {
+			if !gock.IsDone() {
+				t.Errorf("must request pulls")
+			}
+			gock.Clean()
+		}()
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			ctrl.Finish()
+		}()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Do(func(ctx context.Context, target job.Target, cmd ...string) {
+				got, err := application.BuildJobFromContext(ctx)
+				if err != nil {
+					t.Errorf("must not be nil, but got %+v", err)
+				}
+
+				want := &application.BuildJob{
+					ID: job.ID(uuid.Must(uuid.Parse("72d3162e-cc78-11e3-81ab-4c9367dc0958"))),
+					TargetSource: &github.TargetSource{
+						Repository: &go_github.Repository{
+							ID:       go_github.Int64(135493233),
+							FullName: go_github.String("Codertocat/Hello-World"),
+							SSHURL:   go_github.String("git@github.com:Codertocat/Hello-World.git"),
+							CloneURL: go_github.String("https://github.com/Codertocat/Hello-World.git"),
+						},
+						Ref: "refs/test/dummy",
+						SHA: plumbing.NewHash("aa218f56b14c9653891f9e74264a383fa43fefbd"),
+					},
+					TaskName:  "duci/pr/build",
+					TargetURL: webhook.URLMust(url.Parse("http://example.com/")),
+				}
+
+				opt := webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL")
+				if !cmp.Equal(got, want, opt) {
+					t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
+				}
+
+				typ := reflect.TypeOf(target).String()
+				if typ != "*target.GitHub" {
+					t.Errorf("type must be *target.GitHub, but got %s", typ)
+				}
+			}).
+			Return(nil)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("when action is deleted", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		f, err := os.Open("testdata/issue_comment.deleted.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			ctrl.Finish()
+		}()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+
+		// and
+		got := rec.Body.String()
+		if got != `{"message":"skip build"}` {
+			t.Errorf("must be equal. want %s, but got %s", `{"message":"skip build"}`, got)
+		}
+	})
+
+	t.Run("with invalid payload body", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		req.Body = ioutils.NewReadCloserWrapper(strings.NewReader("invalid payload"), func() error {
+			return nil
+		})
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			ctrl.Finish()
+		}()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusInternalServerError {
+			t.Errorf("response code must be %d, but got %d", http.StatusInternalServerError, rec.Code)
+		}
+	})
+
+	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"invalid format"},
+		}
+
+		// and
+		f, err := os.Open("testdata/issue_comment.correct.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("response code must be %d, but got %d", http.StatusBadRequest, rec.Code)
+		}
+	})
+
+	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		f, err := os.Open("testdata/issue_comment.skip_comment.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		if err := github.Initialize(""); err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		defer container.Clear()
+
+		gock.New("https://api.github.com").
+			Get("/repos/Codertocat/Hello-World/pulls/2").
+			Reply(200).
+			JSON(&go_github.PullRequest{
+				Head: &go_github.PullRequestBranch{
+					Ref: go_github.String("refs/test/dummy"),
+					SHA: go_github.String("aa218f56b14c9653891f9e74264a383fa43fefbd"),
+				},
+			})
+		defer func() {
+			if !gock.IsDone() {
+				t.Errorf("must request pulls")
+			}
+			gock.Clean()
+		}()
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+
+		// and
+		got := rec.Body.String()
+		if got != `{"message":"skip build"}` {
+			t.Errorf("must be equal. want %s, but got %s", `{"message":"skip build"}`, got)
 		}
 	})
 }
