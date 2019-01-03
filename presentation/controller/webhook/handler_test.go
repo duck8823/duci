@@ -82,6 +82,124 @@ func TestNewHandler(t *testing.T) {
 	})
 }
 
+func TestHandler_ServeHTTP(t *testing.T) {
+	t.Run("when push event", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header.Set("X-GitHub-Event", "push")
+		req.Header.Set("X-GitHub-Delivery", "72d3162e-cc78-11e3-81ab-4c9367dc0958")
+
+		// and
+		f, err := os.Open("testdata/push.correct.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			ctrl.Finish()
+		}()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(nil)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.ServeHTTP(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+
+		println(rec.Body.String())
+	})
+
+	t.Run("when pull request comment event", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header.Set("X-GitHub-Event", "issue_comment")
+		req.Header.Set("X-GitHub-Delivery", "72d3162e-cc78-11e3-81ab-4c9367dc0958")
+
+		// and
+		f, err := os.Open("testdata/issue_comment.correct.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			ctrl.Finish()
+		}()
+
+		gh := mock_github.NewMockGitHub(ctrl)
+		gh.EXPECT().
+			GetPullRequest(gomock.Any(), gomock.Any(), gomock.Eq(2)).
+			Times(1).
+			Return(&go_github.PullRequest{
+				Head: &go_github.PullRequestBranch{
+					Ref: go_github.String("refs/test/dummy"),
+					SHA: go_github.String("aa218f56b14c9653891f9e74264a383fa43fefbd"),
+				},
+			}, nil)
+		container.Override(gh)
+		defer container.Clear()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(nil)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.ServeHTTP(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("when other event", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		sut := &webhook.Handler{}
+
+		// when
+		sut.ServeHTTP(rec, req)
+
+		// then
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("response code must be %d, but got %d", http.StatusBadRequest, rec.Code)
+		}
+	})
+}
+
 func TestHandler_PushEvent(t *testing.T) {
 	t.Run("with no error", func(t *testing.T) {
 		// given
