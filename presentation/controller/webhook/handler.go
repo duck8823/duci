@@ -77,10 +77,7 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		Point: event,
 	}
 
-	if err := h.executor.Execute(ctx, tgt); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	go h.executor.Execute(ctx, tgt)
 
 	w.WriteHeader(http.StatusOK)
 }
