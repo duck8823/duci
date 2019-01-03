@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestNewHandler(t *testing.T) {
@@ -99,7 +100,10 @@ func TestHandler_PushEvent(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			ctrl.Finish()
+		}()
 
 		executor := mock_executor.NewMockExecutor(ctrl)
 		executor.EXPECT().
