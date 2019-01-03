@@ -2,6 +2,7 @@ package webhook_test
 
 import (
 	"context"
+	"github.com/docker/docker/pkg/ioutils"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/executor/mock_executor"
 	"github.com/duck8823/duci/application/service/job"
@@ -19,6 +20,7 @@ import (
 	"net/url"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -78,73 +80,151 @@ func TestNewHandler(t *testing.T) {
 }
 
 func TestHandler_PushEvent(t *testing.T) {
-	// given
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/", nil)
+	t.Run("with no error", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
 
-	// and
-	req.Header = http.Header{
-		"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
-	}
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
 
-	// and
-	f, err := os.Open("testdata/push.correct.json")
-	if err != nil {
-		t.Fatalf("error occur: %+v", err)
-	}
-	req.Body = f
+		// and
+		f, err := os.Open("testdata/push.correct.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
 
-	// and
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-	executor := mock_executor.NewMockExecutor(ctrl)
-	executor.EXPECT().
-		Execute(gomock.Any(), gomock.Any()).
-		Times(1).
-		Do(func(ctx context.Context, target job.Target) {
-			got, err := application.BuildJobFromContext(ctx)
-			if err != nil {
-				t.Errorf("must not be nil, but got %+v", err)
-			}
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(1).
+			Do(func(ctx context.Context, target job.Target) {
+				got, err := application.BuildJobFromContext(ctx)
+				if err != nil {
+					t.Errorf("must not be nil, but got %+v", err)
+				}
 
-			want := &application.BuildJob{
-				ID: job.ID(uuid.Must(uuid.Parse("72d3162e-cc78-11e3-81ab-4c9367dc0958"))),
-				TargetSource: &github.TargetSource{
-					Repository: &go_github.PushEventRepository{
-						ID:       go_github.Int64(135493233),
-						FullName: go_github.String("Codertocat/Hello-World"),
-						SSHURL:   go_github.String("git@github.com:Codertocat/Hello-World.git"),
-						CloneURL: go_github.String("https://github.com/Codertocat/Hello-World.git"),
+				want := &application.BuildJob{
+					ID: job.ID(uuid.Must(uuid.Parse("72d3162e-cc78-11e3-81ab-4c9367dc0958"))),
+					TargetSource: &github.TargetSource{
+						Repository: &go_github.PushEventRepository{
+							ID:       go_github.Int64(135493233),
+							FullName: go_github.String("Codertocat/Hello-World"),
+							SSHURL:   go_github.String("git@github.com:Codertocat/Hello-World.git"),
+							CloneURL: go_github.String("https://github.com/Codertocat/Hello-World.git"),
+						},
+						Ref: "refs/tags/simple-tag",
+						SHA: plumbing.ZeroHash,
 					},
-					Ref: "refs/tags/simple-tag",
-					SHA: plumbing.ZeroHash,
-				},
-				TaskName:  "duci/push",
-				TargetURL: webhook.URLMust(url.Parse("http://example.com/")),
-			}
+					TaskName:  "duci/push",
+					TargetURL: webhook.URLMust(url.Parse("http://example.com/")),
+				}
 
-			opt := webhook.CmpOptsAllowFields(go_github.PushEventRepository{}, "ID", "FullName", "SSHURL", "CloneURL")
-			if !cmp.Equal(got, want, opt) {
-				t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
-			}
+				opt := webhook.CmpOptsAllowFields(go_github.PushEventRepository{}, "ID", "FullName", "SSHURL", "CloneURL")
+				if !cmp.Equal(got, want, opt) {
+					t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
+				}
 
-			typ := reflect.TypeOf(target).String()
-			if typ != "*target.GitHub" {
-				t.Errorf("type must be *target.GitHub, but got %s", typ)
-			}
-		}).
-		Return(nil)
+				typ := reflect.TypeOf(target).String()
+				if typ != "*target.GitHub" {
+					t.Errorf("type must be *target.GitHub, but got %s", typ)
+				}
+			}).
+			Return(nil)
 
-	// and
-	sut := &webhook.Handler{}
-	defer sut.SetExecutor(executor)()
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
 
-	// when
-	sut.PushEvent(rec, req)
+		// when
+		sut.PushEvent(rec, req)
 
-	// then
-	if rec.Code != http.StatusOK {
-		t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
-	}
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"invalid format"},
+		}
+
+		// and
+		f, err := os.Open("testdata/push.correct.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.PushEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("response code must be %d, but got %d", http.StatusBadRequest, rec.Code)
+		}
+	})
+
+	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		req.Body = ioutils.NewReadCloserWrapper(strings.NewReader("invalid payload"), func() error {
+			return nil
+		})
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.PushEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusInternalServerError {
+			t.Errorf("response code must be %d, but got %d", http.StatusInternalServerError, rec.Code)
+		}
+	})
 }
