@@ -51,6 +51,3 @@ var CreateTarball = createTarball
 var DockerfilePath = dockerfilePath
 
 var ExportedRuntimeOptions = runtimeOptions
-
-type StubLog struct {
-}
