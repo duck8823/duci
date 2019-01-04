@@ -13,7 +13,7 @@ type dataSource struct {
 }
 
 // NewDataSource returns job data source
-func NewDataSource(path string) (*dataSource, error) {
+func NewDataSource(path string) (job.Repository, error) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)

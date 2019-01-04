@@ -11,7 +11,7 @@ type handler struct {
 }
 
 // NewHandler returns implement of health check handler
-func NewHandler() (*handler, error) {
+func NewHandler() (http.Handler, error) {
 	docker, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)

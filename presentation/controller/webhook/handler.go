@@ -24,7 +24,7 @@ type handler struct {
 }
 
 // NewHandler returns a implement of webhook handler
-func NewHandler() (*handler, error) {
+func NewHandler() (http.Handler, error) {
 	executor, err := duci.New()
 	if err != nil {
 		return nil, errors.WithStack(err)

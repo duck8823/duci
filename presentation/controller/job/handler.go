@@ -17,7 +17,7 @@ type handler struct {
 }
 
 // NewHandler returns implement of job
-func NewHandler() (*handler, error) {
+func NewHandler() (http.Handler, error) {
 	service, err := jobService.GetInstance()
 	if err != nil {
 		return nil, errors.WithStack(err)
