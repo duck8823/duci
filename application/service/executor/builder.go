@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/domain/model/runner"
+	"github.com/pkg/errors"
 )
 
 type builder struct {
@@ -14,18 +15,17 @@ type builder struct {
 }
 
 // DefaultExecutorBuilder create new builder of docker runner
-func DefaultExecutorBuilder() *builder {
-	cli, _ := docker.New()
-	return &builder{
-		docker:  cli,
-		logFunc: runner.NothingToDo,
-		startFunc: func(context.Context) {
-			// nothing to do
-		},
-		endFunc: func(context.Context, error) {
-			// nothing to do
-		},
+func DefaultExecutorBuilder() (*builder, error) {
+	docker, err := docker.New()
+	if err != nil {
+		return nil, errors.WithStack(err)
 	}
+	return &builder{
+		docker:    docker,
+		logFunc:   runner.NothingToDo,
+		startFunc: nothingToDoStart,
+		endFunc:   nothingToDoEnd,
+	}, nil
 }
 
 // LogFunc set a LogFunc
@@ -57,4 +57,12 @@ func (b *builder) Build() *jobExecutor {
 		StartFunc:    b.startFunc,
 		EndFunc:      b.endFunc,
 	}
+}
+
+var nothingToDoStart = func(context.Context) {
+	// nothing to do
+}
+
+var nothingToDoEnd = func(context.Context, error) {
+	// nothing to do
 }

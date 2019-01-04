@@ -29,11 +29,16 @@ func New() (*duci, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	builder, err := executor.DefaultExecutorBuilder()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	duci := &duci{
 		jobService: jobService,
 		github:     github,
 	}
-	duci.Executor = executor.DefaultExecutorBuilder().
+	duci.Executor = builder.
 		StartFunc(duci.Start).
 		EndFunc(duci.End).
 		LogFunc(duci.AppendLog).
