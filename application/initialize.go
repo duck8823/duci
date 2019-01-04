@@ -11,12 +11,15 @@ import (
 
 // Initialize singleton instances that are needed by application
 func Initialize() error {
-	if err := git.InitializeWithHTTP(func(ctx context.Context, log job.Log) {
-		for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
-			println(line.Message)
+	switch {
+	case len(Config.GitHub.SSHKeyPath) == 0:
+		if err := git.InitializeWithHTTP(printLog); err != nil {
+			return errors.WithStack(err)
 		}
-	}); err != nil {
-		return errors.WithStack(err)
+	default:
+		if err := git.InitializeWithSSH(Config.GitHub.SSHKeyPath, printLog); err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
 	if err := github.Initialize(Config.GitHub.APIToken.String()); err != nil {
@@ -27,4 +30,10 @@ func Initialize() error {
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func printLog(_ context.Context, log job.Log) {
+	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
+		println(line.Message)
+	}
 }
