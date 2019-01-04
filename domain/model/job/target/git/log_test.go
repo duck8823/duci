@@ -50,6 +50,11 @@ func TestCloneLogger_ReadLine(t *testing.T) {
 	if err != io.EOF {
 		t.Errorf("must be equal io.EOF, but got %+v", err)
 	}
+
+	// and
+	if got != nil {
+		t.Errorf("must be nil, but got %+v", got)
+	}
 }
 
 func TestProgressLogger_Write(t *testing.T) {
