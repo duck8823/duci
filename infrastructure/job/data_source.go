@@ -3,7 +3,7 @@ package job
 import (
 	"bytes"
 	"encoding/json"
-	. "github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -22,15 +22,15 @@ func NewDataSource(path string) (*dataSource, error) {
 }
 
 // FindBy returns job found by ID
-func (d *dataSource) FindBy(id ID) (*Job, error) {
+func (d *dataSource) FindBy(id job.ID) (*job.Job, error) {
 	data, err := d.db.Get(id.ToSlice(), nil)
 	if err == leveldb.ErrNotFound {
-		return nil, ErrNotFound
+		return nil, job.ErrNotFound
 	} else if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	job := &Job{}
+	job := &job.Job{}
 	if err := json.NewDecoder(bytes.NewReader(data)).Decode(job); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -39,7 +39,7 @@ func (d *dataSource) FindBy(id ID) (*Job, error) {
 }
 
 // Save store job to data source
-func (d *dataSource) Save(job Job) error {
+func (d *dataSource) Save(job job.Job) error {
 	data, err := job.ToBytes()
 	if err != nil {
 		return errors.WithStack(err)
