@@ -10,4 +10,4 @@ func (w WorkDir) String() string {
 	return string(w)
 }
 
-type Cleanup func() error
+type Cleanup func()

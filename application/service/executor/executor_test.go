@@ -21,7 +21,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		ctx := context.Background()
 		target := &executor.StubTarget{
 			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
-			Cleanup: func() error { return nil },
+			Cleanup: func() {},
 			Err:     nil,
 		}
 
@@ -72,7 +72,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		ctx := context.Background()
 		target := &executor.StubTarget{
 			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
-			Cleanup: func() error { return nil },
+			Cleanup: func() {},
 			Err:     nil,
 		}
 
@@ -133,7 +133,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		ctx := context.Background()
 		target := &executor.StubTarget{
 			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
-			Cleanup: func() error { return nil },
+			Cleanup: func() {},
 			Err:     nil,
 		}
 
@@ -187,7 +187,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		ctx := context.Background()
 		target := &executor.StubTarget{
 			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
-			Cleanup: func() error { return nil },
+			Cleanup: func() {},
 			Err:     errors.New("test error"),
 		}
 
