@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-type HttpGitClient = httpGitClient
+type HTTPGitClient = httpGitClient
 
-type SshGitClient = sshGitClient
+type SSHGitClient = sshGitClient
 
 type CloneLogger = cloneLogger
 

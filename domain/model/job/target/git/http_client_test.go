@@ -34,7 +34,7 @@ func TestInitializeWithHTTP(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		container.Override(&git.HttpGitClient{})
+		container.Override(&git.HTTPGitClient{})
 		defer container.Clear()
 
 		// when
@@ -70,7 +70,7 @@ func TestHttpGitClient_Clone(t *testing.T) {
 			Return("HEAD")
 
 		// and
-		sut := &git.HttpGitClient{LogFunc: runner.NothingToDo}
+		sut := &git.HTTPGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(
@@ -128,7 +128,7 @@ func TestHttpGitClient_Clone(t *testing.T) {
 			Return(hash)
 
 		// and
-		sut := &git.HttpGitClient{LogFunc: runner.NothingToDo}
+		sut := &git.HTTPGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(context.Background(), tmpDir, targetSrc); err != nil {
@@ -170,7 +170,7 @@ func TestHttpGitClient_Clone(t *testing.T) {
 			Return(plumbing.ZeroHash)
 
 		// and
-		sut := &git.HttpGitClient{LogFunc: runner.NothingToDo}
+		sut := &git.HTTPGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(context.Background(), tmpDir, targetSrc); err == nil {

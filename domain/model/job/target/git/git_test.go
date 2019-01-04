@@ -28,7 +28,7 @@ func TestGetInstance(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		want := &git.HttpGitClient{}
+		want := &git.HTTPGitClient{}
 
 		// and
 		container.Override(want)

@@ -97,7 +97,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 			Return("HEAD")
 
 		// and
-		sut := &git.SshGitClient{LogFunc: runner.NothingToDo}
+		sut := &git.SSHGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(
@@ -154,7 +154,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 			Return(hash)
 
 		// and
-		sut := &git.SshGitClient{LogFunc: runner.NothingToDo}
+		sut := &git.SSHGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(context.Background(), tmpDir, targetSrc); err != nil {
@@ -196,7 +196,7 @@ func TestSshGitClient_Clone(t *testing.T) {
 			Return(plumbing.ZeroHash)
 
 		// and
-		sut := &git.SshGitClient{LogFunc: runner.NothingToDo}
+		sut := &git.SSHGitClient{LogFunc: runner.NothingToDo}
 
 		// expect
 		if err := sut.Clone(context.Background(), tmpDir, targetSrc); err == nil {
