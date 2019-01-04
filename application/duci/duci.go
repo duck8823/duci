@@ -66,7 +66,7 @@ func (d *duci) Start(ctx context.Context) {
 func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		_ = d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+		// TODO: output error message
 		return
 	}
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
@@ -79,11 +79,11 @@ func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 func (d *duci) End(ctx context.Context, e error) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		_ = d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+		// TODO: output error message
 		return
 	}
 	if err := d.jobService.Finish(buildJob.ID); err != nil {
-		println(fmt.Sprintf("%+v", err))
+		_ = d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
 		return
 	}
 
