@@ -56,7 +56,7 @@ func TestConfiguration_Set(t *testing.T) {
 		expected := "hello world"
 
 		// and
-		os.Setenv("TEST_CONF_ENV", expected)
+		_ = os.Setenv("TEST_CONF_ENV", expected)
 
 		//
 		err := application.Config.Set("testdata/config_with_env.yml")

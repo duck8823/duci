@@ -9,6 +9,7 @@ import (
 	"github.com/duck8823/duci/application/service/executor"
 	"github.com/duck8823/duci/domain/model/job/target"
 	"github.com/duck8823/duci/domain/model/job/target/github"
+	"github.com/duck8823/duci/internal/logger"
 	go_github "github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -77,7 +78,11 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		Point: event,
 	}
 
-	go h.executor.Execute(ctx, tgt)
+	go func() {
+		if err := h.executor.Execute(ctx, tgt); err != nil {
+			logger.Error(err)
+		}
+	}()
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -92,7 +97,9 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 
 	if !isValidAction(event.Action) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{\"message\":\"skip build\"}"))
+		if _, err := w.Write([]byte("{\"message\":\"skip build\"}")); err != nil {
+			logger.Error(err)
+		}
 		return
 	}
 
@@ -111,7 +118,9 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 	phrase, err := extractBuildPhrase(event.GetComment().GetBody())
 	if err == SkipBuild {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{\"message\":\"skip build\"}"))
+		if _, err := w.Write([]byte("{\"message\":\"skip build\"}")); err != nil {
+			logger.Error(err)
+		}
 		return
 	} else if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -134,7 +143,11 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		Point: pnt,
 	}
 
-	go h.executor.Execute(ctx, tgt, phrase.Command()...)
+	go func() {
+		if err := h.executor.Execute(ctx, tgt, phrase.Command()...); err != nil {
+			logger.Error(err)
+		}
+	}()
 
 	w.WriteHeader(http.StatusOK)
 }

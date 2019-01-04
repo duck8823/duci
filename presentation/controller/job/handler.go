@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/duck8823/duci/application/service/job"
 	. "github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -54,7 +55,9 @@ func (h *handler) logs(w http.ResponseWriter, id ID) error {
 			return errors.WithStack(err)
 		}
 		for _, msg := range job.Stream[read:] {
-			json.NewEncoder(w).Encode(msg)
+			if err := json.NewEncoder(w).Encode(msg); err != nil {
+				logger.Error(err)
+			}
 			f.Flush()
 			read++
 		}

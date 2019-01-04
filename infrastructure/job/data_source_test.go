@@ -215,12 +215,12 @@ func TestDataSource_Save(t *testing.T) {
 		id := job.ID(uuid.New())
 
 		// and
-		job := &job.Job{
+		j := &job.Job{
 			ID:       id,
 			Finished: false,
 			Stream:   []job.LogLine{{Timestamp: time.Now(), Message: "Hello Test"}},
 		}
-		data, err := json.Marshal(job)
+		data, err := json.Marshal(j)
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
@@ -240,7 +240,7 @@ func TestDataSource_Save(t *testing.T) {
 		defer sut.SetDB(db)()
 
 		// expect
-		if err := sut.Save(*job); err != nil {
+		if err := sut.Save(*j); err != nil {
 			t.Errorf("error must be nil, but got %+v", err)
 		}
 	})
@@ -250,12 +250,12 @@ func TestDataSource_Save(t *testing.T) {
 		id := job.ID(uuid.New())
 
 		// and
-		job := &job.Job{
+		j := &job.Job{
 			ID:       id,
 			Finished: false,
 			Stream:   []job.LogLine{{Timestamp: time.Now(), Message: "Hello Test"}},
 		}
-		data, err := json.Marshal(job)
+		data, err := json.Marshal(j)
 		if err != nil {
 			t.Fatalf("error occurred: %+v", err)
 		}
@@ -275,7 +275,7 @@ func TestDataSource_Save(t *testing.T) {
 		defer sut.SetDB(db)()
 
 		// expect
-		if err := sut.Save(*job); err == nil {
+		if err := sut.Save(*j); err == nil {
 			t.Error("error must not be nil")
 		}
 	})

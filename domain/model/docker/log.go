@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/internal/logger"
 	"github.com/pkg/errors"
 	"io"
 	"time"
@@ -73,7 +74,9 @@ func extractMessage(line []byte) string {
 	s := &struct {
 		Stream string `json:"stream"`
 	}{}
-	json.NewDecoder(bytes.NewReader(line)).Decode(s)
+	if err := json.NewDecoder(bytes.NewReader(line)).Decode(s); err != nil {
+		logger.Error(err)
+	}
 	return s.Stream
 }
 

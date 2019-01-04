@@ -182,7 +182,7 @@ func TestRuntimeOptions(t *testing.T) {
 				}
 				defer file.Close()
 
-				file.WriteString(`---
+				_, _ = file.WriteString(`---
 volumes:
   - hoge:fuga
 `)
@@ -229,7 +229,7 @@ volumes:
 				}
 				defer file.Close()
 
-				file.WriteString("invalid format")
+				_, _ = file.WriteString("invalid format")
 
 				return job.WorkDir(tmpDir), func() {
 					_ = os.RemoveAll(tmpDir)
