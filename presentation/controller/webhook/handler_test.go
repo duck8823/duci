@@ -354,7 +354,7 @@ func TestHandler_PushEvent(t *testing.T) {
 	})
 }
 
-func TestHandler_IssueCommentEvent(t *testing.T) {
+func TestHandler_IssueCommentEvent_Normal(t *testing.T) {
 	t.Run("with no error", func(t *testing.T) {
 		// given
 		rec := httptest.NewRecorder()
@@ -444,6 +444,64 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 		}
 	})
 
+	t.Run("when no match comment", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		f, err := os.Open("testdata/issue_comment.skip_comment.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		gh := mock_github.NewMockGitHub(ctrl)
+		gh.EXPECT().
+			GetPullRequest(gomock.Any(), gomock.Any(), gomock.Eq(2)).
+			Times(1).
+			Return(&go_github.PullRequest{
+				Head: &go_github.PullRequestBranch{
+					Ref: go_github.String("refs/test/dummy"),
+					SHA: go_github.String("aa218f56b14c9653891f9e74264a383fa43fefbd"),
+				},
+			}, nil)
+		container.Override(gh)
+		defer container.Clear()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+
+		// and
+		got := rec.Body.String()
+		if got != `{"message":"skip build"}` {
+			t.Errorf("must be equal. want %s, but got %s", `{"message":"skip build"}`, got)
+		}
+	})
+
 	t.Run("when action is deleted", func(t *testing.T) {
 		// given
 		rec := httptest.NewRecorder()
@@ -492,7 +550,9 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 			t.Errorf("must be equal. want %s, but got %s", `{"message":"skip build"}`, got)
 		}
 	})
+}
 
+func TestHandler_IssueCommentEvent_UnNormal(t *testing.T) {
 	t.Run("with invalid payload body", func(t *testing.T) {
 		// given
 		rec := httptest.NewRecorder()
@@ -570,64 +630,6 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 		// then
 		if rec.Code != http.StatusBadRequest {
 			t.Errorf("response code must be %d, but got %d", http.StatusBadRequest, rec.Code)
-		}
-	})
-
-	t.Run("when url param is invalid format uuid", func(t *testing.T) {
-		// given
-		rec := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "/", nil)
-
-		// and
-		req.Header = http.Header{
-			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
-		}
-
-		// and
-		f, err := os.Open("testdata/issue_comment.skip_comment.json")
-		if err != nil {
-			t.Fatalf("error occur: %+v", err)
-		}
-		req.Body = f
-
-		// and
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		gh := mock_github.NewMockGitHub(ctrl)
-		gh.EXPECT().
-			GetPullRequest(gomock.Any(), gomock.Any(), gomock.Eq(2)).
-			Times(1).
-			Return(&go_github.PullRequest{
-				Head: &go_github.PullRequestBranch{
-					Ref: go_github.String("refs/test/dummy"),
-					SHA: go_github.String("aa218f56b14c9653891f9e74264a383fa43fefbd"),
-				},
-			}, nil)
-		container.Override(gh)
-		defer container.Clear()
-
-		executor := mock_executor.NewMockExecutor(ctrl)
-		executor.EXPECT().
-			Execute(gomock.Any(), gomock.Any()).
-			Times(0)
-
-		// and
-		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
-
-		// when
-		sut.IssueCommentEvent(rec, req)
-
-		// then
-		if rec.Code != http.StatusOK {
-			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
-		}
-
-		// and
-		got := rec.Body.String()
-		if got != `{"message":"skip build"}` {
-			t.Errorf("must be equal. want %s, but got %s", `{"message":"skip build"}`, got)
 		}
 	})
 
