@@ -74,12 +74,10 @@ func Override(val interface{}) {
 	}
 
 	instance.values[key] = val
-	return
 }
 
 // Reset instances in container
 // TODO: should not use in production code
 func Clear() {
 	instance.values = make(map[string]interface{})
-	return
 }
