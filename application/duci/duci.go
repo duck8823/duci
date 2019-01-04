@@ -20,7 +20,7 @@ type duci struct {
 }
 
 // New returns duci instance
-func New() (*duci, error) {
+func New() (executor.Executor, error) {
 	jobService, err := job_service.GetInstance()
 	if err != nil {
 		return nil, errors.WithStack(err)
