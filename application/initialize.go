@@ -2,7 +2,7 @@ package application
 
 import (
 	"context"
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/job/target/github"
@@ -23,7 +23,7 @@ func Initialize() error {
 		return errors.WithStack(err)
 	}
 
-	if err := job_service.Initialize(Config.Server.DatabasePath); err != nil {
+	if err := jobService.Initialize(Config.Server.DatabasePath); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

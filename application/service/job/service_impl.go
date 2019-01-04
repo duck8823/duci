@@ -1,4 +1,4 @@
-package job_service
+package job
 
 import (
 	. "github.com/duck8823/duci/domain/model/job"

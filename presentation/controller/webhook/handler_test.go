@@ -5,7 +5,7 @@ import (
 	"github.com/docker/docker/pkg/ioutils"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/executor/mock_executor"
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/duck8823/duci/domain/model/job/target/github/mock_github"
@@ -30,7 +30,7 @@ import (
 func TestNewHandler(t *testing.T) {
 	t.Run("when there are job service and github in container", func(t *testing.T) {
 		// given
-		container.Override(new(job_service.Service))
+		container.Override(new(jobService.Service))
 		container.Override(new(github.GitHub))
 		defer container.Clear()
 
@@ -58,7 +58,7 @@ func TestNewHandler(t *testing.T) {
 			{
 				name: "without github",
 				given: func() {
-					container.Override(new(job_service.Service))
+					container.Override(new(jobService.Service))
 				},
 			},
 		} {

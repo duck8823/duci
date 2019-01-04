@@ -1,7 +1,7 @@
-package job_service_test
+package job_test
 
 import (
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/mock_job"
 	"github.com/duck8823/duci/internal/container"
@@ -25,7 +25,7 @@ func TestInitialize(t *testing.T) {
 		}()
 
 		// when
-		err := job_service.Initialize(tmpDir)
+		err := jobService.Initialize(tmpDir)
 
 		// then
 		if err != nil {
@@ -41,7 +41,7 @@ func TestInitialize(t *testing.T) {
 		}()
 
 		// when
-		err := job_service.Initialize(tmpDir)
+		err := jobService.Initialize(tmpDir)
 
 		// then
 		if err == nil {
@@ -56,7 +56,7 @@ func TestGetInstance(t *testing.T) {
 		container.Clear()
 
 		// when
-		got, err := job_service.GetInstance()
+		got, err := jobService.GetInstance()
 
 		// then
 		if err == nil {
@@ -71,7 +71,7 @@ func TestGetInstance(t *testing.T) {
 
 	t.Run("when instance is not nil", func(t *testing.T) {
 		// given
-		want := &job_service.StubService{
+		want := &jobService.StubService{
 			ID: random.String(16, random.Alphanumeric),
 		}
 
@@ -80,7 +80,7 @@ func TestGetInstance(t *testing.T) {
 		defer container.Clear()
 
 		// when
-		got, err := job_service.GetInstance()
+		got, err := jobService.GetInstance()
 
 		// then
 		if err != nil {
@@ -122,7 +122,7 @@ func TestServiceImpl_FindBy(t *testing.T) {
 			Return(want, nil)
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -154,7 +154,7 @@ func TestServiceImpl_FindBy(t *testing.T) {
 			Return(nil, errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -188,7 +188,7 @@ func TestServiceImpl_Start(t *testing.T) {
 			Return(nil)
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -215,7 +215,7 @@ func TestServiceImpl_Start(t *testing.T) {
 			Return(errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -245,7 +245,7 @@ func TestServiceImpl_Append(t *testing.T) {
 			Return(nil, errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -277,7 +277,7 @@ func TestServiceImpl_Append(t *testing.T) {
 			Return(errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -309,7 +309,7 @@ func TestServiceImpl_Append(t *testing.T) {
 			Return(errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -343,7 +343,7 @@ func TestServiceImpl_Append(t *testing.T) {
 			Return(nil)
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -372,7 +372,7 @@ func TestServiceImpl_Finish(t *testing.T) {
 			Return(nil, errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -403,7 +403,7 @@ func TestServiceImpl_Finish(t *testing.T) {
 			Return(errors.New("test error"))
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when
@@ -433,7 +433,7 @@ func TestServiceImpl_Finish(t *testing.T) {
 			Return(nil)
 
 		// and
-		sut := &job_service.ServiceImpl{}
+		sut := &jobService.ServiceImpl{}
 		defer sut.SetRepo(repo)()
 
 		// when

@@ -41,7 +41,7 @@ func TestInitialize(t *testing.T) {
 		}
 
 		// and
-		jobService := new(job_service.Service)
+		jobService := new(job.Service)
 		if err := container.Get(jobService); err != nil {
 			t.Errorf("error must be nil, but got %+v", err)
 		}
@@ -86,7 +86,7 @@ func TestInitialize(t *testing.T) {
 		application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 
 		// and
-		container.Override(new(job_service.Service))
+		container.Override(new(job.Service))
 		defer container.Clear()
 
 		// when

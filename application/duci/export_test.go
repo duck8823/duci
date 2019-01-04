@@ -1,7 +1,7 @@
 package duci
 
 import (
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"io"
@@ -11,7 +11,7 @@ import (
 
 type Duci = duci
 
-func (d *Duci) SetJobService(service job_service.Service) (reset func()) {
+func (d *Duci) SetJobService(service jobService.Service) (reset func()) {
 	tmp := d.jobService
 	d.jobService = service
 	return func() {

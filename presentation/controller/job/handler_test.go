@@ -2,11 +2,11 @@ package job_test
 
 import (
 	"context"
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/application/service/job/mock_job"
-	mdlJob "github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/internal/container"
-	"github.com/duck8823/duci/presentation/controller/job"
+	jobController "github.com/duck8823/duci/presentation/controller/job"
 	"github.com/go-chi/chi"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
@@ -21,17 +21,17 @@ import (
 func TestNewHandler(t *testing.T) {
 	t.Run("when there is service in container", func(t *testing.T) {
 		// given
-		service := new(job_service.Service)
+		service := new(jobService.Service)
 
 		container.Override(service)
 		defer container.Clear()
 
 		// and
-		want := &job.Handler{}
+		want := &jobController.Handler{}
 		defer want.SetService(*service)()
 
 		// when
-		got, err := job.NewHandler()
+		got, err := jobController.NewHandler()
 
 		// then
 		if err != nil {
@@ -40,7 +40,7 @@ func TestNewHandler(t *testing.T) {
 
 		// and
 		opts := cmp.Options{
-			cmp.AllowUnexported(job.Handler{}),
+			cmp.AllowUnexported(jobController.Handler{}),
 		}
 		if !cmp.Equal(got, want, opts) {
 			t.Errorf("must be equal, but %+v", cmp.Diff(got, want, opts))
@@ -52,7 +52,7 @@ func TestNewHandler(t *testing.T) {
 		container.Clear()
 
 		// when
-		got, err := job.NewHandler()
+		got, err := jobController.NewHandler()
 
 		// then
 		if err == nil {
@@ -74,7 +74,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 		req := httptest.NewRequest("GET", "/", nil)
 
 		// and
-		id := mdlJob.ID(uuid.New())
+		id := job.ID(uuid.New())
 
 		routeCtx := chi.NewRouteContext()
 		routeCtx.URLParams.Add("uuid", uuid.UUID(id).String())
@@ -88,16 +88,16 @@ func TestHandler_ServeHTTP(t *testing.T) {
 		service.EXPECT().
 			FindBy(gomock.Eq(id)).
 			Times(1).
-			Return(&mdlJob.Job{
+			Return(&job.Job{
 				ID:       id,
 				Finished: true,
-				Stream: []mdlJob.LogLine{
+				Stream: []job.LogLine{
 					{Timestamp: time.Now(), Message: "Hello Test"},
 				},
 			}, nil)
 
 		// and
-		sut := &job.Handler{}
+		sut := &jobController.Handler{}
 		defer sut.SetService(service)()
 
 		// when
@@ -119,7 +119,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 		req := httptest.NewRequest("GET", "/", nil).WithContext(ctx)
 
 		// and
-		sut := &job.Handler{}
+		sut := &jobController.Handler{}
 
 		// when
 		sut.ServeHTTP(rec, req)
@@ -136,7 +136,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 		req := httptest.NewRequest("GET", "/", nil)
 
 		// and
-		id := mdlJob.ID(uuid.New())
+		id := job.ID(uuid.New())
 
 		routeCtx := chi.NewRouteContext()
 		routeCtx.URLParams.Add("uuid", uuid.UUID(id).String())
@@ -153,7 +153,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 			Return(nil, errors.New("test error"))
 
 		// and
-		sut := &job.Handler{}
+		sut := &jobController.Handler{}
 		defer sut.SetService(service)()
 
 		// when

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/duci"
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/application/service/job/mock_job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
@@ -21,7 +21,7 @@ import (
 func TestNew(t *testing.T) {
 	t.Run("when there are instances in container", func(t *testing.T) {
 		// given
-		container.Override(new(job_service.Service))
+		container.Override(new(jobService.Service))
 		container.Override(new(github.GitHub))
 		defer container.Clear()
 
@@ -47,7 +47,7 @@ func TestNew(t *testing.T) {
 		}{
 			{
 				name: "with only job_service.Service instance",
-				in:   []interface{}{new(job_service.Service)},
+				in:   []interface{}{new(jobService.Service)},
 			},
 			{
 				name: "with only github.GitHub instance",

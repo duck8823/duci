@@ -12,7 +12,7 @@ import (
 func TestNew(t *testing.T) {
 	t.Run("with no error", func(t *testing.T) {
 		// given
-		container.Override(new(job_service.Service))
+		container.Override(new(job.Service))
 		container.Override(new(github.GitHub))
 		defer container.Clear()
 
@@ -40,7 +40,7 @@ func TestNew(t *testing.T) {
 
 	t.Run("with invalid environment variable for docker client", func(t *testing.T) {
 		// given
-		container.Override(new(job_service.Service))
+		container.Override(new(job.Service))
 		container.Override(new(github.GitHub))
 		defer container.Clear()
 

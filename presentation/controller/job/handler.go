@@ -3,8 +3,8 @@ package job
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/duck8823/duci/application/service/job"
-	. "github.com/duck8823/duci/domain/model/job"
+	jobService "github.com/duck8823/duci/application/service/job"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/internal/logger"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
@@ -13,12 +13,12 @@ import (
 )
 
 type handler struct {
-	service job_service.Service
+	service jobService.Service
 }
 
 // NewHandler returns implement of job
 func NewHandler() (*handler, error) {
-	service, err := job_service.GetInstance()
+	service, err := jobService.GetInstance()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -35,13 +35,13 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.logs(w, ID(id)); err != nil {
+	if err := h.logs(w, job.ID(id)); err != nil {
 		http.Error(w, fmt.Sprintf(" Error occurred: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 }
 
-func (h *handler) logs(w http.ResponseWriter, id ID) error {
+func (h *handler) logs(w http.ResponseWriter, id job.ID) error {
 	f, ok := w.(http.Flusher)
 	if !ok {
 		return errors.New("Streaming unsupported")
