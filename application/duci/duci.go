@@ -46,7 +46,7 @@ func New() (*duci, error) {
 func (d *duci) Start(ctx context.Context) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		_ = d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+		// TODO: output error message
 		return
 	}
 	if err := d.jobService.Start(buildJob.ID); err != nil {

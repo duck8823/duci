@@ -29,5 +29,9 @@ func BuildJobFromContext(ctx context.Context) (*BuildJob, error) {
 	if val == nil {
 		return nil, fmt.Errorf("context value '%s' should not be null", ctxKey)
 	}
-	return val.(*BuildJob), nil
+	buildJob, ok := val.(*BuildJob)
+	if !ok {
+		return nil, fmt.Errorf("invalid type in context '%s'", ctxKey)
+	}
+	return buildJob, nil
 }
