@@ -5,7 +5,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	moby "github.com/docker/docker/client"
-	. "github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/pkg/errors"
 	"io"
 )
@@ -24,7 +24,7 @@ func New() (Docker, error) {
 }
 
 // Build a docker image.
-func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (Log, error) {
+func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (job.Log, error) {
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag.String()},
 		Dockerfile: dockerfile.String(),
@@ -39,7 +39,7 @@ func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerf
 }
 
 // Run docker container with command.
-func (c *dockerImpl) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, Log, error) {
+func (c *dockerImpl) Run(ctx context.Context, opts RuntimeOptions, tag Tag, cmd Command) (ContainerID, job.Log, error) {
 	con, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:   tag.String(),
 		Env:     opts.Environments.Array(),

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/executor"
-	"github.com/duck8823/duci/application/service/job"
+	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/duck8823/duci/domain/model/runner"
@@ -15,13 +15,13 @@ import (
 
 type duci struct {
 	executor.Executor
-	jobService job_service.Service
+	jobService jobService.Service
 	github     github.GitHub
 }
 
 // New returns duci instance
 func New() (executor.Executor, error) {
-	jobService, err := job_service.GetInstance()
+	jobService, err := jobService.GetInstance()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

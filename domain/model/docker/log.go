@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	. "github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/internal/logger"
 	"github.com/pkg/errors"
 	"io"
@@ -19,12 +19,12 @@ type buildLogger struct {
 }
 
 // NewBuildLog return a instance of Log.
-func NewBuildLog(r io.Reader) Log {
+func NewBuildLog(r io.Reader) job.Log {
 	return &buildLogger{bufio.NewReader(r)}
 }
 
 // ReadLine returns LogLine.
-func (l *buildLogger) ReadLine() (*LogLine, error) {
+func (l *buildLogger) ReadLine() (*job.LogLine, error) {
 	for {
 		line, _, err := l.reader.ReadLine()
 		if err != nil {
@@ -36,7 +36,7 @@ func (l *buildLogger) ReadLine() (*LogLine, error) {
 			continue
 		}
 
-		return &LogLine{Timestamp: now(), Message: msg}, nil
+		return &job.LogLine{Timestamp: now(), Message: msg}, nil
 	}
 }
 
@@ -45,12 +45,12 @@ type runLogger struct {
 }
 
 // NewRunLog returns a instance of Log
-func NewRunLog(r io.Reader) Log {
+func NewRunLog(r io.Reader) job.Log {
 	return &runLogger{bufio.NewReader(r)}
 }
 
 // ReadLine returns LogLine.
-func (l *runLogger) ReadLine() (*LogLine, error) {
+func (l *runLogger) ReadLine() (*job.LogLine, error) {
 	for {
 		line, _, err := l.reader.ReadLine()
 		if err != nil {
@@ -66,7 +66,7 @@ func (l *runLogger) ReadLine() (*LogLine, error) {
 
 		// prevent to CR
 		progress := bytes.Split(msg, []byte{'\r'})
-		return &LogLine{Timestamp: now(), Message: string(progress[0])}, nil
+		return &job.LogLine{Timestamp: now(), Message: string(progress[0])}, nil
 	}
 }
 
