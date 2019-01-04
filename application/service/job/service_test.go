@@ -302,7 +302,7 @@ func TestServiceImpl_Append(t *testing.T) {
 		repo.EXPECT().
 			FindBy(gomock.Eq(id)).
 			Times(1).
-			Return(nil, job.NotFound)
+			Return(nil, job.ErrNotFound)
 		repo.EXPECT().
 			Save(gomock.Eq(job.Job{ID: id, Finished: false, Stream: []job.LogLine{line}})).
 			Times(1).

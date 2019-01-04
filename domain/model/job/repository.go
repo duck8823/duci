@@ -2,7 +2,8 @@ package job
 
 import "errors"
 
-var NotFound = errors.New("job not found")
+// ErrNotFound represents a job not found error
+var ErrNotFound = errors.New("job not found")
 
 // Repository is Job Repository
 type Repository interface {

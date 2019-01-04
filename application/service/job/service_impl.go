@@ -70,7 +70,7 @@ func (s *serviceImpl) Append(id job.ID, line job.LogLine) error {
 
 func (s *serviceImpl) findOrInitialize(id job.ID) (*job.Job, error) {
 	j, err := s.repo.FindBy(id)
-	if err == job.NotFound {
+	if err == job.ErrNotFound {
 		return &job.Job{ID: id, Finished: false}, nil
 	} else if err != nil {
 		return nil, errors.WithStack(err)

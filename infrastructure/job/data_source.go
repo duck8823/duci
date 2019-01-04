@@ -25,7 +25,7 @@ func NewDataSource(path string) (*dataSource, error) {
 func (d *dataSource) FindBy(id ID) (*Job, error) {
 	data, err := d.db.Get(id.ToSlice(), nil)
 	if err == leveldb.ErrNotFound {
-		return nil, NotFound
+		return nil, ErrNotFound
 	} else if err != nil {
 		return nil, errors.WithStack(err)
 	}
