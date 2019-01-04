@@ -16,8 +16,8 @@ import (
 	"net/http"
 )
 
-// SkipBuild represents error of skip build
-var SkipBuild = errors.New("Skip build")
+// ErrSkipBuild represents error of skip build
+var ErrSkipBuild = errors.New("Skip build")
 
 type handler struct {
 	executor executor.Executor
@@ -116,7 +116,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	phrase, err := extractBuildPhrase(event.GetComment().GetBody())
-	if err == SkipBuild {
+	if err == ErrSkipBuild {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("{\"message\":\"skip build\"}")); err != nil {
 			logger.Error(err)
