@@ -7,20 +7,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-type builder struct {
+// Builder is an executor builder
+type Builder struct {
 	docker    docker.Docker
 	logFunc   runner.LogFunc
 	startFunc func(context.Context)
 	endFunc   func(context.Context, error)
 }
 
-// DefaultExecutorBuilder create new builder of docker runner
-func DefaultExecutorBuilder() (*builder, error) {
+// DefaultExecutorBuilder create new Builder of docker runner
+func DefaultExecutorBuilder() (*Builder, error) {
 	docker, err := docker.New()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &builder{
+	return &Builder{
 		docker:    docker,
 		logFunc:   runner.NothingToDo,
 		startFunc: nothingToDoStart,
@@ -29,25 +30,25 @@ func DefaultExecutorBuilder() (*builder, error) {
 }
 
 // LogFunc set a LogFunc
-func (b *builder) LogFunc(f runner.LogFunc) *builder {
+func (b *Builder) LogFunc(f runner.LogFunc) *Builder {
 	b.logFunc = f
 	return b
 }
 
 // StartFunc set a startFunc
-func (b *builder) StartFunc(f func(context.Context)) *builder {
+func (b *Builder) StartFunc(f func(context.Context)) *Builder {
 	b.startFunc = f
 	return b
 }
 
 // EndFunc set a endFunc
-func (b *builder) EndFunc(f func(context.Context, error)) *builder {
+func (b *Builder) EndFunc(f func(context.Context, error)) *Builder {
 	b.endFunc = f
 	return b
 }
 
 // Build returns a executor
-func (b *builder) Build() *jobExecutor {
+func (b *Builder) Build() Executor {
 	r := runner.DefaultDockerRunnerBuilder().
 		LogFunc(b.logFunc).
 		Build()

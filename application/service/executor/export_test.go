@@ -7,8 +7,6 @@ import (
 	"github.com/duck8823/duci/domain/model/runner"
 )
 
-type Builder = builder
-
 func (b *Builder) SetDocker(docker docker.Docker) (reset func()) {
 	tmp := b.docker
 	b.docker = docker
