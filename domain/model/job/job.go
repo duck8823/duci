@@ -35,7 +35,7 @@ func (j *Job) ToBytes() ([]byte, error) {
 // ID is the identifier of job
 type ID uuid.UUID
 
-// Slice returns slice value
+// ToSlice returns slice value
 func (i ID) ToSlice() []byte {
 	return []byte(uuid.UUID(i).String())
 }
