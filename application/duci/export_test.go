@@ -46,3 +46,7 @@ func (l *MockLog) ReadLine() (*job.LogLine, error) {
 	l.Msgs = l.Msgs[1:]
 	return &job.LogLine{Timestamp: time.Now(), Message: msg}, nil
 }
+
+func String(val string) *string {
+	return &val
+}

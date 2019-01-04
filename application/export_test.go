@@ -28,6 +28,6 @@ func TrimSuffix(tag string) string {
 	return trimSuffix(tag)
 }
 
-func GetCtxKey() string {
-	return ctxKey
+func GetCtxKey() *string {
+	return &ctxKey
 }

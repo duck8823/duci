@@ -89,7 +89,7 @@ func TestDuci_Start(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -126,7 +126,7 @@ func TestDuci_Start(t *testing.T) {
 
 	t.Run("when invalid build job value", func(t *testing.T) {
 		// given
-		ctx := context.WithValue(context.Background(), "duci_job", "invalid value")
+		ctx := context.WithValue(context.Background(), duci.String("duci_job"), "invalid value")
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -164,7 +164,7 @@ func TestDuci_Start(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -206,7 +206,7 @@ func TestDuci_AppendLog(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 
 		log := &duci.MockLog{Msgs: []string{"Hello", "World"}}
 
@@ -231,7 +231,7 @@ func TestDuci_AppendLog(t *testing.T) {
 
 	t.Run("when invalid build job value", func(t *testing.T) {
 		// given
-		ctx := context.WithValue(context.Background(), "duci_job", "invalid value")
+		ctx := context.WithValue(context.Background(), duci.String("duci_job"), "invalid value")
 		log := &duci.MockLog{Msgs: []string{"Hello", "World"}}
 
 		// and
@@ -262,7 +262,7 @@ func TestDuci_End(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 		var err error = nil
 
 		// and
@@ -308,7 +308,7 @@ func TestDuci_End(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 		err := runner.ErrFailure
 
 		// and
@@ -354,7 +354,7 @@ func TestDuci_End(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 		err := errors.New("test error")
 
 		// and
@@ -394,7 +394,7 @@ func TestDuci_End(t *testing.T) {
 
 	t.Run("when invalid build job value", func(t *testing.T) {
 		// given
-		ctx := context.WithValue(context.Background(), "duci_job", "invalid value")
+		ctx := context.WithValue(context.Background(), duci.String("duci_job"), "invalid value")
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -428,7 +428,7 @@ func TestDuci_End(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
-		ctx := context.WithValue(context.Background(), "duci_job", buildJob)
+		ctx := application.ContextWithJob(context.Background(), buildJob)
 
 		// and
 		ctrl := gomock.NewController(t)

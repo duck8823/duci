@@ -20,12 +20,12 @@ type BuildJob struct {
 
 // ContextWithJob set parent context BuildJob and returns it.
 func ContextWithJob(parent context.Context, job *BuildJob) context.Context {
-	return context.WithValue(parent, ctxKey, job)
+	return context.WithValue(parent, &ctxKey, job)
 }
 
 // BuildJobFromContext extract BuildJob from context
 func BuildJobFromContext(ctx context.Context) (*BuildJob, error) {
-	val := ctx.Value(ctxKey)
+	val := ctx.Value(&ctxKey)
 	if val == nil {
 		return nil, fmt.Errorf("context value '%s' should not be null", ctxKey)
 	}
