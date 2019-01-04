@@ -14,9 +14,9 @@ func (p phrase) Command() docker.Command {
 }
 
 func extractBuildPhrase(comment string) (phrase, error) {
-	if !regexp.MustCompile("^ci\\s+[^\\s]+").Match([]byte(comment)) {
+	if !regexp.MustCompile(`^ci\s+[^\\s]+`).Match([]byte(comment)) {
 		return "", SkipBuild
 	}
-	phrase := phrase(regexp.MustCompile("^ci\\s+").ReplaceAllString(comment, ""))
+	phrase := phrase(regexp.MustCompile(`^ci\s+`).ReplaceAllString(comment, ""))
 	return phrase, nil
 }
