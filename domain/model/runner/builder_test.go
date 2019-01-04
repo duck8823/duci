@@ -2,12 +2,12 @@ package runner_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/runner"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"reflect"
 	"testing"
 )
 
@@ -15,8 +15,8 @@ func TestDefaultDockerRunnerBuilder(t *testing.T) {
 	// given
 	opts := []cmp.Option{
 		cmp.AllowUnexported(runner.Builder{}),
-		cmp.Transformer("LogFunc", func(l runner.LogFunc) string {
-			return fmt.Sprint(l)
+		cmp.Transformer("LogFunc", func(f runner.LogFunc) uintptr {
+			return reflect.ValueOf(f).Pointer()
 		}),
 		cmpopts.IgnoreInterfaces(struct{ docker.Docker }{}),
 	}
@@ -38,8 +38,8 @@ func TestBuilder_LogFunc(t *testing.T) {
 	// given
 	opts := []cmp.Option{
 		cmp.AllowUnexported(runner.Builder{}),
-		cmp.Transformer("LogFunc", func(l runner.LogFunc) string {
-			return fmt.Sprint(l)
+		cmp.Transformer("LogFunc", func(f runner.LogFunc) uintptr {
+			return reflect.ValueOf(f).Pointer()
 		}),
 		cmpopts.IgnoreInterfaces(struct{ docker.Docker }{}),
 	}
@@ -74,8 +74,8 @@ func TestBuilder_Build(t *testing.T) {
 	// given
 	opts := []cmp.Option{
 		cmp.AllowUnexported(runner.DockerRunnerImpl{}),
-		cmp.Transformer("LogFunc", func(l runner.LogFunc) string {
-			return fmt.Sprint(l)
+		cmp.Transformer("LogFunc", func(f runner.LogFunc) uintptr {
+			return reflect.ValueOf(f).Pointer()
 		}),
 	}
 
