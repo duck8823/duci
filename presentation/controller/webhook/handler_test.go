@@ -101,10 +101,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			ctrl.Finish()
-		}()
+		defer ctrl.Finish()
 
 		executor := mock_executor.NewMockExecutor(ctrl)
 		executor.EXPECT().
@@ -114,7 +111,11 @@ func TestHandler_ServeHTTP(t *testing.T) {
 
 		// and
 		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
 
 		// when
 		sut.ServeHTTP(rec, req)
@@ -123,8 +124,6 @@ func TestHandler_ServeHTTP(t *testing.T) {
 		if rec.Code != http.StatusOK {
 			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
 		}
-
-		println(rec.Body.String())
 	})
 
 	t.Run("when pull request comment event", func(t *testing.T) {
@@ -145,10 +144,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			ctrl.Finish()
-		}()
+		defer ctrl.Finish()
 
 		gh := mock_github.NewMockGitHub(ctrl)
 		gh.EXPECT().
@@ -171,7 +167,11 @@ func TestHandler_ServeHTTP(t *testing.T) {
 
 		// and
 		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
 
 		// when
 		sut.ServeHTTP(rec, req)
@@ -220,10 +220,7 @@ func TestHandler_PushEvent(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			ctrl.Finish()
-		}()
+		defer ctrl.Finish()
 
 		executor := mock_executor.NewMockExecutor(ctrl)
 		executor.EXPECT().
@@ -265,7 +262,11 @@ func TestHandler_PushEvent(t *testing.T) {
 
 		// and
 		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
 
 		// when
 		sut.PushEvent(rec, req)
@@ -373,10 +374,7 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			ctrl.Finish()
-		}()
+		defer ctrl.Finish()
 
 		gh := mock_github.NewMockGitHub(ctrl)
 		gh.EXPECT().
@@ -431,7 +429,11 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 
 		// and
 		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
 
 		// when
 		sut.IssueCommentEvent(rec, req)
@@ -461,10 +463,7 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			ctrl.Finish()
-		}()
+		defer ctrl.Finish()
 
 		executor := mock_executor.NewMockExecutor(ctrl)
 		executor.EXPECT().
@@ -473,7 +472,11 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 
 		// and
 		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
 
 		// when
 		sut.IssueCommentEvent(rec, req)
@@ -507,10 +510,7 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 
 		// and
 		ctrl := gomock.NewController(t)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			ctrl.Finish()
-		}()
+		defer ctrl.Finish()
 
 		executor := mock_executor.NewMockExecutor(ctrl)
 		executor.EXPECT().
@@ -519,7 +519,11 @@ func TestHandler_IssueCommentEvent(t *testing.T) {
 
 		// and
 		sut := &webhook.Handler{}
-		defer sut.SetExecutor(executor)()
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
 
 		// when
 		sut.IssueCommentEvent(rec, req)
