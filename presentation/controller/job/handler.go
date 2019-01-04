@@ -44,7 +44,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *handler) logs(w http.ResponseWriter, id ID) error {
 	f, ok := w.(http.Flusher)
 	if !ok {
-		return errors.New("Streaming unsupported!")
+		return errors.New("Streaming unsupported")
 	}
 
 	// TODO: add timeout
