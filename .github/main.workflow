@@ -1,8 +1,10 @@
 workflow "test" {
   on = "push"
-  resolves = ["duci"]
+  resolves = ["test"]
 }
 
-action "duci" {
-  uses = "./.duci/"
+action "test" {
+  uses = "docker://golang:1.11"
+  runs = "go"
+  args = ["test", "./..."]
 }
