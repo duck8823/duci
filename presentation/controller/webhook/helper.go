@@ -46,7 +46,7 @@ func targetPoint(event *go_github.IssueCommentEvent) (github.TargetPoint, error)
 	}
 
 	return &github.SimpleTargetPoint{
-		Ref: pr.GetHead().GetRef(),
+		Ref: fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
 		SHA: pr.GetHead().GetSHA(),
 	}, nil
 }

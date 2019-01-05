@@ -382,7 +382,7 @@ func TestHandler_IssueCommentEvent_Normal(t *testing.T) {
 			Times(1).
 			Return(&go_github.PullRequest{
 				Head: &go_github.PullRequestBranch{
-					Ref: go_github.String("refs/test/dummy"),
+					Ref: go_github.String("dummy"),
 					SHA: go_github.String("aa218f56b14c9653891f9e74264a383fa43fefbd"),
 				},
 			}, nil)
@@ -408,7 +408,7 @@ func TestHandler_IssueCommentEvent_Normal(t *testing.T) {
 							SSHURL:   go_github.String("git@github.com:Codertocat/Hello-World.git"),
 							CloneURL: go_github.String("https://github.com/Codertocat/Hello-World.git"),
 						},
-						Ref: "refs/test/dummy",
+						Ref: "refs/heads/dummy",
 						SHA: plumbing.NewHash("aa218f56b14c9653891f9e74264a383fa43fefbd"),
 					},
 					TaskName:  "duci/pr/build",

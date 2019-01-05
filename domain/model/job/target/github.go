@@ -2,7 +2,6 @@ package target
 
 import (
 	"context"
-	"fmt"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/job/target/github"
@@ -33,7 +32,7 @@ func (g *GitHub) Prepare() (job.WorkDir, job.Cleanup, error) {
 
 	if err := git.Clone(context.Background(), tmpDir, &github.TargetSource{
 		Repository: g.Repo,
-		Ref:        fmt.Sprintf("refs/heads/%s", g.Point.GetRef()),
+		Ref:        g.Point.GetRef(),
 		SHA:        plumbing.NewHash(g.Point.GetHead()),
 	}); err != nil {
 		return "", cleanupFunc(tmpDir), errors.WithStack(err)
