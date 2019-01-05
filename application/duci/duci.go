@@ -9,6 +9,7 @@ import (
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/duck8823/duci/domain/model/runner"
+	"github.com/duck8823/duci/internal/logger"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -55,16 +56,20 @@ func (d *duci) Start(ctx context.Context) {
 		return
 	}
 	if err := d.jobService.Start(buildJob.ID); err != nil {
-		_ = d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
+			logger.Error(err)
+		}
 		return
 	}
-	_ = d.github.CreateCommitStatus(ctx, github.CommitStatus{
+	if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 		TargetSource: buildJob.TargetSource,
 		State:        github.PENDING,
 		Description:  "pending",
 		Context:      buildJob.TaskName,
 		TargetURL:    buildJob.TargetURL,
-	})
+	}); err != nil {
+		logger.Error(err)
+	}
 }
 
 // AppendLog is a function that print and store log
@@ -76,7 +81,9 @@ func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 	}
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
 		println(line.Message)
-		_ = d.jobService.Append(buildJob.ID, *line)
+		if err := d.jobService.Append(buildJob.ID, *line); err != nil {
+			logger.Error(err)
+		}
 	}
 }
 
@@ -88,34 +95,42 @@ func (d *duci) End(ctx context.Context, e error) {
 		return
 	}
 	if err := d.jobService.Finish(buildJob.ID); err != nil {
-		_ = d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()})
+		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
+			logger.Error(err)
+		}
 		return
 	}
 
 	switch e {
 	case nil:
-		_ = d.github.CreateCommitStatus(ctx, github.CommitStatus{
+		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.SUCCESS,
 			Description:  "success",
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
-		})
+		}); err != nil {
+			logger.Error(err)
+		}
 	case runner.ErrFailure:
-		_ = d.github.CreateCommitStatus(ctx, github.CommitStatus{
+		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.FAILURE,
 			Description:  "failure",
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
-		})
+		}); err != nil {
+			logger.Error(err)
+		}
 	default:
-		_ = d.github.CreateCommitStatus(ctx, github.CommitStatus{
+		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.ERROR,
 			Description:  github.Description(fmt.Sprintf("error: %s", e.Error())),
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
-		})
+		}); err != nil {
+			logger.Error(err)
+		}
 	}
 }
