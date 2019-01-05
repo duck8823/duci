@@ -1,22 +1,25 @@
 FROM golang:1.11-alpine AS build
 MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
-RUN apk --update add --no-cache alpine-sdk
+RUN apk --update add --no-cache alpine-sdk ca-certificates \
+ && update-ca-certificates
 
-WORKDIR /go/src/github.com/duck8823/duci
+WORKDIR /workdir
 
-ADD . .
+COPY go.mod .
+COPY go.sum .
 
-ENV GO111MODULE=on
+RUN go mod download
 
-RUN make build
+COPY . .
 
-FROM alpine
+RUN CGO_ENABLED=0 make build
 
-RUN apk add --update --no-cache ca-certificates && update-ca-certificates
+FROM scratch
 
 WORKDIR /root/
-COPY --from=build /go/src/github.com/duck8823/duci/duci .
+COPY --from=build /workdir/duci .
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 8080
 
