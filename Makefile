@@ -21,7 +21,6 @@ test:
 test-in-docker:
 	docker build -t duck8823/duci:test -f .duci/Dockerfile .
 	docker run --rm \
-	           -v ${GOPATH}/pkg/mod/cache:/go/pkg/mod/cache \
 	           duck8823/duci:test test
 
 clean:

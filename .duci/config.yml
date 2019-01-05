@@ -1,3 +1,0 @@
----
-volumes:
-  - ${GOPATH}/pkg/mod/cache:/go/pkg/mod/cache
