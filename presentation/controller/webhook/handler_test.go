@@ -245,7 +245,7 @@ func TestHandler_PushEvent(t *testing.T) {
 						SHA: plumbing.ZeroHash,
 					},
 					TaskName:  "duci/push",
-					TargetURL: webhook.URLMust(url.Parse("http://example.com/")),
+					TargetURL: webhook.URLMust(url.Parse("http://example.com/logs/72d3162e-cc78-11e3-81ab-4c9367dc0958")),
 				}
 
 				opt := webhook.CmpOptsAllowFields(go_github.PushEventRepository{}, "ID", "FullName", "SSHURL", "CloneURL")
@@ -412,7 +412,7 @@ func TestHandler_IssueCommentEvent_Normal(t *testing.T) {
 						SHA: plumbing.NewHash("aa218f56b14c9653891f9e74264a383fa43fefbd"),
 					},
 					TaskName:  "duci/pr/build",
-					TargetURL: webhook.URLMust(url.Parse("http://example.com/")),
+					TargetURL: webhook.URLMust(url.Parse("http://example.com/logs/72d3162e-cc78-11e3-81ab-4c9367dc0958")),
 				}
 
 				opt := webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL")

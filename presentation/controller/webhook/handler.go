@@ -62,6 +62,8 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	targetURL := targetURL(r)
+	targetURL.Path = fmt.Sprintf("/logs/%s", reqID.ToSlice())
 	ctx := application.ContextWithJob(context.Background(), &application.BuildJob{
 		ID: reqID,
 		TargetSource: &github.TargetSource{
@@ -70,7 +72,7 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 			SHA:        plumbing.NewHash(event.GetHead()),
 		},
 		TaskName:  fmt.Sprintf("%s/push", application.Name),
-		TargetURL: targetURL(r),
+		TargetURL: targetURL,
 	})
 
 	tgt := &target.GitHub{
@@ -127,6 +129,8 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	targetURL := targetURL(r)
+	targetURL.Path = fmt.Sprintf("/logs/%s", reqID.ToSlice())
 	ctx := application.ContextWithJob(context.Background(), &application.BuildJob{
 		ID: reqID,
 		TargetSource: &github.TargetSource{
@@ -135,7 +139,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 			SHA:        plumbing.NewHash(pnt.GetHead()),
 		},
 		TaskName:  fmt.Sprintf("%s/pr/%s", application.Name, phrase.Command().Slice()[0]),
-		TargetURL: targetURL(r),
+		TargetURL: targetURL,
 	})
 
 	tgt := &target.GitHub{
