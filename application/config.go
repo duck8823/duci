@@ -31,6 +31,11 @@ func (s maskString) MarshalJSON() ([]byte, error) {
 	return []byte(`"***"`), nil
 }
 
+// ToString returns unmasked string.
+func (s maskString) String() string {
+	return string(s)
+}
+
 // Configuration of application.
 type Configuration struct {
 	Server *Server `yaml:"server" json:"server"`

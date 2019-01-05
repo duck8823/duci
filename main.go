@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/duck8823/duci/application/cmd"
+	"github.com/duck8823/duci/presentation/cmd"
 	"os"
 )
 

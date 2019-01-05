@@ -13,6 +13,6 @@ vendor
 # app
 /config.yml
 release-notes.txt
-duci
+/duci
 duci.exe
 dist

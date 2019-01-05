@@ -56,7 +56,7 @@ func TestConfiguration_Set(t *testing.T) {
 		expected := "hello world"
 
 		// and
-		os.Setenv("TEST_CONF_ENV", expected)
+		_ = os.Setenv("TEST_CONF_ENV", expected)
 
 		//
 		err := application.Config.Set("testdata/config_with_env.yml")
@@ -129,5 +129,21 @@ func TestMaskString_MarshalJSON(t *testing.T) {
 
 	if string(actual) != "\"***\"" {
 		t.Errorf("wont masked string, but got '%s'", actual)
+	}
+}
+
+func TestMaskString_String(t *testing.T) {
+	// given
+	want := "hoge"
+
+	// and
+	sut := application.MaskString(want)
+
+	// when
+	got := sut.String()
+
+	// then
+	if !cmp.Equal(got, want) {
+		t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
 	}
 }
