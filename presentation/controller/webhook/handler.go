@@ -69,7 +69,7 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 		TargetSource: &github.TargetSource{
 			Repository: event.GetRepo(),
 			Ref:        event.GetRef(),
-			SHA:        plumbing.NewHash(event.GetHead()),
+			SHA:        plumbing.NewHash(event.GetHeadCommit().GetID()),
 		},
 		TaskName:  fmt.Sprintf("%s/push", application.Name),
 		TargetURL: targetURL,
