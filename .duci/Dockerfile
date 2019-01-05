@@ -3,9 +3,7 @@ MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache alpine-sdk
 
-WORKDIR /go/src/github.com/duck8823/duci
-
-ENV GO111MODULE=on
+WORKDIR /workdir
 
 COPY go.mod .
 COPY go.sum .
