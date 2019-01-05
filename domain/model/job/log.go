@@ -9,6 +9,6 @@ type Log interface {
 
 // LogLine stores timestamp and message.
 type LogLine struct {
-	Timestamp time.Time
-	Message   string
+	Timestamp time.Time `json:"time"`
+	Message   string	`json:"message"`
 }
