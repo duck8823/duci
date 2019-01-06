@@ -9,8 +9,8 @@ import (
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/duck8823/duci/domain/model/runner"
-	"github.com/duck8823/duci/internal/logger"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -52,12 +52,12 @@ func New() (executor.Executor, error) {
 func (d *duci) Start(ctx context.Context) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		// TODO: output error message
+		logrus.Error(err)
 		return
 	}
 	if err := d.jobService.Start(buildJob.ID); err != nil {
 		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
-			logger.Error(err)
+			logrus.Error(err)
 		}
 		return
 	}
@@ -68,7 +68,7 @@ func (d *duci) Start(ctx context.Context) {
 		Context:      buildJob.TaskName,
 		TargetURL:    buildJob.TargetURL,
 	}); err != nil {
-		logger.Error(err)
+		logrus.Warn(err)
 	}
 }
 
@@ -76,13 +76,13 @@ func (d *duci) Start(ctx context.Context) {
 func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		// TODO: output error message
+		logrus.Error(err)
 		return
 	}
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
-		println(line.Message)
+		logrus.Info(line.Message)
 		if err := d.jobService.Append(buildJob.ID, *line); err != nil {
-			logger.Error(err)
+			logrus.Error(err)
 		}
 	}
 }
@@ -91,12 +91,12 @@ func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 func (d *duci) End(ctx context.Context, e error) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		// TODO: output error message
+		logrus.Error(err)
 		return
 	}
 	if err := d.jobService.Finish(buildJob.ID); err != nil {
 		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
-			logger.Error(err)
+			logrus.Error(err)
 		}
 		return
 	}
@@ -110,7 +110,7 @@ func (d *duci) End(ctx context.Context, e error) {
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}); err != nil {
-			logger.Error(err)
+			logrus.Warn(err)
 		}
 	case runner.ErrFailure:
 		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
@@ -120,7 +120,7 @@ func (d *duci) End(ctx context.Context, e error) {
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}); err != nil {
-			logger.Error(err)
+			logrus.Warn(err)
 		}
 	default:
 		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
@@ -130,7 +130,7 @@ func (d *duci) End(ctx context.Context, e error) {
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}); err != nil {
-			logger.Error(err)
+			logrus.Warn(err)
 		}
 	}
 }

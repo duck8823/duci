@@ -2,9 +2,9 @@ package target
 
 import (
 	"github.com/duck8823/duci/domain/model/job"
-	"github.com/duck8823/duci/internal/logger"
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
@@ -79,7 +79,7 @@ func copyFile(dstFile string, srcFile string) error {
 func cleanupFunc(path string) job.Cleanup {
 	return func() {
 		if err := os.RemoveAll(path); err != nil {
-			logger.Error(err)
+			logrus.Error(err)
 		}
 	}
 }

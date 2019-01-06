@@ -5,9 +5,10 @@ import (
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/semaphore"
 	"github.com/duck8823/duci/presentation/router"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"net/http"
-	"os"
+	"strings"
 )
 
 var (
@@ -27,28 +28,26 @@ func runServer(cmd *cobra.Command, _ []string) {
 	readConfiguration(cmd)
 
 	if err := application.Initialize(); err != nil {
-		println(fmt.Sprintf("Failed to initialize a semaphore.\n%+v", err))
-		os.Exit(1)
+		logrus.Fatal(fmt.Sprintf("Failed to initialize a semaphore.\n%+v", err))
 		return
 	}
 
 	if err := semaphore.Make(); err != nil {
-		println(fmt.Sprintf("Failed to initialize a semaphore.\n%+v", err))
-		os.Exit(1)
+		logrus.Fatal(fmt.Sprintf("Failed to initialize a semaphore.\n%+v", err))
 		return
 	}
 
 	rtr, err := router.New()
 	if err != nil {
-		println(fmt.Sprintf("Failed to initialize controllers.\n%+v", err))
-		os.Exit(1)
+		logrus.Fatal(fmt.Sprintf("Failed to initialize controllers.\n%+v", err))
 		return
 	}
 
-	println(logo)
+	for _, l := range strings.Split(logo, "\n") {
+		logrus.Info(l)
+	}
 	if err := http.ListenAndServe(application.Config.Addr(), rtr); err != nil {
-		println(fmt.Sprintf("Failed to run server.\n%+v", err))
-		os.Exit(1)
+		logrus.Fatal(fmt.Sprintf("Failed to run server.\n%+v", err))
 		return
 	}
 }

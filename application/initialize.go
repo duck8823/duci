@@ -7,6 +7,7 @@ import (
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // Initialize singleton instances that are needed by application
@@ -34,6 +35,6 @@ func Initialize() error {
 
 func printLog(_ context.Context, log job.Log) {
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
-		println(line.Message)
+		logrus.Info(line.Message)
 	}
 }
