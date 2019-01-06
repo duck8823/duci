@@ -52,12 +52,12 @@ func New() (executor.Executor, error) {
 func (d *duci) Start(ctx context.Context) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Errorf("%+v", err)
 		return
 	}
 	if err := d.jobService.Start(buildJob.ID); err != nil {
 		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 		return
 	}
@@ -76,13 +76,13 @@ func (d *duci) Start(ctx context.Context) {
 func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Errorf("%+v", err)
 		return
 	}
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
 		logrus.Info(line.Message)
 		if err := d.jobService.Append(buildJob.ID, *line); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 	}
 }
@@ -91,12 +91,12 @@ func (d *duci) AppendLog(ctx context.Context, log job.Log) {
 func (d *duci) End(ctx context.Context, e error) {
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Errorf("%+v", err)
 		return
 	}
 	if err := d.jobService.Finish(buildJob.ID); err != nil {
 		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 		return
 	}

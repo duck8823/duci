@@ -79,7 +79,7 @@ func extractMessage(line []byte) string {
 		Stream string `json:"stream"`
 	}{}
 	if err := json.NewDecoder(bytes.NewReader(line)).Decode(s); err != nil {
-		logrus.Error(err)
+		logrus.Errorf("%+v", err)
 	}
 	return s.Stream
 }

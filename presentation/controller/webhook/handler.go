@@ -82,7 +82,7 @@ func (h *handler) PushEvent(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		if err := h.executor.Execute(ctx, tgt); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 	}()
 
@@ -100,7 +100,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 	if !isValidAction(event.Action) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("{\"message\":\"skip build\"}")); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 		return
 	}
@@ -121,7 +121,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 	if err == ErrSkipBuild {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("{\"message\":\"skip build\"}")); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 		return
 	} else if err != nil {
@@ -149,7 +149,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		if err := h.executor.Execute(ctx, tgt, phrase.Command()...); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 	}()
 

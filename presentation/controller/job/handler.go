@@ -56,7 +56,7 @@ func (h *handler) logs(w http.ResponseWriter, id job.ID) error {
 		}
 		for _, msg := range job.Stream[read:] {
 			if err := json.NewEncoder(w).Encode(msg); err != nil {
-				logrus.Error(err)
+				logrus.Errorf("%+v", err)
 			}
 			f.Flush()
 			read++

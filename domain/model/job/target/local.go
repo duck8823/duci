@@ -79,7 +79,7 @@ func copyFile(dstFile string, srcFile string) error {
 func cleanupFunc(path string) job.Cleanup {
 	return func() {
 		if err := os.RemoveAll(path); err != nil {
-			logrus.Error(err)
+			logrus.Errorf("%+v", err)
 		}
 	}
 }

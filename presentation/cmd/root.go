@@ -17,8 +17,7 @@ func init() {
 func Execute(args []string) {
 	rootCmd.SetArgs(args)
 	if err := rootCmd.Execute(); err != nil {
-		logrus.Error(err)
-		os.Exit(1)
+		logrus.Fatal(err)
 	}
 }
 
