@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/duck8823/duci/application"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -17,8 +17,7 @@ func init() {
 func Execute(args []string) {
 	rootCmd.SetArgs(args)
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		logrus.Fatal(err)
 	}
 }
 
@@ -41,8 +40,7 @@ func readConfiguration(cmd *cobra.Command) {
 	}
 
 	if err := application.Config.Set(configFilePath); err != nil {
-		println(fmt.Sprintf("Failed to set configuration.\n%+v", err))
-		os.Exit(1)
+		logrus.Fatalf("Failed to set configuration.\n%+v", err)
 	}
 }
 

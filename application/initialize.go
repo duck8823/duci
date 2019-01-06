@@ -7,10 +7,16 @@ import (
 	"github.com/duck8823/duci/domain/model/job/target/git"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // Initialize singleton instances that are needed by application
 func Initialize() error {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: "06-01-02 15:04:05.000",
+		FullTimestamp:   true,
+	})
+
 	switch {
 	case len(Config.GitHub.SSHKeyPath) == 0:
 		if err := git.InitializeWithHTTP(printLog); err != nil {
@@ -34,6 +40,6 @@ func Initialize() error {
 
 func printLog(_ context.Context, log job.Log) {
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
-		println(line.Message)
+		logrus.Info(line.Message)
 	}
 }
