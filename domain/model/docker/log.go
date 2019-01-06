@@ -9,10 +9,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
+	"strings"
 	"time"
 )
 
-var now = time.Now
+var (
+	now               = time.Now
+	lineBreakReplacer = strings.NewReplacer("\r\n", "", "\r", "", "\n", "")
+)
 
 type buildLogger struct {
 	reader *bufio.Reader
@@ -36,7 +40,7 @@ func (l *buildLogger) ReadLine() (*job.LogLine, error) {
 			continue
 		}
 
-		return &job.LogLine{Timestamp: now(), Message: msg}, nil
+		return &job.LogLine{Timestamp: now(), Message: lineBreakReplacer.Replace(msg)}, nil
 	}
 }
 
@@ -66,7 +70,7 @@ func (l *runLogger) ReadLine() (*job.LogLine, error) {
 
 		// prevent to CR
 		progress := bytes.Split(msg, []byte{'\r'})
-		return &job.LogLine{Timestamp: now(), Message: string(progress[0])}, nil
+		return &job.LogLine{Timestamp: now(), Message: lineBreakReplacer.Replace(string(progress[0]))}, nil
 	}
 }
 
