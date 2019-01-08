@@ -9,7 +9,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
-	github.com/go-chi/chi v3.3.3+incompatible
+	github.com/go-chi/chi v3.3.4+incompatible
 	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/mock v1.2.0
