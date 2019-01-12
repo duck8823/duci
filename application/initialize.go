@@ -12,11 +12,6 @@ import (
 
 // Initialize singleton instances that are needed by application
 func Initialize() error {
-	logrus.SetFormatter(&logrus.TextFormatter{
-		TimestampFormat: "06-01-02 15:04:05.000",
-		FullTimestamp:   true,
-	})
-
 	switch {
 	case len(Config.GitHub.SSHKeyPath) == 0:
 		if err := git.InitializeWithHTTP(printLog); err != nil {
