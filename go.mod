@@ -42,9 +42,7 @@ require (
 	google.golang.org/appengine v1.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
 	google.golang.org/grpc v1.14.0 // indirect
-	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
-	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.12
 	gopkg.in/src-d/go-git.v4 v4.8.1
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
