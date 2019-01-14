@@ -56,11 +56,9 @@ environments:
 ```
 
 ## Server Settings
-### Install Server
-If you have already set $GOPATH, you can install it with the following command.
-```bash
-$ go get -u github.com/duck8823/duci
-```
+### Installation
+Download the asset for your platform from [releases page](https://github.com/duck8823/duci/releases).  
+Extract the downloaded file, and add the binary to your `PATH`. 
 
 ### Setting SSH (optional)
 If target repository is private, You can use SSH key to clone repository from github.com.  
@@ -175,7 +173,7 @@ $ duci health
 ```
 
 ```
-[619a7576-b019-4b5b-8911-c2c8b111e21c] 2018-11-15 22:42:49.208 [INFO] ok.
+INFO[14/Jan/2019 07:17:38.864] ok.
 ```
 
 ## License
