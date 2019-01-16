@@ -52,6 +52,10 @@ func TestDockerRunnerImpl_Run(t *testing.T) {
 			RemoveContainer(gomock.Any(), gomock.Eq(conID)).
 			Times(1).
 			Return(nil)
+		mockDocker.EXPECT().
+			RemoveImage(gomock.Any(), gomock.Eq(tag)).
+			Times(1).
+			Return(nil)
 
 		// and
 		sut := runner.DockerRunnerImpl{}
@@ -304,6 +308,10 @@ func TestDockerRunnerImpl_Run(t *testing.T) {
 			RemoveContainer(gomock.Any(), gomock.Eq(conID)).
 			Times(1).
 			Return(nil)
+		mockDocker.EXPECT().
+			RemoveImage(gomock.Any(), gomock.Eq(tag)).
+			Times(1).
+			Return(nil)
 
 		// and
 		sut := runner.DockerRunnerImpl{}
@@ -350,6 +358,58 @@ func TestDockerRunnerImpl_Run(t *testing.T) {
 			Return(docker.ExitCode(0), nil)
 		mockDocker.EXPECT().
 			RemoveContainer(gomock.Any(), gomock.Eq(conID)).
+			Times(1).
+			Return(errors.New("test error"))
+
+		// and
+		sut := runner.DockerRunnerImpl{}
+		defer sut.SetDocker(mockDocker)()
+		defer sut.SetLogFunc(runner.NothingToDo)()
+
+		// when
+		err := sut.Run(context.Background(), dir, tag, cmd)
+
+		// then
+		if err == nil {
+			t.Error("error must not be nil")
+		}
+	})
+
+	t.Run("when failure docker remove image", func(t *testing.T) {
+		// given
+		dir, cleanup := tmpDir(t)
+		defer cleanup()
+
+		tag := docker.Tag(fmt.Sprintf("duci/test:%s", random.String(8)))
+		cmd := docker.Command{"echo", "test"}
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		// and
+		log := stubLog(t, ctrl)
+		conID := docker.ContainerID(random.String(16, random.Alphanumeric))
+
+		mockDocker := mock_docker.NewMockDocker(ctrl)
+		mockDocker.EXPECT().
+			Build(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(log, nil)
+		mockDocker.EXPECT().
+			Run(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Times(1).
+			Return(conID, log, nil)
+		mockDocker.EXPECT().
+			ExitCode(gomock.Any(), gomock.Eq(conID)).
+			Times(1).
+			Return(docker.ExitCode(0), nil)
+		mockDocker.EXPECT().
+			RemoveContainer(gomock.Any(), gomock.Eq(conID)).
+			Times(1).
+			Return(nil)
+		mockDocker.EXPECT().
+			RemoveImage(gomock.Any(), gomock.Eq(tag)).
 			Times(1).
 			Return(errors.New("test error"))
 

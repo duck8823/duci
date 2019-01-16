@@ -37,6 +37,9 @@ func (r *dockerRunnerImpl) Run(ctx context.Context, dir job.WorkDir, tag docker.
 	if err := r.docker.RemoveContainer(ctx, conID); err != nil {
 		return errors.WithStack(err)
 	}
+	if err := r.docker.RemoveImage(ctx, tag); err != nil {
+		return errors.WithStack(err)
+	}
 	if code.IsFailure() {
 		return ErrFailure
 	}
