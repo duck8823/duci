@@ -43,8 +43,9 @@ func TestGetInstance(t *testing.T) {
 		}
 
 		// and
-		if !cmp.Equal(got, want) {
-			t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
+		opt := cmp.AllowUnexported(git.HTTPGitClient{})
+		if !cmp.Equal(got, want, opt) {
+			t.Errorf("must be equal, but %+v", cmp.Diff(got, want, opt))
 		}
 	})
 }
