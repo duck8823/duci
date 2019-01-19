@@ -21,7 +21,7 @@ func InitializeWithHTTP(token string, logFunc runner.LogFunc) error {
 	git := new(Git)
 	*git = &httpGitClient{
 		auth: &http.BasicAuth{
-			Username: "",
+			Username: "abc123",
 			Password: token,
 		},
 		LogFunc: logFunc,
