@@ -24,7 +24,7 @@ func TestInitializeWithHTTP(t *testing.T) {
 		container.Clear()
 
 		// when
-		err := git.InitializeWithHTTP(func(_ context.Context, _ job.Log) {})
+		err := git.InitializeWithHTTP("", func(_ context.Context, _ job.Log) {})
 
 		// then
 		if err != nil {
@@ -38,7 +38,7 @@ func TestInitializeWithHTTP(t *testing.T) {
 		defer container.Clear()
 
 		// when
-		err := git.InitializeWithHTTP(func(_ context.Context, _ job.Log) {})
+		err := git.InitializeWithHTTP("", func(_ context.Context, _ job.Log) {})
 
 		// then
 		if err == nil {

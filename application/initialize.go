@@ -14,7 +14,7 @@ import (
 func Initialize() error {
 	switch {
 	case len(Config.GitHub.SSHKeyPath) == 0:
-		if err := git.InitializeWithHTTP(printLog); err != nil {
+		if err := git.InitializeWithHTTP(Config.GitHub.APIToken.String(), printLog); err != nil {
 			return errors.WithStack(err)
 		}
 	default:
