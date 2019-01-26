@@ -3,10 +3,10 @@ version: 1
 update_configs:
   - package_manager: "go:modules"
     directory: "/"
-    update_schedule: "live"
+    update_schedule: "daily"
   - package_manager: "docker"
     directory: "/"
-    update_schedule: "live"
+    update_schedule: "daily"
   - package_manager: "docker"
     directory: "/.duci"
-    update_schedule: "live"
+    update_schedule: "daily"
