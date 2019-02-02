@@ -41,5 +41,5 @@ action "check modified" {
 
 action "goreportcard" {
   uses = "docker://duck8823/goreportcard:latest"
-  args = ["-t", "100"]
+  args = ["-t", "100", "-v"]
 }
