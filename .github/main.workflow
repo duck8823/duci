@@ -1,6 +1,6 @@
 workflow "main workflow" {
   on = "push"
-  resolves = ["test", "check modified"]
+  resolves = ["test", "check modified", "goreportcard"]
 }
 
 action "download" {
@@ -37,4 +37,9 @@ action "check modified" {
   needs = ["tidy"]
   runs = "sh"
   args = ["-c", "! git status | grep modified"]
+}
+
+action "goreportcard" {
+  uses = "docker://duck8823/goreportcard:latest"
+  args = ["-t", "100"]
 }
