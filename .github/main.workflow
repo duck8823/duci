@@ -48,6 +48,7 @@ action "lint" {
     "--enable=gocyclo", "--cyclo-over=15",
     "--enable=golint", "--min-confidence=0.85", "--vendor",
     "--enable=ineffassign",
-    "--enable=misspell"
+    "--enable=misspell",
+    "--deadline=5m"
   ]
 }
