@@ -1,6 +1,6 @@
 workflow "main workflow" {
   on = "push"
-  resolves = ["test", "check modified", "goreportcard"]
+  resolves = ["test", "check modified", "lint"]
 }
 
 action "download" {
@@ -39,7 +39,15 @@ action "check modified" {
   args = ["-c", "! git status | grep modified"]
 }
 
-action "goreportcard" {
-  uses = "docker://duck8823/goreportcard:latest"
-  args = ["-t", "100", "-v"]
+action "lint" {
+  uses = "docker://duck8823/gometalinter:latest"
+  args = [
+    "--disable-all",
+    "--enable=gofmt",
+    "--enable=vet",
+    "--enable=gocyclo", "--cyclo-over=15",
+    "--enable=golint", "--min-confidence=0.85", "--vendor",
+    "--enable=ineffassign",
+    "--enable=misspell"
+  ]
 }
