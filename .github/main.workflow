@@ -49,6 +49,7 @@ action "lint" {
     "--enable=golint", "--min-confidence=0.85", "--vendor",
     "--enable=ineffassign",
     "--enable=misspell",
-    "--deadline=5m"
+    "--deadline=5m",
+    "--skip=.go..."
   ]
 }
