@@ -28,6 +28,7 @@ func (r *jobExecutor) Execute(ctx context.Context, target job.Target, cmd ...str
 
 	workDir, cleanup, err := target.Prepare()
 	if err != nil {
+		r.EndFunc(ctx, err)
 		return errors.WithStack(err)
 	}
 	defer cleanup()

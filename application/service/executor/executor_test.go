@@ -227,8 +227,8 @@ func TestJobExecutor_Execute(t *testing.T) {
 		}
 
 		// and
-		if calledEndFunc {
-			t.Errorf("must not be called endFunc")
+		if !calledEndFunc {
+			t.Errorf("must be called endFunc")
 		}
 	})
 }
