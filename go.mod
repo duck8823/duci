@@ -25,7 +25,7 @@ require (
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/labstack/gommon v0.2.8
-	github.com/moby/buildkit v0.3.3 // indirect
+	github.com/moby/buildkit v0.3.3
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect

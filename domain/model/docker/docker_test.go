@@ -11,6 +11,7 @@ import (
 	"github.com/duck8823/duci/domain/model/docker/mock_docker"
 	. "github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-github/github"
 	"github.com/labstack/gommon/random"
 	"gopkg.in/src-d/go-git.v4/utils/ioutil"
 	"os"
@@ -86,7 +87,7 @@ func TestClient_Build(t *testing.T) {
 		ctx := context.Background()
 		buildContext := strings.NewReader("hello world")
 		tag := "test_tag"
-		dockerfile := "test_dockerfile"
+		dockerfile := "testdata/Dockerfile"
 
 		// and
 		want := "want value"
@@ -96,6 +97,7 @@ func TestClient_Build(t *testing.T) {
 		mockMoby.EXPECT().
 			ImageBuild(Eq(ctx), Eq(buildContext), Eq(types.ImageBuildOptions{
 				Tags:       []string{tag},
+				BuildArgs:  map[string]*string{},
 				Dockerfile: dockerfile,
 				Remove:     true,
 			})).
@@ -132,7 +134,7 @@ func TestClient_Build(t *testing.T) {
 		ctx := context.Background()
 		buildContext := strings.NewReader("hello world")
 		tag := "test_tag"
-		dockerfile := "test_dockerfile"
+		dockerfile := "testdata/Dockerfile"
 
 		// and
 		empty := types.ImageBuildResponse{}
@@ -143,6 +145,7 @@ func TestClient_Build(t *testing.T) {
 		mockMoby.EXPECT().
 			ImageBuild(Eq(ctx), Eq(buildContext), Eq(types.ImageBuildOptions{
 				Tags:       []string{tag},
+				BuildArgs:  map[string]*string{},
 				Dockerfile: dockerfile,
 				Remove:     true,
 			})).
@@ -628,4 +631,41 @@ func TestClient_Status(t *testing.T) {
 			t.Error("error must not be nil")
 		}
 	})
+}
+
+func TestBuildArgs(t *testing.T) {
+	// given
+	dockerfile := docker.Dockerfile("testdata/Dockerfile")
+
+	// and
+	hostArg2 := os.Getenv("ARGUMENT_2")
+	_ = os.Setenv("ARGUMENT_2", "host_arg2")
+	defer func() {
+		_ = os.Setenv("ARGUMENT_2", hostArg2)
+	}()
+
+	hostArg5 := os.Getenv("ARGUMENT_5")
+	_ = os.Setenv("ARGUMENT_5", "host_arg5")
+	defer func() {
+		_ = os.Setenv("ARGUMENT_5", hostArg5)
+	}()
+
+	// and
+	want := map[string]*string{
+		"ARGUMENT_2": github.String("host_arg2"),
+		"ARGUMENT_5": github.String("host_arg5"),
+	}
+
+	// when
+	got, err := docker.BuildArgs(dockerfile)
+
+	// then
+	if err != nil {
+		t.Errorf("error must be nil, but got %+v", err)
+	}
+
+	// and
+	if !cmp.Equal(got, want) {
+		t.Errorf("must be equal but: %+v", cmp.Diff(got, want))
+	}
 }
