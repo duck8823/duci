@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/gommon/random"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 )
 
@@ -69,7 +70,7 @@ func TestDockerfilePath(t *testing.T) {
 	for _, tt := range []struct {
 		name  string
 		given func(t *testing.T) (workDir job.WorkDir, cleanup func())
-		want  docker.Dockerfile
+		want  string
 	}{
 		{
 			name: "when .duci directory not found",
@@ -127,12 +128,15 @@ func TestDockerfilePath(t *testing.T) {
 			// given
 			in, cleanup := tt.given(t)
 
+			// and
+			want := docker.Dockerfile(filepath.Join(in.String(), tt.want))
+
 			// when
 			got := runner.DockerfilePath(in)
 
 			// then
-			if got != tt.want {
-				t.Errorf("must be equal, but %+v", cmp.Diff(got, tt.want))
+			if got != want {
+				t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
 			}
 
 			// cleanup

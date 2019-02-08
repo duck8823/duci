@@ -35,7 +35,7 @@ func dockerfilePath(workDir job.WorkDir) docker.Dockerfile {
 	if exists(filepath.Join(workDir.String(), ".duci/Dockerfile")) {
 		dockerfile = ".duci/Dockerfile"
 	}
-	return docker.Dockerfile(dockerfile)
+	return docker.Dockerfile(filepath.Join(workDir.String(), dockerfile))
 }
 
 // exists indicates whether the file exists
