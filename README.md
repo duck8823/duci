@@ -37,7 +37,16 @@ CMD ["build"]
 When push to github, duci execute `mvn compile` / `fastlane build`.  
 And when comment `ci test` on github pull request, execute `mvn test` / `fastlane test`.  
 
-### Using Volumes
+### Using host environment value
+If exists `ARG` instruction in Dockerfile, override environment variable from host.  
+
+```Dockerfile
+ARG FOO=default
+ARG BAR
+```
+
+### Runtime configuration
+#### volumes
 You can use volumes options for external dependency, cache and etc.  
 Set configurations in `.duci/config.yml`  
 
@@ -46,7 +55,7 @@ volumes:
   - '/path/to/host/dir:/path/to/container/dir'
 ```
 
-### Using environments
+#### environment variable
 You can set environment variables in docker container.  
 Add the following to `.duci/config.yml`
 
