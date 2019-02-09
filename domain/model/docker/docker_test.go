@@ -169,6 +169,34 @@ func TestClient_Build(t *testing.T) {
 			t.Errorf("log moust be nil, but got %+v", err)
 		}
 	})
+
+	t.Run("with invalid dockerfile path", func(t *testing.T) {
+		// given
+		ctrl := NewController(t)
+		defer ctrl.Finish()
+
+		// and
+		ctx := context.Background()
+		buildContext := strings.NewReader("hello world")
+		tag := "test_tag"
+		dockerfile := "invalid/testdata/Dockerfile"
+
+		// and
+		sut := &docker.Client{}
+
+		// when
+		got, err := sut.Build(ctx, buildContext, docker.Tag(tag), docker.Dockerfile{Dir: ".", Path: dockerfile})
+
+		// then
+		if err == nil {
+			t.Errorf("error must not be nil")
+		}
+
+		// and
+		if got != nil {
+			t.Errorf("log moust be nil, but got %+v", err)
+		}
+	})
 }
 
 func TestClient_Run(t *testing.T) {

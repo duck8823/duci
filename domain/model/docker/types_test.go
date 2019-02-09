@@ -5,6 +5,7 @@ import (
 	"github.com/duck8823/duci/domain/model/docker"
 	"github.com/google/go-cmp/cmp"
 	"github.com/labstack/gommon/random"
+	"io/ioutil"
 	"testing"
 )
 
@@ -37,6 +38,28 @@ func TestCommand_Slice(t *testing.T) {
 	// then
 	if !cmp.Equal(got, want) {
 		t.Errorf("must equal: want %+v, got %+v", want, got)
+	}
+}
+
+func TestDockerfile_Open(t *testing.T) {
+	// given
+	sut := docker.Dockerfile{Dir: ".", Path: "testdata/Dockerfile"}
+
+	// and
+	want, _ := ioutil.ReadFile("testdata/Dockerfile")
+
+	// when
+	r, err := sut.Open()
+	got, _ := ioutil.ReadAll(r)
+
+	// then
+	if err != nil {
+		t.Errorf("error must be nil, but got %+v", err)
+	}
+
+	// and
+	if !cmp.Equal(got, want) {
+		t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
 	}
 }
 
