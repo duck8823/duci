@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 // Tag describes a docker tag
@@ -23,16 +24,14 @@ func (c Command) Slice() []string {
 }
 
 // Dockerfile represents a path to dockerfile
-type Dockerfile string
-
-// ToString returns string value
-func (d Dockerfile) String() string {
-	return string(d)
+type Dockerfile struct {
+	Dir  string
+	Path string
 }
 
 // Open dockerfile
-func (d Dockerfile) Open() (io.Reader, error) {
-	file, err := os.Open(d.String())
+func (d *Dockerfile) Open() (io.Reader, error) {
+	file, err := os.Open(filepath.Join(d.Dir, d.Path))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

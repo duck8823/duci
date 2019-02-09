@@ -40,22 +40,6 @@ func TestCommand_Slice(t *testing.T) {
 	}
 }
 
-func TestDockerfile_String(t *testing.T) {
-	// given
-	want := "duck8823/duci"
-
-	// and
-	sut := docker.Dockerfile(want)
-
-	// when
-	got := sut.String()
-
-	// then
-	if got != want {
-		t.Errorf("must equal: want %s, got %s", want, got)
-	}
-}
-
 func TestContainerID_String(t *testing.T) {
 	// given
 	want := random.String(16, random.Alphanumeric)

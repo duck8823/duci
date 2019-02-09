@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/gommon/random"
 	"os"
 	"path"
-	"path/filepath"
 	"testing"
 )
 
@@ -129,7 +128,7 @@ func TestDockerfilePath(t *testing.T) {
 			in, cleanup := tt.given(t)
 
 			// and
-			want := docker.Dockerfile(filepath.Join(in.String(), tt.want))
+			want := docker.Dockerfile{Dir: in.String(), Path: tt.want}
 
 			// when
 			got := runner.DockerfilePath(in)

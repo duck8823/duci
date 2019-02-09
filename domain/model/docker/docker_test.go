@@ -111,7 +111,7 @@ func TestClient_Build(t *testing.T) {
 		defer sut.SetMoby(mockMoby)()
 
 		// when
-		got, err := sut.Build(ctx, buildContext, docker.Tag(tag), docker.Dockerfile(dockerfile))
+		got, err := sut.Build(ctx, buildContext, docker.Tag(tag), docker.Dockerfile{Dir: ".", Path: dockerfile})
 
 		// then
 		if err != nil {
@@ -157,7 +157,7 @@ func TestClient_Build(t *testing.T) {
 		defer sut.SetMoby(mockMoby)()
 
 		// when
-		got, err := sut.Build(ctx, buildContext, docker.Tag(tag), docker.Dockerfile(dockerfile))
+		got, err := sut.Build(ctx, buildContext, docker.Tag(tag), docker.Dockerfile{Dir: ".", Path: dockerfile})
 
 		// then
 		if err.Error() != wantError.Error() {
@@ -635,7 +635,7 @@ func TestClient_Status(t *testing.T) {
 
 func TestBuildArgs(t *testing.T) {
 	// given
-	dockerfile := docker.Dockerfile("testdata/Dockerfile")
+	dockerfile := docker.Dockerfile{Dir: ".", Path: "testdata/Dockerfile"}
 
 	// and
 	hostArg2 := os.Getenv("ARGUMENT_2")

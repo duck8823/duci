@@ -37,7 +37,7 @@ func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerf
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag.String()},
 		BuildArgs:  args,
-		Dockerfile: dockerfile.String(),
+		Dockerfile: dockerfile.Path,
 		Remove:     true,
 	}
 	resp, err := c.moby.ImageBuild(ctx, file, opts)

@@ -31,11 +31,14 @@ func createTarball(workDir job.WorkDir) (*os.File, error) {
 
 // dockerfilePath returns a path to dockerfile for duci using
 func dockerfilePath(workDir job.WorkDir) docker.Dockerfile {
-	dockerfile := "./Dockerfile"
+	path := "./Dockerfile"
 	if exists(filepath.Join(workDir.String(), ".duci/Dockerfile")) {
-		dockerfile = ".duci/Dockerfile"
+		path = ".duci/Dockerfile"
 	}
-	return docker.Dockerfile(filepath.Join(workDir.String(), dockerfile))
+	return docker.Dockerfile{
+		Dir:  workDir.String(),
+		Path: path,
+	}
 }
 
 // exists indicates whether the file exists
