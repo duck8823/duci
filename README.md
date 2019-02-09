@@ -37,13 +37,21 @@ CMD ["build"]
 When push to github, duci execute `mvn compile` / `fastlane build`.  
 And when comment `ci test` on github pull request, execute `mvn test` / `fastlane test`.  
 
-### Using host environment value
-If exists `ARG` instruction in Dockerfile, override environment variable from host.  
+### Using host environment variables
+If exists `ARG` instruction in Dockerfile, override value from host environment variable.  
 
 ```Dockerfile
 ARG FOO=default
 ARG BAR
 ```
+
+and you can use as envrionment variable in command.
+
+```Dockerfile
+ARG FOO=default
+ENV FOO=$FOO
+```
+
 
 ### Runtime configuration
 #### volumes
