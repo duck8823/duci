@@ -1,0 +1,9 @@
+FROM alipne
+
+ARG ARGUMENT_1=arg1
+ARG ARGUMENT_2=arg2
+ARG ARGUMENT_3
+ARG ARGUMENT_5
+
+ENTRYPOINT ["echo"]
+CMD ["hello world"]

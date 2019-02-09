@@ -6,8 +6,12 @@ import (
 	"github.com/docker/docker/api/types/container"
 	moby "github.com/docker/docker/client"
 	"github.com/duck8823/duci/domain/model/job"
+	"github.com/moby/buildkit/frontend/dockerfile/command"
+	"github.com/moby/buildkit/frontend/dockerfile/parser"
 	"github.com/pkg/errors"
 	"io"
+	"os"
+	"strings"
 )
 
 type dockerImpl struct {
@@ -25,9 +29,15 @@ func New() (Docker, error) {
 
 // Build a docker image.
 func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerfile Dockerfile) (job.Log, error) {
+	args, err := BuildArgs(dockerfile)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	opts := types.ImageBuildOptions{
 		Tags:       []string{tag.String()},
-		Dockerfile: dockerfile.String(),
+		BuildArgs:  args,
+		Dockerfile: dockerfile.Path,
 		Remove:     true,
 	}
 	resp, err := c.moby.ImageBuild(ctx, file, opts)
@@ -36,6 +46,36 @@ func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerf
 	}
 
 	return NewBuildLog(resp.Body), nil
+}
+
+// BuildArgs returns build args with host environment values
+func BuildArgs(dockerfile Dockerfile) (map[string]*string, error) {
+	args := map[string]*string{}
+
+	r, err := dockerfile.Open()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	result, err := parser.Parse(r)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	for _, node := range result.AST.Children {
+		if node.Value != command.Arg {
+			continue
+		}
+		key := strings.Split(node.Next.Value, "=")[0]
+		hostEnv := os.Getenv(key)
+		if hostEnv == "" {
+			continue
+		}
+
+		args[key] = &hostEnv
+	}
+
+	return args, nil
 }
 
 // Run docker container with command.
