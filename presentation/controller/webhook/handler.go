@@ -111,7 +111,7 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pnt, err := targetPoint(event)
+	tgt, err := targetGitHub(event)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -135,17 +135,12 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 		ID: reqID,
 		TargetSource: &github.TargetSource{
 			Repository: event.GetRepo(),
-			Ref:        pnt.GetRef(),
-			SHA:        plumbing.NewHash(pnt.GetHead()),
+			Ref:        tgt.Point.GetRef(),
+			SHA:        plumbing.NewHash(tgt.Point.GetHead()),
 		},
 		TaskName:  fmt.Sprintf("%s/pr/%s", application.Name, phrase.Command().Slice()[0]),
 		TargetURL: targetURL,
 	})
-
-	tgt := &target.GitHub{
-		Repo:  event.GetRepo(),
-		Point: pnt,
-	}
 
 	go func() {
 		if err := h.executor.Execute(ctx, tgt, phrase.Command()...); err != nil {

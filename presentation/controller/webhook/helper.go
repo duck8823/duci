@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/duck8823/duci/domain/model/job"
+	"github.com/duck8823/duci/domain/model/job/target"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	go_github "github.com/google/go-github/github"
 	"github.com/google/uuid"
@@ -34,7 +35,7 @@ func targetURL(r *http.Request) *url.URL {
 	return runtimeURL
 }
 
-func targetPoint(event *go_github.IssueCommentEvent) (github.TargetPoint, error) {
+func targetGitHub(event *go_github.IssueCommentEvent) (*target.GitHub, error) {
 	gh, err := github.GetInstance()
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -45,9 +46,12 @@ func targetPoint(event *go_github.IssueCommentEvent) (github.TargetPoint, error)
 		return nil, errors.WithStack(err)
 	}
 
-	return &github.SimpleTargetPoint{
-		Ref: fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
-		SHA: pr.GetHead().GetSHA(),
+	return &target.GitHub{
+		Repo: pr.GetHead().GetRepo(),
+		Point: &github.SimpleTargetPoint{
+			Ref: fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
+			SHA: pr.GetHead().GetSHA(),
+		},
 	}, nil
 }
 
