@@ -4,7 +4,7 @@ services:
   server:
     image: duck8823/duci
     volumes:
-      - duci-db:/root/.duci/db
+      - duci-db:/.duci/db
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - GITHUB_API_TOKEN
