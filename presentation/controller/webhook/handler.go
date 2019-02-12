@@ -41,6 +41,8 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.PushEvent(w, r)
 	case "issue_comment":
 		h.IssueCommentEvent(w, r)
+	case "pull_request":
+		h.PullRequestEvent(w, r)
 	default:
 		msg := fmt.Sprintf("payload event type must be push or issue_comment. but %s", event)
 		http.Error(w, msg, http.StatusBadRequest)
@@ -144,6 +146,60 @@ func (h *handler) IssueCommentEvent(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		if err := h.executor.Execute(ctx, tgt, phrase.Command()...); err != nil {
+			logrus.Errorf("%+v", err)
+		}
+	}()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// PullRequestEvent receives github pull request event
+func (h *handler) PullRequestEvent(w http.ResponseWriter, r *http.Request) {
+	event := &go_github.PullRequestEvent{}
+	if err := json.NewDecoder(r.Body).Decode(event); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !(event.GetAction() == "opened" || event.GetAction() == "synchronize") {
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write([]byte("{\"message\":\"skip build\"}")); err != nil {
+			logrus.Errorf("%+v", err)
+		}
+		return
+	}
+
+	reqID, err := reqID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	pr := event.GetPullRequest()
+	tgt := &target.GitHub{
+		Repo: pr.GetHead().GetRepo(),
+
+		Point: &github.SimpleTargetPoint{
+			Ref: fmt.Sprintf("refs/heads/%s", pr.GetHead().GetRef()),
+			SHA: pr.GetHead().GetSHA(),
+		},
+	}
+
+	targetURL := targetURL(r)
+	targetURL.Path = fmt.Sprintf("/logs/%s", reqID.ToSlice())
+	ctx := application.ContextWithJob(context.Background(), &application.BuildJob{
+		ID: reqID,
+		TargetSource: &github.TargetSource{
+			Repository: event.GetRepo(),
+			Ref:        tgt.Point.GetRef(),
+			SHA:        plumbing.NewHash(tgt.Point.GetHead()),
+		},
+		TaskName:  fmt.Sprintf("%s/pr", application.Name),
+		TargetURL: targetURL,
+	})
+
+	go func() {
+		if err := h.executor.Execute(ctx, tgt); err != nil {
 			logrus.Errorf("%+v", err)
 		}
 	}()

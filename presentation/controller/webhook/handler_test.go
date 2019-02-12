@@ -2,6 +2,7 @@ package webhook_test
 
 import (
 	"context"
+	"fmt"
 	"github.com/docker/docker/pkg/ioutils"
 	"github.com/duck8823/duci/application"
 	"github.com/duck8823/duci/application/service/executor/mock_executor"
@@ -83,48 +84,62 @@ func TestNewHandler(t *testing.T) {
 }
 
 func TestHandler_ServeHTTP(t *testing.T) {
-	t.Run("when push event", func(t *testing.T) {
-		// given
-		rec := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "/", nil)
+	for _, tt := range []struct {
+		event   string
+		payload string
+	}{
+		{
+			event:   "push",
+			payload: "testdata/push.correct.json",
+		},
+		{
+			event:   "pull_request",
+			payload: "testdata/pr.synchronize.json",
+		},
+	} {
+		t.Run(fmt.Sprintf("when %s event", tt.event), func(t *testing.T) {
+			// given
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/", nil)
 
-		// and
-		req.Header.Set("X-GitHub-Event", "push")
-		req.Header.Set("X-GitHub-Delivery", "72d3162e-cc78-11e3-81ab-4c9367dc0958")
+			// and
+			req.Header.Set("X-GitHub-Event", tt.event)
+			req.Header.Set("X-GitHub-Delivery", "72d3162e-cc78-11e3-81ab-4c9367dc0958")
 
-		// and
-		f, err := os.Open("testdata/push.correct.json")
-		if err != nil {
-			t.Fatalf("error occur: %+v", err)
-		}
-		req.Body = f
+			// and
+			f, err := os.Open(tt.payload)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			req.Body = f
 
-		// and
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+			// and
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		executor := mock_executor.NewMockExecutor(ctrl)
-		executor.EXPECT().
-			Execute(gomock.Any(), gomock.Any()).
-			Times(1).
-			Return(nil)
+			executor := mock_executor.NewMockExecutor(ctrl)
+			executor.EXPECT().
+				Execute(gomock.Any(), gomock.Any()).
+				Times(1).
+				Return(nil)
 
-		// and
-		sut := &webhook.Handler{}
-		reset := sut.SetExecutor(executor)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			reset()
-		}()
+			// and
+			sut := &webhook.Handler{}
+			reset := sut.SetExecutor(executor)
+			defer func() {
+				time.Sleep(10 * time.Millisecond) // for goroutine
+				reset()
+			}()
 
-		// when
-		sut.ServeHTTP(rec, req)
+			// when
+			sut.ServeHTTP(rec, req)
 
-		// then
-		if rec.Code != http.StatusOK {
-			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
-		}
-	})
+			// then
+			if rec.Code != http.StatusOK {
+				t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+			}
+		})
+	}
 
 	t.Run("when pull request comment event", func(t *testing.T) {
 		// given
@@ -715,6 +730,217 @@ func TestHandler_IssueCommentEvent_UnNormal(t *testing.T) {
 
 		// when
 		sut.IssueCommentEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("response code must be %d, but got %d", http.StatusBadRequest, rec.Code)
+		}
+	})
+}
+
+func TestHandler_PullRequestEvent(t *testing.T) {
+	for _, tt := range []struct {
+		action  string
+		payload string
+	}{
+		{
+			action:  "opened",
+			payload: "testdata/pr.opened.json",
+		},
+		{
+			action:  "synchronize",
+			payload: "testdata/pr.synchronize.json",
+		},
+	} {
+		t.Run(fmt.Sprintf("when action is %s", tt.action), func(t *testing.T) {
+			// given
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/", nil)
+
+			// and
+			req.Header = http.Header{
+				"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+			}
+
+			// and
+			f, err := os.Open(tt.payload)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			req.Body = f
+
+			// and
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			executor := mock_executor.NewMockExecutor(ctrl)
+			executor.EXPECT().
+				Execute(gomock.Any(), gomock.Any()).
+				Times(1).
+				Do(func(ctx context.Context, target job.Target) {
+					got, err := application.BuildJobFromContext(ctx)
+					if err != nil {
+						t.Errorf("must not be nil, but got %+v", err)
+					}
+
+					want := &application.BuildJob{
+						ID: job.ID(uuid.Must(uuid.Parse("72d3162e-cc78-11e3-81ab-4c9367dc0958"))),
+						TargetSource: &github.TargetSource{
+							Repository: &go_github.Repository{
+								ID:       go_github.Int64(135493233),
+								FullName: go_github.String("Codertocat/Hello-World"),
+								SSHURL:   go_github.String("git@github.com:Codertocat/Hello-World.git"),
+								CloneURL: go_github.String("https://github.com/Codertocat/Hello-World.git"),
+							},
+							Ref: "refs/heads/changes",
+							SHA: plumbing.NewHash("34c5c7793cb3b279e22454cb6750c80560547b3a"),
+						},
+						TaskName:  "duci/pr",
+						TargetURL: webhook.URLMust(url.Parse("http://example.com/logs/72d3162e-cc78-11e3-81ab-4c9367dc0958")),
+					}
+
+					opt := webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL")
+					if !cmp.Equal(got, want, opt) {
+						t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
+					}
+
+					typ := reflect.TypeOf(target).String()
+					if typ != "*target.GitHub" {
+						t.Errorf("type must be *target.GitHub, but got %s", typ)
+					}
+				}).
+				Return(nil)
+
+			// and
+			sut := &webhook.Handler{}
+			reset := sut.SetExecutor(executor)
+			defer func() {
+				time.Sleep(10 * time.Millisecond) // for goroutine
+				reset()
+			}()
+
+			// when
+			sut.PullRequestEvent(rec, req)
+
+			// then
+			if rec.Code != http.StatusOK {
+				t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+			}
+		})
+	}
+
+	t.Run("when pull request closed", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		f, err := os.Open("testdata/pr.closed.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		reset := sut.SetExecutor(executor)
+		defer func() {
+			time.Sleep(10 * time.Millisecond) // for goroutine
+			reset()
+		}()
+
+		// when
+		sut.PullRequestEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusOK {
+			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("with invalid payload", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		req.Body = ioutils.NewReadCloserWrapper(strings.NewReader("invalid payload"), func() error {
+			return nil
+		})
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.PullRequestEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusInternalServerError {
+			t.Errorf("response code must be %d, but got %d", http.StatusInternalServerError, rec.Code)
+		}
+	})
+
+	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"invalid format"},
+		}
+
+		// and
+		f, err := os.Open("testdata/pr.synchronize.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.PullRequestEvent(rec, req)
 
 		// then
 		if rec.Code != http.StatusBadRequest {
