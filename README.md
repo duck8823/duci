@@ -74,8 +74,19 @@ environments:
 
 ## Server Settings
 ### Installation
-Download the asset for your platform from [releases page](https://github.com/duck8823/duci/releases).  
-Extract the downloaded file, and add the binary to your `PATH`. 
+```sh 
+# binary will be $(go env GOPATH)/bin/duci
+curl -sfL https://raw.githubusercontent.com/duck8823/duci/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+duci version
+```
+
+You can also install a specific version. (replace `vX.Y.Z` with the specific version from the [releases page](https://github.com/duck8823/duci/releases)):
+
+```sh 
+# binary will be $(go env GOPATH)/bin/duci
+curl -sfL https://raw.githubusercontent.com/duck8823/duci/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z
+duci version
+```
 
 ### Setting SSH (optional)
 If target repository is private, You can use SSH key to clone repository from github.com.  
