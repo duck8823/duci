@@ -871,4 +871,80 @@ func TestHandler_PullRequestEvent(t *testing.T) {
 			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
 		}
 	})
+
+	t.Run("with invalid payload", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"72d3162e-cc78-11e3-81ab-4c9367dc0958"},
+		}
+
+		// and
+		req.Body = ioutils.NewReadCloserWrapper(strings.NewReader("invalid payload"), func() error {
+			return nil
+		})
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.PullRequestEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusInternalServerError {
+			t.Errorf("response code must be %d, but got %d", http.StatusInternalServerError, rec.Code)
+		}
+	})
+
+	t.Run("when url param is invalid format uuid", func(t *testing.T) {
+		// given
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		req.Header = http.Header{
+			"X-Github-Delivery": []string{"invalid format"},
+		}
+
+		// and
+		f, err := os.Open("testdata/pr.synchronize.json")
+		if err != nil {
+			t.Fatalf("error occur: %+v", err)
+		}
+		req.Body = f
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		executor := mock_executor.NewMockExecutor(ctrl)
+		executor.EXPECT().
+			Execute(gomock.Any(), gomock.Any()).
+			Times(0)
+
+		// and
+		sut := &webhook.Handler{}
+		defer sut.SetExecutor(executor)()
+
+		// when
+		sut.PullRequestEvent(rec, req)
+
+		// then
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("response code must be %d, but got %d", http.StatusBadRequest, rec.Code)
+		}
+	})
 }
