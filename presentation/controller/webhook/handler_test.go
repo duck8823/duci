@@ -84,48 +84,62 @@ func TestNewHandler(t *testing.T) {
 }
 
 func TestHandler_ServeHTTP(t *testing.T) {
-	t.Run("when push event", func(t *testing.T) {
-		// given
-		rec := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "/", nil)
+	for _, tt := range []struct {
+		event   string
+		payload string
+	}{
+		{
+			event:   "push",
+			payload: "testdata/push.correct.json",
+		},
+		{
+			event:   "pull_request",
+			payload: "testdata/pr.synchronize.json",
+		},
+	} {
+		t.Run(fmt.Sprintf("when %s event", tt.event), func(t *testing.T) {
+			// given
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/", nil)
 
-		// and
-		req.Header.Set("X-GitHub-Event", "push")
-		req.Header.Set("X-GitHub-Delivery", "72d3162e-cc78-11e3-81ab-4c9367dc0958")
+			// and
+			req.Header.Set("X-GitHub-Event", tt.event)
+			req.Header.Set("X-GitHub-Delivery", "72d3162e-cc78-11e3-81ab-4c9367dc0958")
 
-		// and
-		f, err := os.Open("testdata/push.correct.json")
-		if err != nil {
-			t.Fatalf("error occur: %+v", err)
-		}
-		req.Body = f
+			// and
+			f, err := os.Open(tt.payload)
+			if err != nil {
+				t.Fatalf("error occur: %+v", err)
+			}
+			req.Body = f
 
-		// and
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+			// and
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		executor := mock_executor.NewMockExecutor(ctrl)
-		executor.EXPECT().
-			Execute(gomock.Any(), gomock.Any()).
-			Times(1).
-			Return(nil)
+			executor := mock_executor.NewMockExecutor(ctrl)
+			executor.EXPECT().
+				Execute(gomock.Any(), gomock.Any()).
+				Times(1).
+				Return(nil)
 
-		// and
-		sut := &webhook.Handler{}
-		reset := sut.SetExecutor(executor)
-		defer func() {
-			time.Sleep(10 * time.Millisecond) // for goroutine
-			reset()
-		}()
+			// and
+			sut := &webhook.Handler{}
+			reset := sut.SetExecutor(executor)
+			defer func() {
+				time.Sleep(10 * time.Millisecond) // for goroutine
+				reset()
+			}()
 
-		// when
-		sut.ServeHTTP(rec, req)
+			// when
+			sut.ServeHTTP(rec, req)
 
-		// then
-		if rec.Code != http.StatusOK {
-			t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
-		}
-	})
+			// then
+			if rec.Code != http.StatusOK {
+				t.Errorf("response code must be %d, but got %d", http.StatusOK, rec.Code)
+			}
+		})
+	}
 
 	t.Run("when pull request comment event", func(t *testing.T) {
 		// given
