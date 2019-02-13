@@ -14,11 +14,11 @@ import (
 func Initialize() error {
 	switch {
 	case len(Config.GitHub.SSHKeyPath) == 0:
-		if err := git.InitializeWithHTTP(Config.GitHub.APIToken.String(), printLog); err != nil {
+		if err := git.InitializeWithHTTP(Config.GitHub.APIToken.String(), appendLog); err != nil {
 			return errors.WithStack(err)
 		}
 	default:
-		if err := git.InitializeWithSSH(Config.GitHub.SSHKeyPath, printLog); err != nil {
+		if err := git.InitializeWithSSH(Config.GitHub.SSHKeyPath, appendLog); err != nil {
 			return errors.WithStack(err)
 		}
 	}
@@ -36,5 +36,26 @@ func Initialize() error {
 func printLog(_ context.Context, log job.Log) {
 	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
 		logrus.Info(line.Message)
+	}
+}
+
+// appendLog is a function that print and store log
+func appendLog(ctx context.Context, log job.Log) {
+	s, err := jobService.GetInstance()
+	if err != nil {
+		printLog(ctx, log)
+		return
+	}
+
+	buildJob, err := BuildJobFromContext(ctx)
+	if err != nil {
+		logrus.Errorf("%+v", err)
+		return
+	}
+	for line, err := log.ReadLine(); err == nil; line, err = log.ReadLine() {
+		logrus.Info(line.Message)
+		if err := s.Append(buildJob.ID, *line); err != nil {
+			logrus.Errorf("%+v", err)
+		}
 	}
 }
