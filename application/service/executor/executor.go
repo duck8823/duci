@@ -18,13 +18,14 @@ type Executor interface {
 
 type jobExecutor struct {
 	runner.DockerRunner
+	InitFunc  func(context.Context)
 	StartFunc func(context.Context)
 	EndFunc   func(context.Context, error)
 }
 
 // Execute job
 func (r *jobExecutor) Execute(ctx context.Context, target job.Target, cmd ...string) error {
-	r.StartFunc(ctx)
+	r.InitFunc(ctx)
 
 	workDir, cleanup, err := target.Prepare()
 	if err != nil {
@@ -40,6 +41,7 @@ func (r *jobExecutor) Execute(ctx context.Context, target job.Target, cmd ...str
 
 	go func() {
 		semaphore.Acquire()
+		r.StartFunc(ctx)
 		errs <- r.DockerRunner.Run(timeout, workDir, docker.Tag(random.String(16, random.Lowercase)), cmd)
 		semaphore.Release()
 	}()

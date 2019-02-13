@@ -15,6 +15,7 @@ import (
 func TestDefaultExecutorBuilder(t *testing.T) {
 	// given
 	want := &executor.Builder{}
+	defer want.SetInitFunc(executor.NothingToDoStart)()
 	defer want.SetStartFunc(executor.NothingToDoStart)()
 	defer want.SetLogFunc(runner.NothingToDo)()
 	defer want.SetEndFunc(executor.NothingToDoEnd)()
@@ -37,6 +38,33 @@ func TestDefaultExecutorBuilder(t *testing.T) {
 			return reflect.ValueOf(f).Pointer()
 		}),
 		cmp.Transformer("endFuncToPointer", func(f func(context.Context, error)) uintptr {
+			return reflect.ValueOf(f).Pointer()
+		}),
+		cmpopts.IgnoreInterfaces(struct{ docker.Docker }{}),
+	}
+	if !cmp.Equal(got, want, opts) {
+		t.Errorf("must be equal. but: %+v", cmp.Diff(got, want, opts))
+	}
+}
+
+func TestBuilder_InitFunc(t *testing.T) {
+	// given
+	initFunc := func(context.Context) {}
+
+	// and
+	want := &executor.Builder{}
+	defer want.SetInitFunc(initFunc)()
+
+	// and
+	sut := &executor.Builder{}
+
+	// when
+	got := sut.InitFunc(initFunc)
+
+	// then
+	opts := cmp.Options{
+		cmp.AllowUnexported(executor.Builder{}),
+		cmp.Transformer("startFuncToPointer", func(f func(context.Context)) uintptr {
 			return reflect.ValueOf(f).Pointer()
 		}),
 		cmpopts.IgnoreInterfaces(struct{ docker.Docker }{}),
