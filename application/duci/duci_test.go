@@ -214,8 +214,7 @@ func TestDuci_Start(t *testing.T) {
 		service := mock_job_service.NewMockService(ctrl)
 		service.EXPECT().
 			Start(gomock.Eq(buildJob.ID)).
-			Times(1).
-			Return(nil)
+			Times(0)
 
 		hub := mock_github.NewMockGitHub(ctrl)
 		hub.EXPECT().
@@ -255,46 +254,6 @@ func TestDuci_Start(t *testing.T) {
 		service.EXPECT().
 			Append(gomock.Any(), gomock.Any()).
 			Times(0)
-
-		hub := mock_github.NewMockGitHub(ctrl)
-		hub.EXPECT().
-			CreateCommitStatus(gomock.Any(), gomock.Any()).
-			Times(0)
-
-		// and
-		sut := &duci.Duci{}
-		defer sut.SetJobService(service)()
-		defer sut.SetGitHub(hub)()
-
-		// when
-		sut.Start(ctx)
-
-		// then
-		ctrl.Finish()
-	})
-
-	t.Run("when failed to job_service.Service#Start", func(t *testing.T) {
-		// given
-		buildJob := &application.BuildJob{
-			ID:           job.ID(uuid.New()),
-			TargetSource: &github.TargetSource{},
-			TaskName:     "task/name",
-			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
-		}
-		ctx := application.ContextWithJob(context.Background(), buildJob)
-
-		// and
-		ctrl := gomock.NewController(t)
-
-		service := mock_job_service.NewMockService(ctrl)
-		service.EXPECT().
-			Start(gomock.Any()).
-			Times(1).
-			Return(errors.New("test error"))
-		service.EXPECT().
-			Append(gomock.Any(), gomock.Any()).
-			Times(1).
-			Return(nil)
 
 		hub := mock_github.NewMockGitHub(ctrl)
 		hub.EXPECT().
