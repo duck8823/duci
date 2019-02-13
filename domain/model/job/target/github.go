@@ -19,7 +19,7 @@ type GitHub struct {
 }
 
 // Prepare working directory
-func (g *GitHub) Prepare() (job.WorkDir, job.Cleanup, error) {
+func (g *GitHub) Prepare(ctx context.Context) (job.WorkDir, job.Cleanup, error) {
 	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
 	if err := os.MkdirAll(tmpDir, 0700); err != nil {
 		return "", cleanupFunc(tmpDir), errors.WithStack(err)
@@ -30,7 +30,7 @@ func (g *GitHub) Prepare() (job.WorkDir, job.Cleanup, error) {
 		return "", cleanupFunc(tmpDir), errors.WithStack(err)
 	}
 
-	if err := git.Clone(context.Background(), tmpDir, &github.TargetSource{
+	if err := git.Clone(ctx, tmpDir, &github.TargetSource{
 		Repository: g.Repo,
 		Ref:        g.Point.GetRef(),
 		SHA:        plumbing.NewHash(g.Point.GetHead()),

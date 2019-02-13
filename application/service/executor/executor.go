@@ -27,7 +27,7 @@ type jobExecutor struct {
 func (r *jobExecutor) Execute(ctx context.Context, target job.Target, cmd ...string) error {
 	r.InitFunc(ctx)
 
-	workDir, cleanup, err := target.Prepare()
+	workDir, cleanup, err := target.Prepare(ctx)
 	if err != nil {
 		r.EndFunc(ctx, err)
 		return errors.WithStack(err)
