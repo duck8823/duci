@@ -80,12 +80,6 @@ func (d *duci) Start(ctx context.Context) {
 		logrus.Errorf("%+v", err)
 		return
 	}
-	if err := d.jobService.Start(buildJob.ID); err != nil {
-		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
-			logrus.Errorf("%+v", err)
-		}
-		return
-	}
 	if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 		TargetSource: buildJob.TargetSource,
 		State:        github.PENDING,

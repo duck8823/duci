@@ -1,8 +1,10 @@
 package job
 
+import "context"
+
 // Target represents build target
 type Target interface {
-	Prepare() (WorkDir, Cleanup, error)
+	Prepare(context.Context) (WorkDir, Cleanup, error)
 }
 
 // WorkDir is a working directory for build job

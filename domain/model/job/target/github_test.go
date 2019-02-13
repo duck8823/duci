@@ -1,6 +1,7 @@
 package target_test
 
 import (
+	"context"
 	"errors"
 	"github.com/duck8823/duci/domain/model/job/target"
 	"github.com/duck8823/duci/domain/model/job/target/git/mock_git"
@@ -43,7 +44,7 @@ func TestGithubPush_Prepare(t *testing.T) {
 		}
 
 		// when
-		got, cleanup, err := sut.Prepare()
+		got, cleanup, err := sut.Prepare(context.Background())
 		defer cleanup()
 
 		// then
@@ -88,7 +89,7 @@ func TestGithubPush_Prepare(t *testing.T) {
 		}
 
 		// when
-		got, cleanup, err := sut.Prepare()
+		got, cleanup, err := sut.Prepare(context.Background())
 		defer cleanup()
 
 		// then
@@ -123,7 +124,7 @@ func TestGithubPush_Prepare(t *testing.T) {
 		}
 
 		// when
-		got, cleanup, err := sut.Prepare()
+		got, cleanup, err := sut.Prepare(context.Background())
 		defer cleanup()
 
 		// then

@@ -90,6 +90,6 @@ type StubTarget struct {
 	Err     error
 }
 
-func (t *StubTarget) Prepare() (dir job.WorkDir, cleanup job.Cleanup, err error) {
+func (t *StubTarget) Prepare(context.Context) (dir job.WorkDir, cleanup job.Cleanup, err error) {
 	return t.Dir, t.Cleanup, t.Err
 }
