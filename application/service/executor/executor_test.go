@@ -26,7 +26,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		}
 
 		// and
-		var calledStartFunc, calledEndFunc bool
+		var calledInitFunc, calledStartFunc, calledEndFunc bool
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -41,6 +41,9 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// and
 		sut := &executor.JobExecutor{}
 		defer sut.SetDockerRunner(runner)()
+		defer sut.SetInitFunc(func(i context.Context) {
+			calledInitFunc = true
+		})()
 		defer sut.SetStartFunc(func(context.Context) {
 			calledStartFunc = true
 		})()
@@ -54,6 +57,11 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// then
 		if err != nil {
 			t.Errorf("must be nil, but got %+v", err)
+		}
+
+		// and
+		if !calledInitFunc {
+			t.Errorf("must be called initFunc")
 		}
 
 		// and
@@ -80,7 +88,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		wantErr := errors.New("test error")
 
 		// and
-		var calledStartFunc, calledEndFunc bool
+		var calledInitFunc, calledStartFunc, calledEndFunc bool
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -95,6 +103,9 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// and
 		sut := &executor.JobExecutor{}
 		defer sut.SetDockerRunner(runner)()
+		defer sut.SetInitFunc(func(context.Context) {
+			calledInitFunc = true
+		})()
 		defer sut.SetStartFunc(func(context.Context) {
 			calledStartFunc = true
 		})()
@@ -108,6 +119,11 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// then
 		if err != wantErr {
 			t.Errorf("must be equal. want %+v, but got %+v", wantErr, err)
+		}
+
+		// and
+		if !calledInitFunc {
+			t.Errorf("must be called initFunc")
 		}
 
 		// and
@@ -138,7 +154,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		}
 
 		// and
-		var calledStartFunc, calledEndFunc bool
+		var calledInitFunc, calledStartFunc, calledEndFunc bool
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -156,6 +172,9 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// and
 		sut := &executor.JobExecutor{}
 		defer sut.SetDockerRunner(runner)()
+		defer sut.SetInitFunc(func(i context.Context) {
+			calledInitFunc = true
+		})()
 		defer sut.SetStartFunc(func(context.Context) {
 			calledStartFunc = true
 		})()
@@ -169,6 +188,11 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// then
 		if err != context.DeadlineExceeded {
 			t.Errorf("must be equal. want %+v, but got %+v", context.DeadlineExceeded, err)
+		}
+
+		// and
+		if !calledInitFunc {
+			t.Errorf("must be called initFunc")
 		}
 
 		// and
@@ -192,7 +216,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		}
 
 		// and
-		var calledStartFunc, calledEndFunc bool
+		var calledInitFunc, calledStartFunc, calledEndFunc bool
 
 		// and
 		ctrl := gomock.NewController(t)
@@ -206,6 +230,9 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// and
 		sut := &executor.JobExecutor{}
 		defer sut.SetDockerRunner(runner)()
+		defer sut.SetInitFunc(func(i context.Context) {
+			calledInitFunc = true
+		})()
 		defer sut.SetStartFunc(func(context.Context) {
 			calledStartFunc = true
 		})()
@@ -222,8 +249,13 @@ func TestJobExecutor_Execute(t *testing.T) {
 		}
 
 		// and
-		if !calledStartFunc {
-			t.Errorf("must be called startFunc")
+		if !calledInitFunc {
+			t.Errorf("must be called initFunc")
+		}
+
+		// and
+		if calledStartFunc {
+			t.Errorf("must not be called startFunc")
 		}
 
 		// and

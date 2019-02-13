@@ -15,6 +15,14 @@ func (b *Builder) SetDocker(docker docker.Docker) (reset func()) {
 	}
 }
 
+func (b *Builder) SetInitFunc(initFunc func(context.Context)) (reset func()) {
+	tmp := b.initFunc
+	b.initFunc = initFunc
+	return func() {
+		b.initFunc = tmp
+	}
+}
+
 func (b *Builder) SetStartFunc(startFunc func(context.Context)) (reset func()) {
 	tmp := b.startFunc
 	b.startFunc = startFunc
@@ -43,6 +51,14 @@ var NothingToDoStart = nothingToDoStart
 var NothingToDoEnd = nothingToDoEnd
 
 type JobExecutor = jobExecutor
+
+func (r *JobExecutor) SetInitFunc(initFunc func(context.Context)) (reset func()) {
+	tmp := r.InitFunc
+	r.InitFunc = initFunc
+	return func() {
+		r.InitFunc = tmp
+	}
+}
 
 func (r *JobExecutor) SetStartFunc(startFunc func(context.Context)) (reset func()) {
 	tmp := r.StartFunc

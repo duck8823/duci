@@ -11,6 +11,7 @@ import (
 type Builder struct {
 	docker    docker.Docker
 	logFunc   runner.LogFunc
+	initFunc  func(context.Context)
 	startFunc func(context.Context)
 	endFunc   func(context.Context, error)
 }
@@ -24,6 +25,7 @@ func DefaultExecutorBuilder() (*Builder, error) {
 	return &Builder{
 		docker:    docker,
 		logFunc:   runner.NothingToDo,
+		initFunc:  nothingToDoStart,
 		startFunc: nothingToDoStart,
 		endFunc:   nothingToDoEnd,
 	}, nil
@@ -32,6 +34,12 @@ func DefaultExecutorBuilder() (*Builder, error) {
 // LogFunc set a LogFunc
 func (b *Builder) LogFunc(f runner.LogFunc) *Builder {
 	b.logFunc = f
+	return b
+}
+
+// InitFunc set a initFunc
+func (b *Builder) InitFunc(f func(context.Context)) *Builder {
+	b.initFunc = f
 	return b
 }
 
@@ -55,6 +63,7 @@ func (b *Builder) Build() Executor {
 
 	return &jobExecutor{
 		DockerRunner: r,
+		InitFunc:     b.initFunc,
 		StartFunc:    b.startFunc,
 		EndFunc:      b.endFunc,
 	}

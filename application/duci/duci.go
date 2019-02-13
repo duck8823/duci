@@ -40,12 +40,37 @@ func New() (executor.Executor, error) {
 		github:     github,
 	}
 	duci.Executor = builder.
+		InitFunc(duci.Init).
 		StartFunc(duci.Start).
 		EndFunc(duci.End).
 		LogFunc(duci.AppendLog).
 		Build()
 
 	return duci, nil
+}
+
+// Init represents a function of init job
+func (d *duci) Init(ctx context.Context) {
+	buildJob, err := application.BuildJobFromContext(ctx)
+	if err != nil {
+		logrus.Errorf("%+v", err)
+		return
+	}
+	if err := d.jobService.Start(buildJob.ID); err != nil {
+		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
+			logrus.Errorf("%+v", err)
+		}
+		return
+	}
+	if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
+		TargetSource: buildJob.TargetSource,
+		State:        github.PENDING,
+		Description:  "queued",
+		Context:      buildJob.TaskName,
+		TargetURL:    buildJob.TargetURL,
+	}); err != nil {
+		logrus.Warn(err)
+	}
 }
 
 // Start represents a function of start job
@@ -64,7 +89,7 @@ func (d *duci) Start(ctx context.Context) {
 	if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 		TargetSource: buildJob.TargetSource,
 		State:        github.PENDING,
-		Description:  "pending",
+		Description:  "running",
 		Context:      buildJob.TaskName,
 		TargetURL:    buildJob.TargetURL,
 	}); err != nil {
