@@ -10,6 +10,7 @@ func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		TimestampFormat: "02/Jan/2006 15:04:05.000",
 		FullTimestamp:   true,
+		ForceColors:     true,
 	})
 }
 
