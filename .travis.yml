@@ -36,7 +36,8 @@ before_deploy:
   # copy dependencies to vendor
   - go mod vendor
   - GO111MODULE=off go get -u github.com/buchanae/github-release-notes
-  - GO111MODULE=off go get -u github.com/goreleaser/goreleaser
+  - sudo apt update && sudo apt install snapd
+  - sudo snap install goreleaser --classic
   - github-release-notes -org duck8823 -repo duci -since-latest-release > release-notes.txt
 deploy:
   - provider: script
