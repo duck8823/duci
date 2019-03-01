@@ -6,8 +6,9 @@ os:
 language: go
 go:
   - tip
-  - "1.11.5"
   - "1.11.x"
+  - "1.12"
+  - "1.12.x"
 
 matrix:
   exclude:
@@ -31,7 +32,7 @@ script:
 after_success:
   # for coverage report
   - GO111MODULE=off go get -u github.com/mattn/goveralls
-  - if [ "$TRAVIS_GO_VERSION" = "1.11.5" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
+  - if [ "$TRAVIS_GO_VERSION" = "1.12" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
 before_deploy:
   # copy dependencies to vendor
   - go mod vendor
@@ -45,5 +46,5 @@ deploy:
     on:
       tags: true
       condition:
-        - $TRAVIS_GO_VERSION = "1.11.5"
+        - $TRAVIS_GO_VERSION = "1.12"
         - $TRAVIS_OS_NAME = "linux"

@@ -18,7 +18,7 @@ action "lint" {
 }
 
 action "download" {
-  uses = "docker://golang:1.11"
+  uses = "docker://golang:1.12"
   needs = ["lint"]
   env = {
     GOPATH = "/github/workspace/.go"
@@ -28,7 +28,7 @@ action "download" {
 }
 
 action "test" {
-  uses = "docker://golang:1.11"
+  uses = "docker://golang:1.12"
   needs = ["download"]
   env = {
     GOPATH = "/github/workspace/.go"
@@ -38,7 +38,7 @@ action "test" {
 }
 
 action "tidy" {
-  uses = "docker://golang:1.11"
+  uses = "docker://golang:1.12"
   needs = ["download"]
   env = {
     GOPATH = "/github/workspace/.go"
