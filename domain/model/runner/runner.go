@@ -5,6 +5,7 @@ import (
 	"github.com/duck8823/duci/domain/model/docker"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/pkg/errors"
+	"os"
 )
 
 // DockerRunner is a interface describes task runner.
@@ -53,7 +54,10 @@ func (r *dockerRunnerImpl) dockerBuild(ctx context.Context, dir job.WorkDir, tag
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer tarball.Close()
+	defer func() {
+		tarball.Close()
+		os.Remove(tarball.Name())
+	}()
 
 	buildLog, err := r.docker.Build(ctx, tarball, docker.Tag(tag), dockerfilePath(dir))
 	if err != nil {
