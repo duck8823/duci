@@ -14,6 +14,17 @@ cross-build:
 docker-build:
 	docker build -t duck8823/duci:$$(git describe --tags) .
 
+lint:
+	gometalinter \
+      --disable-all \
+      --enable=gofmt \
+      --enable=vet \
+      --enable=gocyclo  --cyclo-over=15 \
+      --enable=golint --min-confidence=0.85 --vendor \
+      --enable=ineffassign \
+      --enable=misspell \
+      --deadline=5m
+
 test:
 	go test -coverprofile cover.out $$(go list ./... | grep -v mock_)
 	go tool cover -html cover.out -o cover.html

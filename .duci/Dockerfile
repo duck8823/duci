@@ -5,6 +5,9 @@ RUN apk --update add --no-cache alpine-sdk
 
 WORKDIR /workdir
 
+# install gometalinter for lint
+RUN curl -s -L https://git.io/vp6lP | sh
+
 COPY go.mod .
 COPY go.sum .
 
