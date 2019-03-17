@@ -2,7 +2,8 @@
 version: "3.3"
 services:
   server:
-    image: duck8823/duci
+    build:
+      context: .
     volumes:
       - duci-db:/.duci/db
       - /var/run/docker.sock:/var/run/docker.sock
@@ -13,7 +14,8 @@ services:
       traefik.frontend.priority: "1"
       traefik.port: "8080"
   ui:
-    image: duck8823/duci-ui
+    build:
+      context: https://github.com/duck8823/duci-ui.git
     environment:
       - DUCI_LOGS_URL=http://${DUCI_HOST:-localhost}/stream/logs/
     restart: always
