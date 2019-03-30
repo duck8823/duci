@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -10,6 +11,7 @@ import (
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
 	"github.com/pkg/errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -45,7 +47,13 @@ func (c *dockerImpl) Build(ctx context.Context, file io.Reader, tag Tag, dockerf
 		return nil, errors.WithStack(err)
 	}
 
-	return NewBuildLog(resp.Body), nil
+	// For waiting build
+	log, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return NewBuildLog(bytes.NewReader(log)), nil
 }
 
 // BuildArgs returns build args with host environment values
