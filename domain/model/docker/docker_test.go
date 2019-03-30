@@ -125,7 +125,7 @@ func TestClient_Build(t *testing.T) {
 		}
 	})
 
-	t.Run("with error", func(t *testing.T) {
+	t.Run("with build error", func(t *testing.T) {
 		// given
 		ctrl := NewController(t)
 		defer ctrl.Finish()
@@ -162,6 +162,52 @@ func TestClient_Build(t *testing.T) {
 		// then
 		if err.Error() != wantError.Error() {
 			t.Errorf("error want: %+v, but got: %+v", wantError, err)
+		}
+
+		// and
+		if got != nil {
+			t.Errorf("log moust be nil, but got %+v", err)
+		}
+	})
+
+	t.Run("when failure read log", func(t *testing.T) {
+		// given
+		ctrl := NewController(t)
+		defer ctrl.Finish()
+
+		// and
+		ctx := context.Background()
+		buildContext := strings.NewReader("hello world")
+		tag := "test_tag"
+		dockerfile := "testdata/Dockerfile"
+
+		// and
+		errorRes := types.ImageBuildResponse{
+			 Body: new(docker.ErrorResponse),
+		}
+
+		// and
+		mockMoby := mock_docker.NewMockMoby(ctrl)
+		mockMoby.EXPECT().
+			ImageBuild(Eq(ctx), Eq(buildContext), Eq(types.ImageBuildOptions{
+				Tags:       []string{tag},
+				BuildArgs:  map[string]*string{},
+				Dockerfile: dockerfile,
+				Remove:     true,
+			})).
+			Times(1).
+			Return(errorRes, nil)
+
+		// and
+		sut := &docker.Client{}
+		defer sut.SetMoby(mockMoby)()
+
+		// when
+		got, err := sut.Build(ctx, buildContext, docker.Tag(tag), docker.Dockerfile{Dir: ".", Path: dockerfile})
+
+		// then
+		if err == nil {
+			t.Error("error must not be nil")
 		}
 
 		// and
