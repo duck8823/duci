@@ -1,8 +1,10 @@
 package job
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/duck8823/duci/application"
 	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/go-chi/chi"
@@ -47,23 +49,40 @@ func (h *handler) logs(w http.ResponseWriter, id job.ID) error {
 		return errors.New("Streaming unsupported")
 	}
 
-	// TODO: add timeout
-	var read int
-	for {
-		job, err := h.service.FindBy(id)
+	timeout, cancel := context.WithTimeout(context.Background(), application.Config.Timeout())
+	defer cancel()
+
+	errs := make(chan error, 1)
+
+	go func() {
+		var read int
+		for {
+			job, err := h.service.FindBy(id)
+			if err != nil {
+				errs <- errors.WithStack(err)
+				break
+			}
+			for _, msg := range job.Stream[read:] {
+				if err := json.NewEncoder(w).Encode(msg); err != nil {
+					logrus.Errorf("%+v", err)
+				}
+				f.Flush()
+				read++
+			}
+			if job.Finished {
+				errs <- nil
+				break
+			}
+		}
+	}()
+
+	select {
+	case <-timeout.Done():
+		return timeout.Err()
+	case err := <-errs:
 		if err != nil {
 			return errors.WithStack(err)
 		}
-		for _, msg := range job.Stream[read:] {
-			if err := json.NewEncoder(w).Encode(msg); err != nil {
-				logrus.Errorf("%+v", err)
-			}
-			f.Flush()
-			read++
-		}
-		if job.Finished {
-			break
-		}
+		return nil
 	}
-	return nil
 }

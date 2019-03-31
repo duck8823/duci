@@ -2,6 +2,7 @@ package job_test
 
 import (
 	"context"
+	"github.com/duck8823/duci/application"
 	jobService "github.com/duck8823/duci/application/service/job"
 	"github.com/duck8823/duci/application/service/job/mock_job"
 	"github.com/duck8823/duci/domain/model/job"
@@ -151,6 +152,50 @@ func TestHandler_ServeHTTP(t *testing.T) {
 			FindBy(gomock.Eq(id)).
 			Times(1).
 			Return(nil, errors.New("test error"))
+
+		// and
+		sut := &jobController.Handler{}
+		defer sut.SetService(service)()
+
+		// when
+		sut.ServeHTTP(rec, req.WithContext(ctx))
+
+		// then
+		if rec.Code != http.StatusInternalServerError {
+			t.Errorf("response code must be %d, but got %d", http.StatusInternalServerError, rec.Code)
+		}
+	})
+
+	t.Run("with timeout", func(t *testing.T) {
+		// given
+		timeout := application.Config.Timeout()
+		application.Config.Job.Timeout = 1
+		defer func() {
+			application.Config.Job.Timeout = int64(timeout.Seconds())
+		}()
+
+		// and
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/", nil)
+
+		// and
+		id := job.ID(uuid.New())
+
+		routeCtx := chi.NewRouteContext()
+		routeCtx.URLParams.Add("uuid", uuid.UUID(id).String())
+		ctx := context.WithValue(context.Background(), chi.RouteCtxKey, routeCtx)
+
+		// and
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		service := mock_job_service.NewMockService(ctrl)
+		service.EXPECT().
+			FindBy(gomock.Eq(id)).
+			Times(1).
+			Do(func(_ interface{}) {
+				time.Sleep(5 * time.Second)
+			})
 
 		// and
 		sut := &jobController.Handler{}
