@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 )
 
-var localCmd = createCmd("local", "Run locally", runLocal)
+var runCmd = createCmd("run", "Run locally", runLocal)
 
 func runLocal(cmd *cobra.Command, args []string) {
 	readConfiguration(cmd)
