@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -28,4 +29,15 @@ func SetNowFunc(f func() time.Time) (reset func()) {
 	return func() {
 		now = tmp
 	}
+}
+
+type ErrorResponse struct {
+}
+
+func (e *ErrorResponse) Read(p []byte) (n int, err error) {
+	return 0, errors.New("test error")
+}
+
+func (e *ErrorResponse) Close() error {
+	return nil
 }
