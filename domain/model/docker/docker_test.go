@@ -183,7 +183,7 @@ func TestClient_Build(t *testing.T) {
 
 		// and
 		errorRes := types.ImageBuildResponse{
-			 Body: new(docker.ErrorResponse),
+			Body: new(docker.ErrorResponse),
 		}
 
 		// and
