@@ -19,7 +19,7 @@ require (
 	github.com/labstack/gommon v0.2.8
 	github.com/moby/buildkit v0.4.0
 	github.com/pkg/errors v0.8.1
-	github.com/sirupsen/logrus v1.4.0
+	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20180815032940-ae2bd5eed72d
