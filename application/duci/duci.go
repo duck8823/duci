@@ -14,10 +14,13 @@ import (
 	"time"
 )
 
+var now = time.Now
+
 type duci struct {
 	executor.Executor
 	jobService jobService.Service
 	github     github.GitHub
+	begin      time.Time
 }
 
 // New returns duci instance
@@ -57,7 +60,7 @@ func (d *duci) Init(ctx context.Context) {
 		return
 	}
 	if err := d.jobService.Start(buildJob.ID); err != nil {
-		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
+		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: now(), Message: err.Error()}); err != nil {
 			logrus.Errorf("%+v", err)
 		}
 		return
@@ -75,6 +78,7 @@ func (d *duci) Init(ctx context.Context) {
 
 // Start represents a function of start job
 func (d *duci) Start(ctx context.Context) {
+	d.begin = now()
 	buildJob, err := application.BuildJobFromContext(ctx)
 	if err != nil {
 		logrus.Errorf("%+v", err)
@@ -114,7 +118,7 @@ func (d *duci) End(ctx context.Context, e error) {
 		return
 	}
 	if err := d.jobService.Finish(buildJob.ID); err != nil {
-		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: time.Now(), Message: err.Error()}); err != nil {
+		if err := d.jobService.Append(buildJob.ID, job.LogLine{Timestamp: now(), Message: err.Error()}); err != nil {
 			logrus.Errorf("%+v", err)
 		}
 		return
@@ -125,7 +129,7 @@ func (d *duci) End(ctx context.Context, e error) {
 		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.SUCCESS,
-			Description:  "success",
+			Description:  github.Description(fmt.Sprintf("success in %s", d.duration())),
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}); err != nil {
@@ -135,7 +139,7 @@ func (d *duci) End(ctx context.Context, e error) {
 		if err := d.github.CreateCommitStatus(ctx, github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.FAILURE,
-			Description:  "failure",
+			Description:  github.Description(fmt.Sprintf("failure in %s", d.duration())),
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}); err != nil {
@@ -151,5 +155,14 @@ func (d *duci) End(ctx context.Context, e error) {
 		}); err != nil {
 			logrus.Warn(err)
 		}
+	}
+}
+
+func (d *duci) duration() string {
+	dur := now().Sub(d.begin)
+	if int(dur.Minutes()) > 0 {
+		return fmt.Sprintf("%dmin", int(dur.Minutes()))
+	} else {
+		return fmt.Sprintf("%dsec", int(dur.Seconds()))
 	}
 }

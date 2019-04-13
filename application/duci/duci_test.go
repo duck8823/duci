@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"net/url"
 	"testing"
+	"time"
 )
 
 func TestNew(t *testing.T) {
@@ -342,10 +343,15 @@ func TestDuci_End(t *testing.T) {
 		var err error = nil
 
 		// and
+		defer duci.SetNowFunc(func() time.Time {
+			return time.Unix(302, 1)
+		})()
+
+		// and
 		want := github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.SUCCESS,
-			Description:  "success",
+			Description:  "success in 5min",
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}
@@ -368,6 +374,7 @@ func TestDuci_End(t *testing.T) {
 		sut := &duci.Duci{}
 		defer sut.SetJobService(service)()
 		defer sut.SetGitHub(hub)()
+		defer sut.SetBegin(time.Unix(0, 0))()
 
 		// when
 		sut.End(ctx, err)
@@ -388,10 +395,15 @@ func TestDuci_End(t *testing.T) {
 		err := runner.ErrFailure
 
 		// and
+		defer duci.SetNowFunc(func() time.Time {
+			return time.Unix(49, 1)
+		})()
+
+		// and
 		want := github.CommitStatus{
 			TargetSource: buildJob.TargetSource,
 			State:        github.FAILURE,
-			Description:  "failure",
+			Description:  "failure in 49sec",
 			Context:      buildJob.TaskName,
 			TargetURL:    buildJob.TargetURL,
 		}
@@ -414,6 +426,7 @@ func TestDuci_End(t *testing.T) {
 		sut := &duci.Duci{}
 		defer sut.SetJobService(service)()
 		defer sut.SetGitHub(hub)()
+		defer sut.SetBegin(time.Unix(0, 0))()
 
 		// when
 		sut.End(ctx, err)

@@ -27,6 +27,14 @@ func (d *Duci) SetGitHub(hub github.GitHub) (reset func()) {
 	}
 }
 
+func (d *Duci) SetBegin(t time.Time) (reset func()) {
+	tmp := d.begin
+	d.begin = t
+	return func() {
+		d.begin = tmp
+	}
+}
+
 func URLMust(url *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
@@ -49,4 +57,12 @@ func (l *MockLog) ReadLine() (*job.LogLine, error) {
 
 func String(val string) *string {
 	return &val
+}
+
+func SetNowFunc(f func() time.Time) (reset func()) {
+	tmp := now
+	now = f
+	return func() {
+		now = tmp
+	}
 }
