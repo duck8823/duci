@@ -3,6 +3,7 @@ module github.com/duck8823/duci
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/docker/docker v0.7.3-0.20180814124044-678d4b3a6d4c
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-chi/chi v3.3.4+incompatible
@@ -10,7 +11,6 @@ require (
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
 	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2 // indirect
@@ -19,14 +19,14 @@ require (
 	github.com/labstack/gommon v0.2.8
 	github.com/moby/buildkit v0.4.0
 	github.com/pkg/errors v0.8.1
+	github.com/rhysd/go-github-selfupdate v1.1.0
 	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20180815032940-ae2bd5eed72d
 	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e
-	golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc
+	golang.org/x/oauth2 v0.0.0-20181106182150-f42d05182288
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
-	google.golang.org/appengine v1.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8 // indirect
 	google.golang.org/grpc v1.14.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.14
