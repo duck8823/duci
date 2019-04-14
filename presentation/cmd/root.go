@@ -10,7 +10,7 @@ import (
 var rootCmd = &cobra.Command{Use: "duci"}
 
 func init() {
-	rootCmd.AddCommand(serverCmd, runCmd, configCmd, healthCmd, versionCmd)
+	rootCmd.AddCommand(serverCmd, runCmd, configCmd, healthCmd, versionCmd, updateCmd)
 }
 
 // Execute command
