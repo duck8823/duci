@@ -4,6 +4,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/containers/libpod v1.2.0 // indirect
 	github.com/docker/docker v0.7.3-0.20180814124044-678d4b3a6d4c
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-chi/chi v3.3.4+incompatible
