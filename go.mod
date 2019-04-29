@@ -17,7 +17,7 @@ require (
 	github.com/hashicorp/go-version v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/labstack/gommon v0.2.8
-	github.com/moby/buildkit v0.4.0
+	github.com/moby/buildkit v0.5.0
 	github.com/pkg/errors v0.8.1
 	github.com/rhysd/go-github-selfupdate v1.1.0
 	github.com/sirupsen/logrus v1.4.1
