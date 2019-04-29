@@ -4,13 +4,14 @@ workflow "main workflow" {
 }
 
 action "lint" {
-  uses = "docker://duck8823/gometalinter:latest"
+  uses = "docker://golangci/golangci-lint:latest"
+  runs = ["golangci-lint", "run"]
   args = [
     "--disable-all",
     "--enable=gofmt",
     "--enable=vet",
-    "--enable=gocyclo", "--cyclo-over=15",
-    "--enable=golint", "--min-confidence=0.85", "--vendor",
+    "--enable=gocyclo",
+    "--enable=golint",
     "--enable=ineffassign",
     "--enable=misspell",
     "--deadline=5m"

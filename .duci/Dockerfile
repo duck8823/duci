@@ -5,8 +5,8 @@ RUN apk --update add --no-cache alpine-sdk
 
 WORKDIR /workdir
 
-# install gometalinter for lint
-RUN curl -s -L https://git.io/vp6lP | sh -s -- -b /usr/local/bin
+# install golangci-lint
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin
 
 COPY go.mod .
 COPY go.sum .

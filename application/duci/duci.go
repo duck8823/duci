@@ -162,7 +162,6 @@ func (d *duci) duration() string {
 	dur := now().Sub(d.begin)
 	if int(dur.Minutes()) > 0 {
 		return fmt.Sprintf("%dmin", int(dur.Minutes()))
-	} else {
-		return fmt.Sprintf("%dsec", int(dur.Seconds()))
 	}
+	return fmt.Sprintf("%dsec", int(dur.Seconds()))
 }
