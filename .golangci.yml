@@ -1,0 +1,8 @@
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  golint:
+    min-confidence: 0.85
+
+run:
+  tests: false
