@@ -2,9 +2,8 @@ module github.com/duck8823/duci
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/docker/docker v0.7.3-0.20180814124044-678d4b3a6d4c
+	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-chi/chi v3.3.4+incompatible
 	github.com/golang/mock v1.2.0
@@ -17,7 +16,7 @@ require (
 	github.com/hashicorp/go-version v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/labstack/gommon v0.2.8
-	github.com/moby/buildkit v0.4.0
+	github.com/moby/buildkit v0.5.0
 	github.com/pkg/errors v0.8.1
 	github.com/rhysd/go-github-selfupdate v1.1.0
 	github.com/sirupsen/logrus v1.4.1
