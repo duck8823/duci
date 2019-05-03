@@ -6,7 +6,7 @@ require (
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-chi/chi v3.3.4+incompatible
-	github.com/golang/mock v1.2.0
+	github.com/golang/mock v1.3.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.3.0
 	github.com/google/go-github v17.0.0+incompatible
