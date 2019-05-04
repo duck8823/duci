@@ -12,9 +12,6 @@ go:
 matrix:
   allow_failures:
     - go: tip
-  exclude:
-    - go: tip
-      os: osx
 
 env:
   global:
