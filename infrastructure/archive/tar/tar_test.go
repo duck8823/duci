@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -106,6 +107,9 @@ func TestCreate(t *testing.T) {
 	t.Run("with wrong permission in target", func(t *testing.T) {
 		if os.Getuid() == 0 {
 			t.Skip("skip if root user")
+		}
+		if runtime.GOOS == "windows" {
+			t.Skip("skip in windows")
 		}
 
 		// setup
