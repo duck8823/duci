@@ -12,6 +12,7 @@ go:
 matrix:
   allow_failures:
     - go: tip
+    - os: windows
 
 env:
   global:
