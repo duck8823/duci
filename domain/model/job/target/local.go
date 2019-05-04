@@ -8,7 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // Local is target with Local directory
@@ -18,7 +18,7 @@ type Local struct {
 
 // Prepare working directory
 func (l *Local) Prepare() (job.WorkDir, job.Cleanup, error) {
-	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
+	tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
 	if err := os.MkdirAll(tmpDir, 0700); err != nil {
 		return "", nil, errors.WithStack(err)
 	}
@@ -37,8 +37,8 @@ func copyDir(dstDir string, srcDir string) error {
 	}
 
 	for _, entry := range entries {
-		dstPath := path.Join(dstDir, entry.Name())
-		srcPath := path.Join(srcDir, entry.Name())
+		dstPath := filepath.Join(dstDir, entry.Name())
+		srcPath := filepath.Join(srcDir, entry.Name())
 
 		if entry.IsDir() {
 			if err := os.MkdirAll(dstPath, 0700); err != nil {

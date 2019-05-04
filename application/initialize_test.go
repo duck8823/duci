@@ -8,7 +8,7 @@ import (
 	"github.com/duck8823/duci/internal/container"
 	"github.com/labstack/gommon/random"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 )
 
@@ -19,7 +19,7 @@ func TestInitialize(t *testing.T) {
 			sshKeyPath := application.Config.GitHub.SSHKeyPath
 			databasePath := application.Config.Server.DatabasePath
 			application.Config.GitHub.SSHKeyPath = ""
-			application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+			application.Config.Server.DatabasePath = filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 			defer func() {
 				application.Config.GitHub.SSHKeyPath = sshKeyPath
 				application.Config.Server.DatabasePath = databasePath
@@ -57,18 +57,18 @@ func TestInitialize(t *testing.T) {
 
 		t.Run("with correct ssh key path", func(t *testing.T) {
 			// given
-			dir := path.Join(os.TempDir(), random.String(16))
+			dir := filepath.Join(os.TempDir(), random.String(16))
 			if err := os.MkdirAll(dir, 0700); err != nil {
 				t.Fatalf("error occur: %+v", err)
 			}
-			keyPath := path.Join(dir, "id_rsa")
+			keyPath := filepath.Join(dir, "id_rsa")
 			application.GenerateSSHKey(t, keyPath)
 
 			// and
 			sshKeyPath := application.Config.GitHub.SSHKeyPath
 			databasePath := application.Config.Server.DatabasePath
 			application.Config.GitHub.SSHKeyPath = keyPath
-			application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+			application.Config.Server.DatabasePath = filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 			defer func() {
 				application.Config.GitHub.SSHKeyPath = sshKeyPath
 				application.Config.Server.DatabasePath = databasePath
@@ -109,7 +109,7 @@ func TestInitialize(t *testing.T) {
 			sshKeyPath := application.Config.GitHub.SSHKeyPath
 			databasePath := application.Config.Server.DatabasePath
 			application.Config.GitHub.SSHKeyPath = "/path/to/invalid/key/path"
-			application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+			application.Config.Server.DatabasePath = filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 			defer func() {
 				application.Config.GitHub.SSHKeyPath = sshKeyPath
 				application.Config.Server.DatabasePath = databasePath
@@ -133,7 +133,7 @@ func TestInitialize(t *testing.T) {
 		sshKeyPath := application.Config.GitHub.SSHKeyPath
 		databasePath := application.Config.Server.DatabasePath
 		application.Config.GitHub.SSHKeyPath = ""
-		application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		application.Config.Server.DatabasePath = filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
 			application.Config.GitHub.SSHKeyPath = sshKeyPath
 			application.Config.Server.DatabasePath = databasePath
@@ -157,7 +157,7 @@ func TestInitialize(t *testing.T) {
 		sshKeyPath := application.Config.GitHub.SSHKeyPath
 		databasePath := application.Config.Server.DatabasePath
 		application.Config.GitHub.SSHKeyPath = ""
-		application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		application.Config.Server.DatabasePath = filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
 			application.Config.GitHub.SSHKeyPath = sshKeyPath
 			application.Config.Server.DatabasePath = databasePath
@@ -181,7 +181,7 @@ func TestInitialize(t *testing.T) {
 		sshKeyPath := application.Config.GitHub.SSHKeyPath
 		databasePath := application.Config.Server.DatabasePath
 		application.Config.GitHub.SSHKeyPath = ""
-		application.Config.Server.DatabasePath = path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		application.Config.Server.DatabasePath = filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
 			application.Config.GitHub.SSHKeyPath = sshKeyPath
 			application.Config.Server.DatabasePath = databasePath

@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -80,7 +80,7 @@ func TestDockerRunnerImpl_Run(t *testing.T) {
 		cmd := docker.Command{"echo", "test"}
 
 		// and
-		if err := os.MkdirAll(path.Join(dir.String(), "duci.tar"), 0700); err != nil {
+		if err := os.MkdirAll(filepath.Join(dir.String(), "duci.tar"), 0700); err != nil {
 			t.Fatalf("error occur: %+v", err)
 		}
 
@@ -117,7 +117,7 @@ func TestDockerRunnerImpl_Run(t *testing.T) {
 		cmd := docker.Command{"echo", "test"}
 
 		// and
-		if err := os.MkdirAll(path.Join(dir.String(), ".duci", "config.yml"), 0700); err != nil {
+		if err := os.MkdirAll(filepath.Join(dir.String(), ".duci", "config.yml"), 0700); err != nil {
 			t.Fatalf("error occur: %+v", err)
 		}
 
@@ -431,7 +431,7 @@ func TestDockerRunnerImpl_Run(t *testing.T) {
 func tmpDir(t *testing.T) (workDir job.WorkDir, clean func()) {
 	t.Helper()
 
-	dir := job.WorkDir(path.Join(os.TempDir(), random.String(16)))
+	dir := job.WorkDir(filepath.Join(os.TempDir(), random.String(16)))
 	if err := os.MkdirAll(dir.String(), 0700); err != nil {
 		t.Fatalf("error occur: %+v", err)
 	}

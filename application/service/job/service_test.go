@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -19,7 +19,7 @@ import (
 func TestInitialize(t *testing.T) {
 	t.Run("with temporary directory", func(t *testing.T) {
 		// given
-		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
 			_ = os.RemoveAll(tmpDir)
 		}()
@@ -35,7 +35,7 @@ func TestInitialize(t *testing.T) {
 
 	t.Run("with invalid directory", func(t *testing.T) {
 		// given
-		tmpDir := path.Join("/path/to/invalid/dir")
+		tmpDir := filepath.Join("/path/to/invalid/dir")
 		defer func() {
 			_ = os.RemoveAll(tmpDir)
 		}()
