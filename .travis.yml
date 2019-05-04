@@ -1,7 +1,7 @@
 os:
   - linux
   - osx
-#  - windows is still early access stage: https://travis-ci.community/c/windows
+  - windows
 
 language: go
 go:
