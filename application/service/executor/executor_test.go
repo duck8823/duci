@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/gommon/random"
 	"github.com/pkg/errors"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -20,7 +20,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// given
 		ctx := context.Background()
 		target := &executor.StubTarget{
-			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
+			Dir:     job.WorkDir(filepath.Join(os.TempDir(), random.String(16))),
 			Cleanup: func() {},
 			Err:     nil,
 		}
@@ -79,7 +79,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// given
 		ctx := context.Background()
 		target := &executor.StubTarget{
-			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
+			Dir:     job.WorkDir(filepath.Join(os.TempDir(), random.String(16))),
 			Cleanup: func() {},
 			Err:     nil,
 		}
@@ -148,7 +148,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// and
 		ctx := context.Background()
 		target := &executor.StubTarget{
-			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
+			Dir:     job.WorkDir(filepath.Join(os.TempDir(), random.String(16))),
 			Cleanup: func() {},
 			Err:     nil,
 		}
@@ -210,7 +210,7 @@ func TestJobExecutor_Execute(t *testing.T) {
 		// given
 		ctx := context.Background()
 		target := &executor.StubTarget{
-			Dir:     job.WorkDir(path.Join(os.TempDir(), random.String(16))),
+			Dir:     job.WorkDir(filepath.Join(os.TempDir(), random.String(16))),
 			Cleanup: func() {},
 			Err:     errors.New("test error"),
 		}

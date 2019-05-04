@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -20,7 +20,7 @@ import (
 func TestNewDataSource(t *testing.T) {
 	t.Run("with temporary path", func(t *testing.T) {
 		// given
-		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
 			_ = os.RemoveAll(tmpDir)
 		}()
@@ -41,7 +41,7 @@ func TestNewDataSource(t *testing.T) {
 
 	t.Run("with wrong path", func(t *testing.T) {
 		// given
-		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 		defer func() {
 			_ = os.RemoveAll(tmpDir)
 		}()

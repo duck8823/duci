@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // GitHub is target with github repository
@@ -20,7 +20,7 @@ type GitHub struct {
 
 // Prepare working directory
 func (g *GitHub) Prepare(ctx context.Context) (job.WorkDir, job.Cleanup, error) {
-	tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
+	tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric, random.Numeric))
 	if err := os.MkdirAll(tmpDir, 0700); err != nil {
 		return "", cleanupFunc(tmpDir), errors.WithStack(err)
 	}

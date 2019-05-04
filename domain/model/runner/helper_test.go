@@ -7,26 +7,26 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/labstack/gommon/random"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 )
 
 func TestCreateTarball(t *testing.T) {
 	t.Run("with correct directory", func(t *testing.T) {
 		// given
-		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 
 		if err := os.MkdirAll(tmpDir, 0700); err != nil {
 			t.Fatalf("error occur: %+v", err)
 		}
 		defer os.RemoveAll(tmpDir)
 
-		if _, err := os.Create(path.Join(tmpDir, "a")); err != nil {
+		if _, err := os.Create(filepath.Join(tmpDir, "a")); err != nil {
 			t.Fatalf("error occur: %+v", err)
 		}
 
 		// and
-		want := path.Join(tmpDir, "duci.tar")
+		want := filepath.Join(tmpDir, "duci.tar")
 
 		// when
 		got, err := runner.CreateTarball(job.WorkDir(tmpDir))
@@ -45,7 +45,7 @@ func TestCreateTarball(t *testing.T) {
 
 	t.Run("with invalid directory", func(t *testing.T) {
 		// given
-		tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+		tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 
 		// when
 		got, err := runner.CreateTarball(job.WorkDir(tmpDir))
@@ -76,7 +76,7 @@ func TestDockerfilePath(t *testing.T) {
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 				if err := os.MkdirAll(tmpDir, 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
@@ -92,8 +92,8 @@ func TestDockerfilePath(t *testing.T) {
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
-				if err := os.MkdirAll(path.Join(tmpDir, ".duci"), 0700); err != nil {
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(filepath.Join(tmpDir, ".duci"), 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
 
@@ -108,11 +108,11 @@ func TestDockerfilePath(t *testing.T) {
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
-				if err := os.MkdirAll(path.Join(tmpDir, ".duci"), 0700); err != nil {
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(filepath.Join(tmpDir, ".duci"), 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
-				if _, err := os.Create(path.Join(tmpDir, ".duci", "Dockerfile")); err != nil {
+				if _, err := os.Create(filepath.Join(tmpDir, ".duci", "Dockerfile")); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
 
@@ -157,7 +157,7 @@ func TestRuntimeOptions(t *testing.T) {
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
 				if err := os.MkdirAll(tmpDir, 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
@@ -174,12 +174,12 @@ func TestRuntimeOptions(t *testing.T) {
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
-				if err := os.MkdirAll(path.Join(tmpDir, ".duci"), 0700); err != nil {
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(filepath.Join(tmpDir, ".duci"), 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
 
-				file, err := os.OpenFile(path.Join(tmpDir, ".duci", "config.yml"), os.O_RDWR|os.O_CREATE, 0400)
+				file, err := os.OpenFile(filepath.Join(tmpDir, ".duci", "config.yml"), os.O_RDWR|os.O_CREATE, 0400)
 				if err != nil {
 					t.Fatalf("%+v", err)
 				}
@@ -204,8 +204,8 @@ volumes:
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
-				if err := os.MkdirAll(path.Join(tmpDir, ".duci", "config.yml"), 0700); err != nil {
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(filepath.Join(tmpDir, ".duci", "config.yml"), 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
 
@@ -221,12 +221,12 @@ volumes:
 			given: func(t *testing.T) (workDir job.WorkDir, cleanup func()) {
 				t.Helper()
 
-				tmpDir := path.Join(os.TempDir(), random.String(16, random.Alphanumeric))
-				if err := os.MkdirAll(path.Join(tmpDir, ".duci"), 0700); err != nil {
+				tmpDir := filepath.Join(os.TempDir(), random.String(16, random.Alphanumeric))
+				if err := os.MkdirAll(filepath.Join(tmpDir, ".duci"), 0700); err != nil {
 					t.Fatalf("error occur: %+v", err)
 				}
 
-				file, err := os.OpenFile(path.Join(tmpDir, ".duci", "config.yml"), os.O_RDWR|os.O_CREATE, 0400)
+				file, err := os.OpenFile(filepath.Join(tmpDir, ".duci", "config.yml"), os.O_RDWR|os.O_CREATE, 0400)
 				if err != nil {
 					t.Fatalf("%+v", err)
 				}
