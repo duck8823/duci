@@ -51,6 +51,11 @@ func newContent(path string, dir string) (*content, error) {
 	}
 	defer file.Close()
 
+	info, err := file.Stat()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -58,8 +63,8 @@ func newContent(path string, dir string) (*content, error) {
 
 	header := &tar.Header{
 		Name: strings.Replace(file.Name(), dir+string(os.PathSeparator), "", -1),
-		Mode: 0600,
-		Size: int64(len(data)),
+		Mode: int64(info.Mode()),
+		Size: info.Size(),
 	}
 	return &content{Header: header, Data: data}, nil
 }
