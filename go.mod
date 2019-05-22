@@ -20,7 +20,6 @@ require (
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2 // indirect
 	github.com/hashicorp/go-version v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/labstack/gommon v0.2.8
 	github.com/moby/buildkit v0.3.3
 	github.com/onsi/ginkgo v1.7.0 // indirect
@@ -31,7 +30,6 @@ require (
 	github.com/rhysd/go-github-selfupdate v1.1.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.4
-	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20180815032940-ae2bd5eed72d
 	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e
