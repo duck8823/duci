@@ -6,6 +6,7 @@ import (
 	"github.com/duck8823/duci/domain/model/job"
 	"github.com/duck8823/duci/domain/model/job/target/github"
 	"net/url"
+	"time"
 )
 
 var ctxKey = "duci_job"
@@ -16,6 +17,27 @@ type BuildJob struct {
 	TargetSource *github.TargetSource
 	TaskName     string
 	TargetURL    *url.URL
+	beginTime    time.Time
+	endTime      time.Time
+}
+
+// BeginAt set a time that begin job
+func (j *BuildJob) BeginAt(time time.Time) {
+	j.beginTime = time
+}
+
+// EndAt set a time that end job
+func (j *BuildJob) EndAt(time time.Time) {
+	j.endTime = time
+}
+
+// Duration returns job duration
+func (j *BuildJob) Duration() string {
+	dur := j.endTime.Sub(j.beginTime)
+	if int(dur.Minutes()) > 0 {
+		return fmt.Sprintf("%dmin", int(dur.Minutes()))
+	}
+	return fmt.Sprintf("%dsec", int(dur.Seconds()))
 }
 
 // ContextWithJob set parent context BuildJob and returns it.

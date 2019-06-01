@@ -11,6 +11,9 @@ import (
 
 func TestContextWithJob(t *testing.T) {
 	// given
+	opts := cmp.AllowUnexported(application.BuildJob{})
+
+	// and
 	want := &application.BuildJob{
 		ID: job.ID(uuid.New()),
 	}
@@ -22,14 +25,17 @@ func TestContextWithJob(t *testing.T) {
 	got := ctx.Value(application.GetCtxKey())
 
 	// then
-	if !cmp.Equal(got, want) {
-		t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
+	if !cmp.Equal(got, want, opts) {
+		t.Errorf("must be equal, but %+v", cmp.Diff(got, want, opts))
 	}
 }
 
 func TestBuildJobFromContext(t *testing.T) {
 	t.Run("with value", func(t *testing.T) {
 		// given
+		opts := cmp.AllowUnexported(application.BuildJob{})
+
+		// and
 		want := &application.BuildJob{
 			ID: job.ID(uuid.New()),
 		}
@@ -45,8 +51,8 @@ func TestBuildJobFromContext(t *testing.T) {
 		}
 
 		// and
-		if !cmp.Equal(got, want) {
-			t.Errorf("must be equal, but %+v", cmp.Diff(got, want))
+		if !cmp.Equal(got, want, opts) {
+			t.Errorf("must be equal, but %+v", cmp.Diff(got, want, opts))
 		}
 	})
 

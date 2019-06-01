@@ -263,7 +263,11 @@ func TestHandler_PushEvent(t *testing.T) {
 					TargetURL: webhook.URLMust(url.Parse("http://example.com/logs/72d3162e-cc78-11e3-81ab-4c9367dc0958")),
 				}
 
-				opt := webhook.CmpOptsAllowFields(go_github.PushEventRepository{}, "ID", "FullName", "SSHURL", "CloneURL")
+				opt := cmp.Options{
+					webhook.CmpOptsAllowFields(go_github.PushEventRepository{}, "ID", "FullName", "SSHURL", "CloneURL"),
+					cmp.AllowUnexported(application.BuildJob{}),
+				}
+
 				if !cmp.Equal(got, want, opt) {
 					t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
 				}
@@ -430,7 +434,10 @@ func TestHandler_IssueCommentEvent_Normal(t *testing.T) {
 					TargetURL: webhook.URLMust(url.Parse("http://example.com/logs/72d3162e-cc78-11e3-81ab-4c9367dc0958")),
 				}
 
-				opt := webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL")
+				opt := cmp.Options{
+					webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL"),
+					cmp.AllowUnexported(application.BuildJob{}),
+				}
 				if !cmp.Equal(got, want, opt) {
 					t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
 				}
@@ -799,7 +806,10 @@ func TestHandler_PullRequestEvent(t *testing.T) {
 						TargetURL: webhook.URLMust(url.Parse("http://example.com/logs/72d3162e-cc78-11e3-81ab-4c9367dc0958")),
 					}
 
-					opt := webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL")
+					opt := cmp.Options{
+						webhook.CmpOptsAllowFields(go_github.Repository{}, "ID", "FullName", "SSHURL", "CloneURL"),
+						cmp.AllowUnexported(application.BuildJob{}),
+					}
 					if !cmp.Equal(got, want, opt) {
 						t.Errorf("must be equal but: %+v", cmp.Diff(got, want, opt))
 					}

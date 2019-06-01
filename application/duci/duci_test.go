@@ -339,6 +339,7 @@ func TestDuci_End(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
+		buildJob.BeginAt(time.Unix(0, 0))
 		ctx := application.ContextWithJob(context.Background(), buildJob)
 		var err error = nil
 
@@ -374,7 +375,6 @@ func TestDuci_End(t *testing.T) {
 		sut := &duci.Duci{}
 		defer sut.SetJobService(service)()
 		defer sut.SetGitHub(hub)()
-		defer sut.SetBegin(time.Unix(0, 0))()
 
 		// when
 		sut.End(ctx, err)
@@ -391,6 +391,7 @@ func TestDuci_End(t *testing.T) {
 			TaskName:     "task/name",
 			TargetURL:    duci.URLMust(url.Parse("http://example.com")),
 		}
+		buildJob.BeginAt(time.Unix(0, 0))
 		ctx := application.ContextWithJob(context.Background(), buildJob)
 		err := runner.ErrFailure
 
@@ -426,7 +427,6 @@ func TestDuci_End(t *testing.T) {
 		sut := &duci.Duci{}
 		defer sut.SetJobService(service)()
 		defer sut.SetGitHub(hub)()
-		defer sut.SetBegin(time.Unix(0, 0))()
 
 		// when
 		sut.End(ctx, err)

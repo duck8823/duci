@@ -27,14 +27,6 @@ func (d *Duci) SetGitHub(hub github.GitHub) (reset func()) {
 	}
 }
 
-func (d *Duci) SetBegin(t time.Time) (reset func()) {
-	tmp := d.begin
-	d.begin = t
-	return func() {
-		d.begin = tmp
-	}
-}
-
 func URLMust(url *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
