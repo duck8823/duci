@@ -8,6 +8,7 @@ import (
 	"github.com/tcnksm/go-latest"
 	"os"
 	"testing"
+	"time"
 )
 
 type MaskString = maskString
@@ -64,4 +65,12 @@ func GenerateSSHKey(t *testing.T, path string) {
 	})); err != nil {
 		t.Fatalf("error occur: %+v", err)
 	}
+}
+
+func (j *BuildJob) GetBeginTime() time.Time {
+	return j.beginTime
+}
+
+func (j *BuildJob) GetEndTime() time.Time {
+	return j.endTime
 }
