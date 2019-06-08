@@ -1,22 +1,21 @@
+language: go
+
 os:
   - linux
   - osx
   - windows
-
-language: go
 go:
   - "1.11.x"
   - "1.12.x"
   - tip
+env:
+  global:
+    - GO111MODULE=on
 
 matrix:
   allow_failures:
     - go: tip
     - os: windows
-
-env:
-  global:
-    - GO111MODULE=on
 
 cache:
   directories:
@@ -39,7 +38,10 @@ script:
 after_success:
   # for coverage report
   - GO111MODULE=off go get -u github.com/mattn/goveralls
-  - if [ "$TRAVIS_GO_VERSION" = "1.12.x" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go; fi
+  - |
+    if [ "$TRAVIS_GO_VERSION" = "1.12.x" ] && [ "$TRAVIS_OS_NAME" = "linux" ] ; then
+      goveralls -service=travis-ci -coverprofile=cover.out -ignore=main.go
+    fi
 before_deploy:
   # copy dependencies to vendor
   - go mod vendor
