@@ -20,7 +20,7 @@ require (
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2 // indirect
 	github.com/hashicorp/go-version v1.0.0 // indirect
-	github.com/labstack/gommon v0.2.8
+	github.com/labstack/gommon v0.2.9
 	github.com/moby/buildkit v0.3.3
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
