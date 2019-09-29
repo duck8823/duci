@@ -16,3 +16,6 @@ release-notes.txt
 /duci
 duci.exe
 dist
+
+# ci temp files
+goreleaser.sh
