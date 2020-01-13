@@ -122,6 +122,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rhysd/go-github-selfupdate v1.1.0 h1:+aMomy69YCYxJ6kr13nYIgAJWSB1kHK5M5YpbmjQkWo=
 github.com/rhysd/go-github-selfupdate v1.1.0/go.mod h1:jbfShZ+Nl3IHUgr77kwQjObcWf1z961UAoD6p5LrPBU=
+github.com/rhysd/go-github-selfupdate v1.2.1 h1:CpU7O4BcHhvcXEBsQSKD50uQ1o4/qv/15Ev6TPAtU3s=
+github.com/rhysd/go-github-selfupdate v1.2.1/go.mod h1:BZHw2H9JIH7wdyda/btlRRD+sgudn1RO1NbnvY27/Ng=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
