@@ -8,5 +8,7 @@ groupBy:
     - "bug"
   "Update Dependencies:":
     - "dependencies"
-  "Maintenance Project:":
+  "Maintenances:":
     - "maintenance"
+template:
+  label: ""
