@@ -1,0 +1,12 @@
+---
+dataSource: "prs"
+groupBy:
+  "Enhancements:":
+    - "enhancement"
+    - "internal"
+  "Bug Fixes:":
+    - "bug"
+  "Update Dependencies:":
+    - "dependencies"
+  "Maintenance Project:":
+    - "maintenance"

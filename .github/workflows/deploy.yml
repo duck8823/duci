@@ -1,0 +1,19 @@
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+name: deploy
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: create release note
+        run: |
+          npm install github-release-notes
+          $(npm bin)/gren release --override --token=${{ secrets.GITHUB_TOKEN }}
