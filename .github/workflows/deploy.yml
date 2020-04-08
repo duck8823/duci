@@ -15,7 +15,3 @@ jobs:
           version: latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: create release note
-        run: |
-          npm install github-release-notes
-          $(npm bin)/gren release --override --token=${{ secrets.GITHUB_TOKEN }}
