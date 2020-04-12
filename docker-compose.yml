@@ -14,8 +14,7 @@ services:
       traefik.frontend.priority: "1"
       traefik.port: "8080"
   ui:
-    build:
-      context: https://github.com/duck8823/duci-ui.git
+    image: duck8823/duci-ui:latest
     environment:
       - DUCI_LOGS_URL=http://${DUCI_HOST:-localhost}/stream/logs/
     restart: always
@@ -24,7 +23,7 @@ services:
       traefik.frontend.priority: "5"
       traefik.port: "3000"
   reverse-proxy:
-    image: traefik
+    image: traefik:v1.7
     command: --docker
     ports:
       - 80:80
