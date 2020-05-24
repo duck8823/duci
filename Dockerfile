@@ -22,7 +22,5 @@ WORKDIR /workdir
 COPY --from=build /workdir/duci /usr/local/bin/duci
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-EXPOSE 8080
-
 ENTRYPOINT ["duci"]
-CMD ["server"]
+CMD ["run"]
