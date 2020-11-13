@@ -12,7 +12,7 @@ require (
 	github.com/go-chi/chi v3.3.4+incompatible
 	github.com/golang/mock v1.4.4
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
-	github.com/google/go-cmp v0.5.1
+	github.com/google/go-cmp v0.5.3
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/gorilla/context v1.1.1 // indirect
