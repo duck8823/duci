@@ -10,20 +10,6 @@ jobs:
         with:
           entrypoint: make
           args: lint
-  check-modified:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: tidy
-        uses: docker://golang:1.13
-        with:
-          entrypoint: go
-          args: mod tidy
-      - name: check modified
-        uses: docker://alpine/git:latest
-        with:
-          entrypoint: sh
-          args: -c "! git status | grep modified"
   test:
     runs-on: ubuntu-latest
     steps:
