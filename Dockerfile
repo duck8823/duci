@@ -1,4 +1,4 @@
-FROM golang:1.15.6-alpine AS build
+FROM golang:1.15.7-alpine AS build
 MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache alpine-sdk ca-certificates \
