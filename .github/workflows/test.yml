@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: lint
-        uses: docker://golangci/golangci-lint:latest
+        uses: docker://golangci/golangci-lint:v1.36
         with:
           entrypoint: make
           args: lint
