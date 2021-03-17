@@ -1,0 +1,24 @@
+version: 2
+updates:
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "20:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: github.com/moby/buildkit
+    versions:
+    - "> 0.3.3"
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "20:00"
+  open-pull-requests-limit: 10
+- package-ecosystem: docker
+  directory: "/.duci"
+  schedule:
+    interval: daily
+    time: "20:00"
+  open-pull-requests-limit: 10
