@@ -1,4 +1,4 @@
-FROM golang:1.16.5-alpine
+FROM golang:1.17beta1-alpine
 MAINTAINER shunsuke maeda <duck8823@gmail.com>
 
 RUN apk --update add --no-cache alpine-sdk
