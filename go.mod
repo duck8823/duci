@@ -14,7 +14,7 @@ require (
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2 // indirect
 	github.com/hashicorp/go-version v1.0.0 // indirect
@@ -27,11 +27,10 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rhysd/go-github-selfupdate v1.2.3
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v0.0.7
+	github.com/spf13/cobra v1.2.1
 	github.com/syndtr/goleveldb v0.0.0-20180815032940-ae2bd5eed72d
 	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e
-	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
-	golang.org/x/oauth2 v0.0.0-20181106182150-f42d05182288
+	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.4.0
