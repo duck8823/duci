@@ -9,7 +9,7 @@ require (
 	github.com/docker/docker v0.7.3-0.20180814124044-678d4b3a6d4c
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.3.1 // indirect
-	github.com/go-chi/chi v3.3.4+incompatible
+	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/golang/mock v1.5.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.5.6
