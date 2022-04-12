@@ -9,7 +9,9 @@ require (
 	github.com/docker/docker v0.7.3-0.20180814124044-678d4b3a6d4c
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.3.1 // indirect
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.5.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.5.7
@@ -27,10 +29,12 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rhysd/go-github-selfupdate v1.2.3
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.4.0
 	github.com/syndtr/goleveldb v0.0.0-20180815032940-ae2bd5eed72d
 	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e
 	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.4.0
