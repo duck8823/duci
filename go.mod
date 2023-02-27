@@ -29,8 +29,8 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e
-	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
-	google.golang.org/appengine v1.6.7 // indirect
+	golang.org/x/oauth2 v0.5.0
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gopkg.in/src-d/go-git.v4 v4.13.1
